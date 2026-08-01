@@ -1,0 +1,14 @@
+# Brain Bridge Library — org search config (BB base only)
+bases:
+  bb:
+    base_id: appwzoLR6BDTeSfyS
+    orgs_table_id: tblPEqGDvtaJihkiP
+    source_label: Brain Bridge Airtable
+    fields:
+      name: Name
+      industry: Industry
+      size: Company Size
+      description: Description
+      website: Website
+      contacts: Contacts
+      deals: Deals

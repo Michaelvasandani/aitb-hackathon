@@ -1,0 +1,135 @@
+{
+  "location": "virtual",
+  "year_month": "2026-11",
+  "categories": {
+    "holidays": {
+      "last_refreshed": "2026-05-23",
+      "ttl_days": 365,
+      "findings": [
+        {
+          "date": "2026-11-11",
+          "severity": "medium",
+          "label": "Veterans Day (US federal, bank holiday)",
+          "source": "Nager.Date"
+        },
+        {
+          "date": "2026-11-25",
+          "severity": "medium",
+          "label": "Thanksgiving Eve, heavy travel day for US audience",
+          "source": "Inferred from Thanksgiving 2026-11-26"
+        },
+        {
+          "date": "2026-11-26",
+          "severity": "high",
+          "label": "Thanksgiving Day (US federal)",
+          "source": "Nager.Date"
+        },
+        {
+          "date": "2026-11-27",
+          "severity": "high",
+          "label": "Day after Thanksgiving, Black Friday, most US businesses closed",
+          "source": "Inferred from Thanksgiving 2026-11-26"
+        }
+      ]
+    },
+    "audience_conferences": {
+      "last_refreshed": "2026-05-23",
+      "ttl_days": 30,
+      "findings": [
+        {
+          "date": "2026-11-09",
+          "severity": "high",
+          "label": "KubeCon + CloudNativeCon NA 2026 (Nov 9 to 12, Salt Lake City), in-person draw for enterprise AI infra buyers",
+          "source": "https://events.linuxfoundation.org/kubecon-cloudnativecon-north-america/"
+        },
+        {
+          "date": "2026-11-10",
+          "severity": "high",
+          "label": "KubeCon + CloudNativeCon NA 2026 (Nov 9 to 12, Salt Lake City)",
+          "source": "https://events.linuxfoundation.org/kubecon-cloudnativecon-north-america/"
+        },
+        {
+          "date": "2026-11-11",
+          "severity": "high",
+          "label": "KubeCon + CloudNativeCon NA 2026 (Nov 9 to 12, Salt Lake City)",
+          "source": "https://events.linuxfoundation.org/kubecon-cloudnativecon-north-america/"
+        },
+        {
+          "date": "2026-11-12",
+          "severity": "high",
+          "label": "KubeCon + CloudNativeCon NA 2026 (Nov 9 to 12, Salt Lake City)",
+          "source": "https://events.linuxfoundation.org/kubecon-cloudnativecon-north-america/"
+        },
+        {
+          "date": "2026-11-09",
+          "severity": "medium",
+          "label": "Web Summit Lisbon 2026 (Nov 9 to 12, Lisbon), pulls global enterprise tech audience",
+          "source": "https://websummit.com/"
+        },
+        {
+          "date": "2026-11-10",
+          "severity": "medium",
+          "label": "Web Summit Lisbon 2026 (Nov 9 to 12, Lisbon)",
+          "source": "https://websummit.com/"
+        },
+        {
+          "date": "2026-11-11",
+          "severity": "medium",
+          "label": "Web Summit Lisbon 2026 (Nov 9 to 12, Lisbon)",
+          "source": "https://websummit.com/"
+        },
+        {
+          "date": "2026-11-12",
+          "severity": "medium",
+          "label": "Web Summit Lisbon 2026 (Nov 9 to 12, Lisbon)",
+          "source": "https://websummit.com/"
+        },
+        {
+          "date": "2026-11-17",
+          "severity": "high",
+          "label": "Microsoft Ignite 2026 (Nov 17 to 20, San Francisco + digital), core enterprise AI buyer audience",
+          "source": "https://ignite.microsoft.com/en-US/home"
+        },
+        {
+          "date": "2026-11-18",
+          "severity": "high",
+          "label": "Microsoft Ignite 2026 (Nov 17 to 20, San Francisco + digital)",
+          "source": "https://ignite.microsoft.com/en-US/home"
+        },
+        {
+          "date": "2026-11-19",
+          "severity": "high",
+          "label": "Microsoft Ignite 2026 (Nov 17 to 20, San Francisco + digital)",
+          "source": "https://ignite.microsoft.com/en-US/home"
+        },
+        {
+          "date": "2026-11-20",
+          "severity": "high",
+          "label": "Microsoft Ignite 2026 (Nov 17 to 20, San Francisco + digital)",
+          "source": "https://ignite.microsoft.com/en-US/home"
+        },
+        {
+          "date": "2026-11-30",
+          "severity": "high",
+          "label": "AWS re:Invent 2026 (Nov 30 to Dec 4, Las Vegas), single largest enterprise cloud and AI event",
+          "source": "https://reinvent.awsevents.com/"
+        }
+      ]
+    },
+    "local_events": {
+      "last_refreshed": "2026-05-23",
+      "ttl_days": 30,
+      "findings": []
+    },
+    "aitb_programming": {
+      "last_refreshed": "2026-05-23",
+      "ttl_days": 14,
+      "findings": []
+    },
+    "weather": {
+      "last_refreshed": "2026-05-23",
+      "ttl_days": 1,
+      "findings": []
+    }
+  }
+}

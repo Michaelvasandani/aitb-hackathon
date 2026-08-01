@@ -1,0 +1,105 @@
+{
+  "location": "tucson",
+  "year_month": "2026-06",
+  "categories": {
+    "holidays": {
+      "last_refreshed": "2026-05-23",
+      "ttl_days": 365,
+      "findings": []
+    },
+    "audience_conferences": {
+      "last_refreshed": "2026-05-23",
+      "ttl_days": 30,
+      "findings": []
+    },
+    "local_events": {
+      "last_refreshed": "2026-05-23",
+      "ttl_days": 30,
+      "findings": [
+        {
+          "date": "2026-06-01",
+          "severity": "low",
+          "label": "Hands-On History Summer Camp at Presidio Museum (June 1 to 5, family audience daytime)",
+          "source": "https://tucsonpresidio.com/"
+        },
+        {
+          "date": "2026-06-02",
+          "severity": "low",
+          "label": "Hands-On History Summer Camp at Presidio Museum",
+          "source": "https://tucsonpresidio.com/"
+        },
+        {
+          "date": "2026-06-03",
+          "severity": "low",
+          "label": "Hands-On History Summer Camp at Presidio Museum",
+          "source": "https://tucsonpresidio.com/"
+        },
+        {
+          "date": "2026-06-04",
+          "severity": "low",
+          "label": "Hands-On History Summer Camp at Presidio Museum",
+          "source": "https://tucsonpresidio.com/"
+        },
+        {
+          "date": "2026-06-05",
+          "severity": "low",
+          "label": "Hands-On History Summer Camp at Presidio Museum (final day)",
+          "source": "https://tucsonpresidio.com/"
+        },
+        {
+          "date": "2026-06-06",
+          "severity": "medium",
+          "label": "John Mulaney at Tucson Convention Center 7pm to 9pm (downtown traffic, evening only, low daytime overlap)",
+          "source": "https://tucsonconventioncenter.com/"
+        },
+        {
+          "date": "2026-06-07",
+          "severity": "low",
+          "label": "Tucson Sugar Skulls vs New Mexico Chupacabras at TCC (family sports draw, downgraded for size)",
+          "source": "https://tucsonconventioncenter.com/"
+        },
+        {
+          "date": "2026-06-11",
+          "severity": "medium",
+          "label": "TUSD last day of school (families distracted with year-end events)",
+          "source": "https://www.tusd1.org/_theme/files/calendar/25-26/25-26%20TUSD%20Calendar%20ENG.pdf"
+        }
+      ]
+    },
+    "aitb_programming": {
+      "last_refreshed": "2026-05-23",
+      "ttl_days": 14,
+      "findings": []
+    },
+    "weather": {
+      "last_refreshed": "2026-05-23",
+      "ttl_days": 1,
+      "findings": [
+        {
+          "date": "2026-06-01",
+          "severity": "medium",
+          "label": "Forecast: 99.9F max (uncomfortable heat for outdoor event with families)",
+          "source": "Open-Meteo"
+        },
+        {
+          "date": "2026-06-02",
+          "severity": "medium",
+          "label": "Forecast: 99.8F max, max wind 24.7 mph (uncomfortable heat plus wind)",
+          "source": "Open-Meteo"
+        },
+        {
+          "date": "2026-06-03",
+          "severity": "medium",
+          "label": "Forecast: 100.1F max (uncomfortable heat for outdoor event)",
+          "source": "Open-Meteo"
+        },
+        {
+          "date": "2026-06-04",
+          "severity": "medium",
+          "label": "Forecast: 99.3F max, max wind 23.8 mph (uncomfortable heat plus wind)",
+          "source": "Open-Meteo"
+        }
+      ]
+    }
+  }
+}

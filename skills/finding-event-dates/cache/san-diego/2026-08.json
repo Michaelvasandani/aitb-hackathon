@@ -1,0 +1,104 @@
+{
+  "location": "san-diego",
+  "year_month": "2026-08",
+  "categories": {
+    "holidays": {
+      "last_refreshed": "2026-05-23",
+      "ttl_days": 365,
+      "findings": []
+    },
+    "audience_conferences": {
+      "last_refreshed": "2026-05-23",
+      "ttl_days": 30,
+      "findings": []
+    },
+    "local_events": {
+      "last_refreshed": "2026-05-23",
+      "ttl_days": 30,
+      "findings": [
+        {
+          "date": "2026-08-01",
+          "severity": "low",
+          "label": "Padres vs Giants home game (Petco Park, downtown traffic/parking)",
+          "source": "https://www.petcoparkinsider.com/padres-schedule-july-august"
+        },
+        {
+          "date": "2026-08-02",
+          "severity": "low",
+          "label": "Padres vs Giants home game (Petco Park, downtown traffic/parking)",
+          "source": "https://www.petcoparkinsider.com/padres-schedule-july-august"
+        },
+        {
+          "date": "2026-08-03",
+          "severity": "medium",
+          "label": "AVID Summer Institute 2026 Program 2 at San Diego Convention Center (educator conference, books downtown hotels)",
+          "source": "https://www.visitsandiego.com/calendar"
+        },
+        {
+          "date": "2026-08-04",
+          "severity": "medium",
+          "label": "AVID Summer Institute 2026 Program 2 at San Diego Convention Center",
+          "source": "https://www.visitsandiego.com/calendar"
+        },
+        {
+          "date": "2026-08-05",
+          "severity": "medium",
+          "label": "AVID Summer Institute 2026 Program 2 at San Diego Convention Center",
+          "source": "https://www.visitsandiego.com/calendar"
+        },
+        {
+          "date": "2026-08-07",
+          "severity": "low",
+          "label": "Padres vs Astros home game (Petco Park, downtown traffic/parking)",
+          "source": "https://www.petcoparkinsider.com/padres-schedule-july-august"
+        },
+        {
+          "date": "2026-08-08",
+          "severity": "low",
+          "label": "Padres vs Astros home game (Petco Park, downtown traffic/parking)",
+          "source": "https://www.petcoparkinsider.com/padres-schedule-july-august"
+        },
+        {
+          "date": "2026-08-09",
+          "severity": "medium",
+          "label": "Hillcrest CityFest street festival (70k attendees on 5th Ave) plus Padres home game plus private convention at SDCC",
+          "source": "https://www.fabuloushillcrest.com/cityfest-street-fair-music-festival"
+        },
+        {
+          "date": "2026-08-10",
+          "severity": "low",
+          "label": "Padres vs Brewers home game; private corporate convention at SDCC continues",
+          "source": "https://www.petcoparkinsider.com/padres-schedule-july-august"
+        },
+        {
+          "date": "2026-08-11",
+          "severity": "low",
+          "label": "Padres vs Brewers home game; private corporate convention at SDCC continues",
+          "source": "https://www.petcoparkinsider.com/padres-schedule-july-august"
+        },
+        {
+          "date": "2026-08-12",
+          "severity": "low",
+          "label": "Padres vs Brewers home game; private corporate convention at SDCC continues",
+          "source": "https://www.petcoparkinsider.com/padres-schedule-july-august"
+        },
+        {
+          "date": "2026-08-15",
+          "severity": "low",
+          "label": "Summer Food Festival at Bates Nut Farm (Valley Center, not central SD)",
+          "source": "https://batesnutfarm.biz/blogs/events/summer-food-festival-august"
+        }
+      ]
+    },
+    "aitb_programming": {
+      "last_refreshed": "2026-05-23",
+      "ttl_days": 14,
+      "findings": []
+    },
+    "weather": {
+      "last_refreshed": "2026-05-23",
+      "ttl_days": 1,
+      "findings": []
+    }
+  }
+}

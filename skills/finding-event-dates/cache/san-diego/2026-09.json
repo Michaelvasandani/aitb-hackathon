@@ -1,0 +1,116 @@
+{
+  "location": "san-diego",
+  "year_month": "2026-09",
+  "categories": {
+    "holidays": {
+      "last_refreshed": "2026-05-24",
+      "ttl_days": 365,
+      "findings": [
+        {
+          "date": "2026-09-07",
+          "severity": "high",
+          "label": "Labor Day — federal holiday, widespread closures, heavy beach/park traffic countywide",
+          "source": "https://www.timeanddate.com/holidays/us/2026"
+        },
+        {
+          "date": "2026-09-16",
+          "severity": "medium",
+          "label": "Día de la Independencia de México — 20,000–25,000 El Grito celebrations in Tijuana (20 min away); heavy border crossing + local celebrations in Barrio Logan and National City",
+          "source": "https://www.nbcsandiego.com/news/local/el-grito-mexican-independence-events-san-diego-county/3896141/"
+        }
+      ]
+    },
+    "audience_conferences": {
+      "by_audience": {
+        "ai-tech-builders": {
+          "last_refreshed": "2026-05-24",
+          "ttl_days": 30,
+          "findings": [
+            {
+              "date": "2026-09-29",
+              "severity": "medium",
+              "label": "The AI Conference 2026 — San Francisco (2-day, pulls AI engineers + founders out of SoCal for travel)",
+              "source": "https://aiconference.com/"
+            }
+          ]
+        }
+      }
+    },
+    "local_events": {
+      "last_refreshed": "2026-05-24",
+      "ttl_days": 30,
+      "findings": [
+        {
+          "date": "2026-09-04",
+          "severity": "low",
+          "label": "Padres vs Yankees home game (Petco Park, downtown traffic/parking)",
+          "source": "https://www.baseball-reference.com/teams/SDP/2026-schedule-scores.shtml"
+        },
+        {
+          "date": "2026-09-05",
+          "severity": "low",
+          "label": "Padres vs Yankees home game (Petco Park, downtown traffic/parking)",
+          "source": "https://www.baseball-reference.com/teams/SDP/2026-schedule-scores.shtml"
+        },
+        {
+          "date": "2026-09-06",
+          "severity": "low",
+          "label": "Padres vs Yankees home game (Petco Park, downtown traffic/parking)",
+          "source": "https://www.baseball-reference.com/teams/SDP/2026-schedule-scores.shtml"
+        },
+        {
+          "date": "2026-09-15",
+          "severity": "low",
+          "label": "BrightonSEO San Diego Day 1 at SDCC (4,000 digital marketing attendees, books downtown hotels)",
+          "source": "https://sandiegodiscover.org/san-convention-calendar"
+        },
+        {
+          "date": "2026-09-16",
+          "severity": "low",
+          "label": "BrightonSEO San Diego Day 2 + Hero Conf at SDCC; also Mexican Independence Day (see holidays)",
+          "source": "https://sandiegodiscover.org/san-convention-calendar"
+        },
+        {
+          "date": "2026-09-25",
+          "severity": "low",
+          "label": "Padres vs Diamondbacks home game — final home series of regular season (Petco Park)",
+          "source": "https://www.baseball-reference.com/teams/SDP/2026-schedule-scores.shtml"
+        },
+        {
+          "date": "2026-09-26",
+          "severity": "low",
+          "label": "Padres vs Diamondbacks home game (Petco Park)",
+          "source": "https://www.baseball-reference.com/teams/SDP/2026-schedule-scores.shtml"
+        },
+        {
+          "date": "2026-09-27",
+          "severity": "low",
+          "label": "Padres vs Diamondbacks home game (Petco Park)",
+          "source": "https://www.baseball-reference.com/teams/SDP/2026-schedule-scores.shtml"
+        },
+        {
+          "date": "2026-09-29",
+          "severity": "medium",
+          "label": "The AI Conference 2026 Day 1, San Francisco — draws AI-tech audience out of SoCal for travel",
+          "source": "https://aiconference.com/"
+        },
+        {
+          "date": "2026-09-30",
+          "severity": "medium",
+          "label": "The AI Conference 2026 Day 2, San Francisco",
+          "source": "https://aiconference.com/"
+        }
+      ]
+    },
+    "aitb_programming": {
+      "last_refreshed": "2026-05-24",
+      "ttl_days": 14,
+      "findings": []
+    },
+    "weather": {
+      "last_refreshed": "2026-05-24",
+      "ttl_days": 1,
+      "findings": []
+    }
+  }
+}

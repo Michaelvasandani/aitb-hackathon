@@ -1,0 +1,14 @@
+# AITB Library — org search config (AITB base only)
+bases:
+  aitb:
+    base_id: appweWEnmxwWfwHDa
+    orgs_table_id: tblaKKARFZGZG8Kfj
+    source_label: AITB Airtable
+    fields:
+      name: Name
+      industry: Industry
+      size: Size
+      description: Description
+      website: Website
+      contacts: Contacts
+      deals: Sponsor Deals

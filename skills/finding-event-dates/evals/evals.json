@@ -1,0 +1,63 @@
+{
+  "skill_name": "finding-event-dates",
+  "evals": [
+    {
+      "id": 0,
+      "name": "aitb-workshop-phoenix",
+      "prompt": "Help me pick a date for an AITB AI founders workshop in Phoenix in October 2026. Indoor, expecting 30 people, need at least 4 weeks lead time.",
+      "expected_output": "Heatmap covering October 2026, 3-5 ranked picks, conflict appendix. Should flag Columbus Day (Oct 12), AI founder conferences in window, ASU football home games, AITB Tucson meetups in window.",
+      "files": [],
+      "assertions": [
+        {"name": "report_md_exists", "type": "file_exists", "path": "report.md"},
+        {"name": "findings_json_exists", "type": "file_exists", "path": "findings.json"},
+        {"name": "report_has_heatmap_section", "type": "contains", "path": "report.md", "needle": "## Heatmap"},
+        {"name": "report_has_top_picks_section", "type": "contains", "path": "report.md", "needle": "## Top picks"},
+        {"name": "report_has_conflict_appendix", "type": "contains", "path": "report.md", "needle": "## Conflict appendix"},
+        {"name": "heatmap_covers_october_2026", "type": "contains_all", "path": "report.md", "needles": ["2026-10-05", "2026-10-15", "2026-10-30"]},
+        {"name": "flags_columbus_day_oct_12", "type": "contains", "path": "findings.json", "needle": "2026-10-12"},
+        {"name": "findings_has_audience_conferences", "type": "contains", "path": "findings.json", "needle": "audience_conferences"},
+        {"name": "report_uses_green_yellow_red_markers", "type": "contains_any", "path": "report.md", "needles": ["GREEN", "YELLOW", "RED"]},
+        {"name": "no_em_dash_in_report", "type": "not_contains", "path": "report.md", "needle": "—"},
+        {"name": "no_en_dash_in_report", "type": "not_contains", "path": "report.md", "needle": "–"},
+        {"name": "at_least_3_top_picks", "type": "regex_count_gte", "path": "report.md", "pattern": "### \\d\\.", "min": 3}
+      ]
+    },
+    {
+      "id": 1,
+      "name": "outdoor-family-hackathon-tucson",
+      "prompt": "We want to run an outdoor AITB family hackathon in Tucson sometime in the next 3 weeks. About 50 people. When should it be?",
+      "expected_output": "Heatmap roughly 2026-05-23 to 2026-06-13. Whole window likely red because of 56-day hackathon lead-time floor. Report should surface that clearly and recommend widening. Weather should be checked since outdoor + within 14 days.",
+      "files": [],
+      "assertions": [
+        {"name": "report_md_exists", "type": "file_exists", "path": "report.md"},
+        {"name": "report_has_heatmap_section", "type": "contains", "path": "report.md", "needle": "## Heatmap"},
+        {"name": "report_has_top_picks_section", "type": "contains", "path": "report.md", "needle": "## Top picks"},
+        {"name": "surfaces_lead_time_floor_issue", "type": "contains_any", "path": "report.md", "needles": ["lead-time floor", "lead time floor", "widening the window", "outside the window", "no green"]},
+        {"name": "heatmap_covers_late_may_early_june", "type": "contains_all", "path": "report.md", "needles": ["2026-05-2", "2026-06-0"]},
+        {"name": "no_em_dash_in_report", "type": "not_contains", "path": "report.md", "needle": "—"},
+        {"name": "weather_considered_or_explained", "type": "contains_any", "path": "report.md", "needles": ["Weather", "weather", "Open-Meteo", "forecast"]}
+      ]
+    },
+    {
+      "id": 2,
+      "name": "virtual-enterprise-summit",
+      "prompt": "Find dates for a virtual AI enterprise buyer summit in November or early December 2026, 200 attendees, need 8 weeks runway.",
+      "expected_output": "Heatmap Nov 1 to Dec 14 2026. Should flag AWS re:Invent, Thanksgiving, MS Ignite if in window. Should skip local_events and weather agents (virtual). Top picks should avoid re:Invent and Thanksgiving weeks.",
+      "files": [],
+      "assertions": [
+        {"name": "report_md_exists", "type": "file_exists", "path": "report.md"},
+        {"name": "findings_json_exists", "type": "file_exists", "path": "findings.json"},
+        {"name": "report_has_heatmap_section", "type": "contains", "path": "report.md", "needle": "## Heatmap"},
+        {"name": "report_has_top_picks_section", "type": "contains", "path": "report.md", "needle": "## Top picks"},
+        {"name": "report_has_conflict_appendix", "type": "contains", "path": "report.md", "needle": "## Conflict appendix"},
+        {"name": "flags_reinvent_or_ignite", "type": "contains_any", "path": "findings.json", "needles": ["re:Invent", "reInvent", "Ignite"]},
+        {"name": "flags_thanksgiving", "type": "contains_any", "path": "findings.json", "needles": ["Thanksgiving", "2026-11-26"]},
+        {"name": "virtual_skips_local_events", "type": "json_empty_or_missing", "path": "findings.json", "json_path": "by_category.local_events"},
+        {"name": "virtual_skips_weather", "type": "json_empty_or_missing", "path": "findings.json", "json_path": "by_category.weather"},
+        {"name": "heatmap_covers_nov_dec_2026", "type": "contains_all", "path": "report.md", "needles": ["2026-11-0", "2026-11-2", "2026-12-0"]},
+        {"name": "no_em_dash_in_report", "type": "not_contains", "path": "report.md", "needle": "—"},
+        {"name": "at_least_3_top_picks", "type": "regex_count_gte", "path": "report.md", "pattern": "### \\d\\.", "min": 3}
+      ]
+    }
+  ]
+}

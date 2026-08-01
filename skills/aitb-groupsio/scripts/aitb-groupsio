@@ -1,0 +1,6 @@
+#!/bin/bash
+# AITB Groups.io CLI wrapper
+# Usage: aitb-groupsio [subscribe|post] [options]
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+python3 "${SCRIPT_DIR}/aitb-groupsio.py" "$@"

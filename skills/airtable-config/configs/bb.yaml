@@ -1,0 +1,151 @@
+bases:
+  bb:
+    base_id: appwzoLR6BDTeSfyS
+    tasks_table_id: tblmQBAxcDPjajPiE
+    tasks_table_name: Tasks
+    task_field: Task
+    status_field: Status
+    description_field: Definition of Done
+    notes_field: Notes
+    assignee_field: Assignee
+    due_date_field: Due Date
+    score_field: Score
+    for_today_field: For Today
+    size_field: Size
+    project_field: Rock
+    hitl_brief_field: HITL Brief
+    hitl_response_field: HITL Response
+    hitl_status_field: HITL Status
+    task_output_field: Task Output
+    project_table: "Rocks (7d)"
+    project_name_field: Project name
+    project_description_field: Definition of Done
+    project_status_field: Status
+    project_goals_field: null
+    project_driver_field: Driver
+    project_mountain_field: Mountains
+    mountain_table_id: tblSoAfDcMsZ49pgt
+    mountain_name_field: Title
+    mountain_goal_field: "Objective (1y)"
+    mountain_goal_table_id: tblAYaj2ZYhZtgp2a
+    mountain_goal_name_field: Objective
+    goals_table: "Objectives (1y)"
+    goal_name_field: Objective
+    goal_type: annual
+    contacts_table_id: tbllWxmXIVG5wveiZ
+    deals_field: Deals
+    orgs_table: tblPEqGDvtaJihkiP
+    inbox_project_id: recAbJvgDY0Jwemga
+    roadmap_table_id: tblvOeff5Bhc4PCrK
+    contacts_name_field: Full Name
+    contacts_first_name_field: First Name
+    contacts_last_name_field: Last Name
+    contacts_email_field: "Email (Work)"
+    contacts_phone_field: Phone
+    contacts_title_field: Title
+    contacts_org_field: Organization
+    orgs_name_field: Name
+    orgs_industry_field: Industry
+    orgs_size_field: Company Size
+    orgs_description_field: Description
+    orgs_website_field: Website
+    orgs_billing_type_field: Billing Type
+    orgs_markup_rate_field: Markup Rate
+    deals_table_id: tblw6rTtN2QJCrOqf
+    deals_name_field: Name
+    deals_status_field: Status
+    deals_type_field: Type
+    deals_org_field: Organization
+    deals_amount_field: Amount
+    deals_description_field: Description
+    deals_assignee_field: Assignee
+    deals_campaign_field: Campaigns
+    deals_contact_field: Deal Contacts
+    deals_contact_junction_table: tbltrHekUeRLmpzGM
+    status_values:
+      not_started: Not Started
+      in_progress: In Progress
+      human_review: Human Review
+      validating: Validating
+      complete: Completed
+      blocked: Blocked
+      cancelled: Cancelled
+    done_statuses:
+      - Completed
+      - Cancelled
+      - Archived
+    projects:
+      base_id: appwzoLR6BDTeSfyS
+      table: "Rocks (7d)"
+      name_field: Project name
+      description_field: Definition of Done
+      goals_field: null
+      notes_field: Notes
+      for_this_week_field: For This Week
+      done_statuses:
+        - Completed
+    goals:
+      annual:
+        base_id: appwzoLR6BDTeSfyS
+        table: "Objectives (1y)"
+        name_field: Objective
+        description_field: Description
+        linked_projects: null
+        linked_down: Mountains
+        linked_up: null
+        sort_field: null
+        sort_direction: null
+        year_field: Years
+      monthly:
+        base_id: appwzoLR6BDTeSfyS
+        table: "Mountains (30d)"
+        name_field: Title
+        description_field: Definition of Done
+        linked_projects: Projects
+        linked_down: null
+        linked_up: "Objective (1y)"
+        sort_field: Priority
+        sort_direction: desc
+      weekly:
+        base_id: appwzoLR6BDTeSfyS
+        table: "Rocks (7d)"
+        name_field: Project name
+        description_field: Definition of Done
+        linked_projects: null
+        linked_down: Tasks
+        linked_up: Mountains
+        sort_field: Priority
+        sort_direction: desc
+    tables:
+      tasks: tblmQBAxcDPjajPiE
+      rocks: tblnWgnX6vy0vIZs0
+      mountains_30d: tblSoAfDcMsZ49pgt
+      objectives_1yr: tblAYaj2ZYhZtgp2a
+      organizations: tblPEqGDvtaJihkiP
+      contacts: tbllWxmXIVG5wveiZ
+      campaigns: tbljjeRqnEj2faFvR
+      deals: tblw6rTtN2QJCrOqf
+      deal_contacts: tbltrHekUeRLmpzGM
+      deal_stage_logs: tblst2Xy6gNnWymm9
+      pipeline_stages: tblzWQfkNzKLFrhse
+      employees: tblMdx046SanyvjwS
+      notes: tblx3exng5UGvFCC4
+      news: tbl7qb8zKr2I5HtLv
+      issues: tblsqjhUZr0sITmEC
+      metrics: tblxOGxaW2C7Uaehw
+      contact_activity_logs: tblgf9zD001tj6mL5
+      config: tbl4H1TgAi7C7I5n9
+      products: tblyPdqAgiDxi0IZM
+      product_roadmap: tblvOeff5Bhc4PCrK
+
+people:
+  pablo:
+    bb: recQd0uiIifJAXXIM
+  aaron:
+    bb: recXgsS1kw8xdSFSW
+  juan:
+    bb: recJmhnGHdEA1ol0C
+  josh:
+    bb: rec9sF1mdcCAM5g4q
+  sven:
+    bb: recaiyQSXfbw84s8v

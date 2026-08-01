@@ -1,0 +1,140 @@
+{
+  "location": "san-diego",
+  "year_month": "2026-10",
+  "categories": {
+    "holidays": {
+      "last_refreshed": "2026-05-24",
+      "ttl_days": 365,
+      "findings": [
+        {
+          "date": "2026-10-12",
+          "severity": "medium",
+          "label": "Columbus Day / Indigenous Peoples Day — federal holiday (banks/federal offices closed), no major travel impact in SD but reduced turnout risk for some audiences",
+          "source": "https://www.timeanddate.com/holidays/us/2026"
+        },
+        {
+          "date": "2026-10-31",
+          "severity": "low",
+          "label": "Halloween — evening social competition, family commitments reduce evening attendance",
+          "source": "https://www.timeanddate.com/holidays/us/2026"
+        }
+      ]
+    },
+    "audience_conferences": {
+      "by_audience": {
+        "ai-tech-builders": {
+          "last_refreshed": "2026-05-24",
+          "ttl_days": 30,
+          "findings": [
+            {
+              "date": "2026-10-01",
+              "severity": "medium",
+              "label": "The AI Conference 2026 Day 3 (final day), San Francisco — travel day back, audience returning",
+              "source": "https://aiconference.com/"
+            },
+            {
+              "date": "2026-10-07",
+              "severity": "low",
+              "label": "World Summit AI Day 1, Amsterdam — international conference, minimal SoCal attendance impact",
+              "source": "https://worldsummit.ai/"
+            },
+            {
+              "date": "2026-10-08",
+              "severity": "low",
+              "label": "World Summit AI Day 2, Amsterdam",
+              "source": "https://worldsummit.ai/"
+            }
+          ]
+        }
+      }
+    },
+    "local_events": {
+      "last_refreshed": "2026-05-24",
+      "ttl_days": 30,
+      "findings": [
+        {
+          "date": "2026-10-02",
+          "severity": "medium",
+          "label": "AAP National Conference Day 1 at SDCC — American Academy of Pediatrics, 11,000 attendees, books downtown hotels",
+          "source": "https://sandiegodiscover.org/san-convention-calendar"
+        },
+        {
+          "date": "2026-10-03",
+          "severity": "medium",
+          "label": "AAP National Conference Day 2 at SDCC",
+          "source": "https://sandiegodiscover.org/san-convention-calendar"
+        },
+        {
+          "date": "2026-10-04",
+          "severity": "medium",
+          "label": "AAP National Conference Day 3 at SDCC",
+          "source": "https://sandiegodiscover.org/san-convention-calendar"
+        },
+        {
+          "date": "2026-10-05",
+          "severity": "medium",
+          "label": "AAP National Conference Day 4 at SDCC",
+          "source": "https://sandiegodiscover.org/san-convention-calendar"
+        },
+        {
+          "date": "2026-10-06",
+          "severity": "medium",
+          "label": "AAP National Conference Day 5 (final) at SDCC",
+          "source": "https://sandiegodiscover.org/san-convention-calendar"
+        },
+        {
+          "date": "2026-10-11",
+          "severity": "low",
+          "label": "West Coast Cheer & Dance Competition at SDCC — 6,000 attendees, weekend parking impact downtown",
+          "source": "https://sandiegodiscover.org/san-convention-calendar"
+        },
+        {
+          "date": "2026-10-16",
+          "severity": "high",
+          "label": "ASA Annual Meeting Day 1 at SDCC — American Society of Anesthesiologists, 16,000 attendees, downtown hotels and transit fully saturated",
+          "source": "https://sandiegodiscover.org/san-convention-calendar"
+        },
+        {
+          "date": "2026-10-17",
+          "severity": "high",
+          "label": "ASA Annual Meeting Day 2 at SDCC",
+          "source": "https://sandiegodiscover.org/san-convention-calendar"
+        },
+        {
+          "date": "2026-10-18",
+          "severity": "high",
+          "label": "ASA Annual Meeting Day 3 at SDCC",
+          "source": "https://sandiegodiscover.org/san-convention-calendar"
+        },
+        {
+          "date": "2026-10-19",
+          "severity": "high",
+          "label": "ASA Annual Meeting Day 4 at SDCC",
+          "source": "https://sandiegodiscover.org/san-convention-calendar"
+        },
+        {
+          "date": "2026-10-20",
+          "severity": "high",
+          "label": "ASA Annual Meeting Day 5 (final) at SDCC",
+          "source": "https://sandiegodiscover.org/san-convention-calendar"
+        },
+        {
+          "date": "2026-10-31",
+          "severity": "medium",
+          "label": "CRF Transcatheter Cardiovascular Therapeutics (TCT) 2026 begins at SDCC — 11,000 cardiologists, runs through Nov 4; evening Halloween competition for social/networking events",
+          "source": "https://sandiegodiscover.org/san-convention-calendar"
+        }
+      ]
+    },
+    "aitb_programming": {
+      "last_refreshed": "2026-05-24",
+      "ttl_days": 14,
+      "findings": []
+    },
+    "weather": {
+      "last_refreshed": "2026-05-24",
+      "ttl_days": 1,
+      "findings": []
+    }
+  }
+}

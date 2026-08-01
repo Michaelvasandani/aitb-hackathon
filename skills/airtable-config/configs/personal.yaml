@@ -1,0 +1,88 @@
+bases:
+  personal:
+    base_id: appvh0RXcE3IPCy6X
+    tasks_table_id: tblxAXXXCOc18a31C
+    tasks_table_name: Tasks
+    task_field: Task
+    status_field: Status
+    description_field: Definition of Done
+    notes_field: Notes
+    assignee_field: Assignee
+    due_date_field: Due Date
+    score_field: Score
+    for_today_field: For Today
+    size_field: Size
+    project_field: Project
+    hitl_brief_field: HITL Brief
+    hitl_response_field: HITL Response
+    hitl_status_field: HITL Status
+    task_output_field: Task Output
+    project_table: Projects
+    project_name_field: Project
+    project_description_field: Definition of Done
+    project_status_field: Status
+    project_goals_field: 1yr Goals
+    project_driver_field: null
+    project_mountain_field: "Mountains (30d)"
+    mountain_table_id: tblkvrnIHTSCVlDWY
+    mountain_name_field: Title
+    mountain_goal_field: 1yr Goal
+    mountain_goal_table_id: tbll1AUS4uBF9Cgnh
+    mountain_goal_name_field: Name
+    goals_table: 1yr Goals
+    goal_name_field: Name
+    goal_type: annual
+    contacts_table_id: null
+    deals_field: null
+    orgs_table: null
+    inbox_project_id: recoKsIgNYclIvkn7
+    status_values:
+      not_started: Not Started
+      in_progress: In Progress
+      human_review: Human Review
+      validating: Validating
+      complete: Completed
+      blocked: Blocked
+      cancelled: Cancelled
+    done_statuses:
+      - Completed
+      - Cancelled
+      - Archived
+    projects:
+      base_id: appvh0RXcE3IPCy6X
+      table: Projects
+      name_field: Project
+      description_field: Definition of Done
+      goals_field: 1yr Goals
+      notes_field: Notes
+      for_this_week_field: For This Week
+      done_statuses:
+        - Complete
+    goals:
+      annual:
+        base_id: appvh0RXcE3IPCy6X
+        table: 1yr Goals
+        name_field: Name
+        description_field: Measurements
+        linked_projects: Projects
+        linked_down: null
+        linked_up: 5yr Goals
+        sort_field: Priority
+        sort_direction: desc
+        year_field: Year
+    tables:
+      tasks: tblxAXXXCOc18a31C
+      projects: tblOapxQkYF4ySYuF
+      mountains_30d: tblkvrnIHTSCVlDWY
+      goals_1yr: tbll1AUS4uBF9Cgnh
+      goals_5yr: tblgQVPrvdD9crv7g
+      goals_10yr: tblWf635ZIkscVX7N
+      people: tblIiIl5ib5ghYoSR
+
+people:
+  pablo:
+    personal: recVET2m8HSdXH15s
+  aaron:
+    personal: recqfhZKB6O5C3No1
+  juan:
+    personal: rec5tFe5N0kbvTNry

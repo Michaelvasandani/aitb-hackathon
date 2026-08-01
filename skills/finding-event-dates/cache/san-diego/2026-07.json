@@ -1,0 +1,79 @@
+{
+  "location": "san-diego",
+  "year_month": "2026-07",
+  "categories": {
+    "holidays": {
+      "last_refreshed": "2026-05-24",
+      "ttl_days": 365,
+      "findings": [
+        {
+          "date": "2026-07-04",
+          "severity": "high",
+          "label": "Independence Day — federal holiday, widespread closures, fireworks events across county",
+          "source": "https://www.timeanddate.com/holidays/us/2026"
+        }
+      ]
+    },
+    "audience_conferences": {
+      "by_audience": {
+        "ai-tech-builders": {
+          "last_refreshed": "2026-05-24",
+          "ttl_days": 30,
+          "findings": []
+        }
+      }
+    },
+    "local_events": {
+      "last_refreshed": "2026-05-24",
+      "ttl_days": 30,
+      "findings": [
+        {
+          "date": "2026-07-04",
+          "severity": "high",
+          "label": "Independence Day fireworks & festivals citywide — Big Bay Boom at waterfront, Balboa Park events, street closures downtown",
+          "source": "https://www.sandiego.org/articles/fireworks/best-4th-of-july-fireworks-san-diego.aspx"
+        },
+        {
+          "date": "2026-07-22",
+          "severity": "high",
+          "label": "San Diego Comic-Con 2026 Preview Night — all downtown hotels sold out, 135,000+ badge holders in city",
+          "source": "https://sdccblog.com/2025/07/san-diego-comic-con-2026-dates-including-registration-revealed/"
+        },
+        {
+          "date": "2026-07-23",
+          "severity": "high",
+          "label": "San Diego Comic-Con 2026 Day 1 — Convention Center + Gaslamp Quarter fully locked down, parking gridlock downtown",
+          "source": "https://sdccblog.com/2025/07/san-diego-comic-con-2026-dates-including-registration-revealed/"
+        },
+        {
+          "date": "2026-07-24",
+          "severity": "high",
+          "label": "San Diego Comic-Con 2026 Day 2 — Convention Center + Gaslamp Quarter fully locked down",
+          "source": "https://sdccblog.com/2025/07/san-diego-comic-con-2026-dates-including-registration-revealed/"
+        },
+        {
+          "date": "2026-07-25",
+          "severity": "high",
+          "label": "San Diego Comic-Con 2026 Day 3 — Convention Center + Gaslamp Quarter fully locked down",
+          "source": "https://sdccblog.com/2025/07/san-diego-comic-con-2026-dates-including-registration-revealed/"
+        },
+        {
+          "date": "2026-07-26",
+          "severity": "high",
+          "label": "San Diego Comic-Con 2026 Day 4 (Sunday) — final day, crowds peak mid-day, downtown still impacted",
+          "source": "https://sdccblog.com/2025/07/san-diego-comic-con-2026-dates-including-registration-revealed/"
+        }
+      ]
+    },
+    "aitb_programming": {
+      "last_refreshed": "2026-05-24",
+      "ttl_days": 14,
+      "findings": []
+    },
+    "weather": {
+      "last_refreshed": "2026-05-24",
+      "ttl_days": 1,
+      "findings": []
+    }
+  }
+}

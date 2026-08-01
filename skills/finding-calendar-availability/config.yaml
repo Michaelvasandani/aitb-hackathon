@@ -1,0 +1,20 @@
+timezone: America/Phoenix
+
+google_calendars:
+  - label: BB
+    account: aaron@brainbridge.app
+    calendar_id: primary
+  - label: AITB
+    account: aaron@aitrailblazers.org
+    calendar_id: primary
+  - label: Personal
+    account: aaroneden77@gmail.com
+    calendar_id: primary
+
+apple_calendars:
+  - name: Work
+    source: Intuit
+  - name: Family
+    source: Family
+  - name: TripIt
+    source: TripIt

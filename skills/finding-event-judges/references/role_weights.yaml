@@ -1,0 +1,98 @@
+# Role-specific scoring weights for finding-event-judges.
+#
+# Each role profile assigns a weight (0.0 to 2.0) to each scoring dimension.
+# The scorer multiplies the candidate's raw dimension score by the role weight,
+# sums across dimensions, then applies any multipliers (past_aitb, sponsor_overlap).
+#
+# Tune these by adjusting weights and re-running on past events to see whether
+# the ranking matches who Aaron actually picked. The dimensions themselves are
+# documented in references/scoring_rubric.md.
+
+roles:
+
+  judge:
+    # Judges need to be credible and draw an audience. They must understand the
+    # topic well enough to evaluate work, but they do not need to be the deepest
+    # researcher in the room. Geographic fit matters because judging is usually
+    # in-person.
+    topical_fit: 1.0
+    practitioner_lean: 1.0   # +1 = practitioner, -1 = academic
+    credibility_and_draw: 1.5
+    geographic_fit: 1.2
+    network_influence: 1.0
+    warm_path: 1.0
+    community_influence: 0.8
+
+  chief-scientist:
+    # Chief scientists bring depth, perspective, and intellectual authority.
+    # Remote is fine. Practitioner-vs-academic leans academic but not exclusively.
+    topical_fit: 1.5
+    practitioner_lean: -0.5
+    credibility_and_draw: 1.3
+    geographic_fit: 0.3   # remote-friendly, geography barely matters
+    network_influence: 1.0
+    warm_path: 0.8
+    community_influence: 1.0
+
+  mentor:
+    # Mentors need to be hands-on, available during the event, and reachable.
+    # Heavy practitioner lean. Warm path matters a lot because the ask is bigger.
+    topical_fit: 1.2
+    practitioner_lean: 1.5
+    credibility_and_draw: 0.6
+    geographic_fit: 1.2
+    network_influence: 0.5
+    warm_path: 1.5
+    community_influence: 0.7
+
+  panelist:
+    # Panelists win on diversity of perspective, storytelling, and topical
+    # relevance. Less about pure credentials, more about whether they add a
+    # voice the audience would not otherwise hear.
+    topical_fit: 1.3
+    practitioner_lean: 0.5
+    credibility_and_draw: 0.8
+    geographic_fit: 1.0
+    network_influence: 1.0
+    warm_path: 0.8
+    community_influence: 1.5   # the diversity dial sits here
+
+  keynote:
+    # Keynotes are about pulling the audience in. Draw and credibility dominate.
+    # Geography matters less because we will pay travel for a real keynote.
+    topical_fit: 1.0
+    practitioner_lean: 0.5
+    credibility_and_draw: 2.0
+    geographic_fit: 0.5
+    network_influence: 1.3
+    warm_path: 0.8
+    community_influence: 1.2
+
+# Multipliers apply after the weighted sum.
+
+multipliers:
+
+  past_aitb_involvement:
+    # Anyone who has already shown up at AITB events is dramatically easier to
+    # invite. Multiplier compounds with sponsor overlap.
+    none: 1.0
+    attended_meetup: 1.1
+    spoke_or_mentored: 1.3
+    judged_prior_event: 1.4
+
+  sponsor_overlap:
+    # Tier of the candidate's employer on the event's Target Sponsor List.
+    # Tier 1 = top priority sponsor target. Tier 3 = nice-to-have.
+    # Additional seniority boost is applied separately, see below.
+    none: 1.0
+    tier_3: 1.1
+    tier_2: 1.2
+    tier_1: 1.4
+
+  sponsor_seniority_at_target:
+    # Stacks on top of sponsor_overlap when the candidate has decision or budget
+    # influence at the sponsor org. A Microsoft AZ Field CTO is a sponsorship
+    # lever; a Microsoft IC engineer is interesting but does not move sponsorship.
+    ic_or_unknown: 1.0
+    senior_or_staff: 1.05
+    director_plus_or_founder: 1.2

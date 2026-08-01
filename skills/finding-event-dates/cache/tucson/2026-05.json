@@ -1,0 +1,100 @@
+{
+  "location": "tucson",
+  "year_month": "2026-05",
+  "categories": {
+    "holidays": {
+      "last_refreshed": "2026-05-23",
+      "ttl_days": 365,
+      "findings": [
+        {
+          "date": "2026-05-25",
+          "severity": "high",
+          "label": "Memorial Day (US federal)",
+          "source": "Nager.Date"
+        }
+      ]
+    },
+    "audience_conferences": {
+      "last_refreshed": "2026-05-23",
+      "ttl_days": 30,
+      "findings": []
+    },
+    "local_events": {
+      "last_refreshed": "2026-05-23",
+      "ttl_days": 30,
+      "findings": [
+        {
+          "date": "2026-05-26",
+          "severity": "low",
+          "label": "Tash Sultana concert at Rialto Theatre (small audience overlap)",
+          "source": "https://www.rialtotheatre.com/"
+        },
+        {
+          "date": "2026-05-27",
+          "severity": "low",
+          "label": "TMC Meet Me Downtown 5K (small competing community draw)",
+          "source": "https://www.visittucson.org/events/"
+        },
+        {
+          "date": "2026-05-28",
+          "severity": "low",
+          "label": "Thievery Corporation 30th Anniversary Tour at Rialto Theatre",
+          "source": "https://www.rialtotheatre.com/"
+        },
+        {
+          "date": "2026-05-29",
+          "severity": "low",
+          "label": "Loft Kids Fest opens (Outdoor Movie Party at Himmel Park) and Ali Siddiq at Rialto. Family draw downgraded since LKF runs daily through 6/28",
+          "source": "https://loftcinema.org/"
+        },
+        {
+          "date": "2026-05-29",
+          "severity": "low",
+          "label": "Thievery Corporation 30th Anniversary Tour at Rialto Theatre",
+          "source": "https://www.rialtotheatre.com/"
+        },
+        {
+          "date": "2026-05-30",
+          "severity": "low",
+          "label": "Loft Kids Fest screening (family overlap, downgraded for ~50 person event)",
+          "source": "https://loftcinema.org/"
+        },
+        {
+          "date": "2026-05-30",
+          "severity": "low",
+          "label": "Thievery Corporation 30th Anniversary Tour at Rialto Theatre",
+          "source": "https://www.rialtotheatre.com/"
+        },
+        {
+          "date": "2026-05-31",
+          "severity": "low",
+          "label": "Loft Kids Fest screening; Goat Yoga at Udall Park 9am (small family-time overlap)",
+          "source": "https://loftcinema.org/"
+        }
+      ]
+    },
+    "aitb_programming": {
+      "last_refreshed": "2026-05-23",
+      "ttl_days": 14,
+      "findings": []
+    },
+    "weather": {
+      "last_refreshed": "2026-05-23",
+      "ttl_days": 1,
+      "findings": [
+        {
+          "date": "2026-05-27",
+          "severity": "medium",
+          "label": "Forecast: max wind 20.6 mph (uncomfortable for outdoor event)",
+          "source": "Open-Meteo"
+        },
+        {
+          "date": "2026-05-28",
+          "severity": "medium",
+          "label": "Forecast: max wind 20.5 mph (uncomfortable for outdoor event)",
+          "source": "Open-Meteo"
+        }
+      ]
+    }
+  }
+}

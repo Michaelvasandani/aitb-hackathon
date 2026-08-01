@@ -1,0 +1,107 @@
+{
+  "skill_name": "finding-calendar-availability",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Find me a 1-hour slot sometime this week during business hours",
+      "expected_output": "JSON output with available 60-minute slots during 9 AM - 5 PM business hours for the next 7 days, excluding weekends. Should include date, day of week, start/end times in 12h format, and ISO timestamps.",
+      "files": [],
+      "expectations": [
+        "Output is valid JSON with a 'slots' array",
+        "Each slot has date, day, start, end, start_iso, and end_iso fields",
+        "All slots fall within 9:00 AM - 5:00 PM window",
+        "No slots appear on Saturday or Sunday",
+        "Duration of each slot is exactly 60 minutes",
+        "Query section shows duration_minutes: 60 and time_of_day: business",
+        "Timezone is America/Phoenix",
+        "At most 10 slots are returned (default max_slots)"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "I need to find a 2-hour afternoon block tomorrow for a deep work session. Can you check my calendar?",
+      "expected_output": "JSON output with available 120-minute slots during 12 PM - 5 PM for tomorrow only.",
+      "files": [],
+      "expectations": [
+        "Output is valid JSON with a 'slots' array",
+        "Query shows duration_minutes: 120",
+        "Query shows time_of_day: afternoon",
+        "Start and end dates are the same (single day)",
+        "All slot start times are at or after 12:00 PM",
+        "All slot end times are at or before 5:00 PM",
+        "Each slot spans exactly 2 hours",
+        "calendars_checked only lists calendars that responded successfully"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "When am I free for a quick 30-min call this weekend? Morning would be ideal",
+      "expected_output": "JSON output with available 30-minute morning slots on Saturday and Sunday. Must use --include-weekends flag since weekends are now skipped by default for all filters except 'any'.",
+      "files": [],
+      "expectations": [
+        "Output is valid JSON with a 'slots' array",
+        "Query shows duration_minutes: 30",
+        "Query shows time_of_day: morning",
+        "Start and end dates cover the upcoming weekend",
+        "All slot start times are between 8:00 AM and 12:00 PM",
+        "Each slot spans exactly 30 minutes",
+        "Uses --include-weekends flag since morning filter skips weekends by default",
+        "Output includes 'Arizona time' or timezone information"
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "hey can you check if I have anything open wednesday afternoon, need like 2hrs for a call with a client. just gimme one option per gap, don't need all the 15 min variations",
+      "expected_output": "Uses --compact flag to return one slot per free window. Duration 120, afternoon filter, single day.",
+      "files": [],
+      "expectations": [
+        "Uses --compact flag in the command",
+        "Query shows duration_minutes: 120",
+        "Query shows time_of_day: afternoon",
+        "Start and end dates are the same Wednesday",
+        "Returns at most one slot per free window (compact mode)",
+        "All slots are in the afternoon (12 PM - 5 PM)"
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "i'm completely slammed tomorrow but my boss wants to squeeze in a 30 min 1:1. can you see if there's literally any gap?",
+      "expected_output": "Checks availability for tomorrow with time_of_day any to maximize chances of finding a slot. Duration 30.",
+      "files": [],
+      "expectations": [
+        "Query shows duration_minutes: 30",
+        "Query shows time_of_day: any or business (either is reasonable)",
+        "Start and end dates are tomorrow",
+        "Output is valid JSON with slots array (may be empty if truly booked)",
+        "Timezone is America/Phoenix"
+      ]
+    },
+    {
+      "id": 6,
+      "prompt": "I need to schedule a half-day workshop next week, so I need a 4-hour block. Morning or afternoon works. Can you find me something?",
+      "expected_output": "Duration 240 minutes. Should check both morning and afternoon or use 'any' to cover both. Next week date range.",
+      "files": [],
+      "expectations": [
+        "Query shows duration_minutes: 240",
+        "Start date is next Monday, end date is next Friday (or similar week range)",
+        "No weekend slots returned",
+        "Each returned slot spans exactly 4 hours",
+        "Output is valid JSON with slots array"
+      ]
+    },
+    {
+      "id": 7,
+      "prompt": "what does my friday look like? any openings for a quick 15 min sync in the morning?",
+      "expected_output": "Duration 15, morning filter, single day (this Friday).",
+      "files": [],
+      "expectations": [
+        "Query shows duration_minutes: 15",
+        "Query shows time_of_day: morning",
+        "Start and end dates are the upcoming Friday",
+        "All slot start times are between 8:00 AM and 12:00 PM",
+        "Each slot spans exactly 15 minutes",
+        "Output is valid JSON"
+      ]
+    }
+  ]
+}

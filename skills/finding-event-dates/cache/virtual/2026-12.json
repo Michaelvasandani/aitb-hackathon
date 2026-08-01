@@ -1,0 +1,56 @@
+{
+  "location": "virtual",
+  "year_month": "2026-12",
+  "categories": {
+    "holidays": {
+      "last_refreshed": "2026-05-23",
+      "ttl_days": 365,
+      "findings": []
+    },
+    "audience_conferences": {
+      "last_refreshed": "2026-05-23",
+      "ttl_days": 30,
+      "findings": [
+        {
+          "date": "2026-12-01",
+          "severity": "high",
+          "label": "AWS re:Invent 2026 (Nov 30 to Dec 4, Las Vegas)",
+          "source": "https://reinvent.awsevents.com/"
+        },
+        {
+          "date": "2026-12-02",
+          "severity": "high",
+          "label": "AWS re:Invent 2026 (Nov 30 to Dec 4, Las Vegas)",
+          "source": "https://reinvent.awsevents.com/"
+        },
+        {
+          "date": "2026-12-03",
+          "severity": "high",
+          "label": "AWS re:Invent 2026 (Nov 30 to Dec 4, Las Vegas)",
+          "source": "https://reinvent.awsevents.com/"
+        },
+        {
+          "date": "2026-12-04",
+          "severity": "high",
+          "label": "AWS re:Invent 2026 (Nov 30 to Dec 4, Las Vegas)",
+          "source": "https://reinvent.awsevents.com/"
+        }
+      ]
+    },
+    "local_events": {
+      "last_refreshed": "2026-05-23",
+      "ttl_days": 30,
+      "findings": []
+    },
+    "aitb_programming": {
+      "last_refreshed": "2026-05-23",
+      "ttl_days": 14,
+      "findings": []
+    },
+    "weather": {
+      "last_refreshed": "2026-05-23",
+      "ttl_days": 1,
+      "findings": []
+    }
+  }
+}
