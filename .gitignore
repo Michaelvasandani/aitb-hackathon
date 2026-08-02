@@ -3,3 +3,14 @@ CLAUDE.md
 
 # Personal Claude Code settings
 .claude/settings.local.json
+
+# macOS
+.DS_Store
+
+# Python
+__pycache__/
+*.py[cod]
+
+# Generated plans
+plan.json
+plan.html

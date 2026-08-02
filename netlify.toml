@@ -1,0 +1,14 @@
+# The whole product is static now — the deterministic core runs in the browser
+# (public/js/core.js, held to core/*.py by tests/test_conformance.py). So Netlify serves
+# the full interactive planner, not just a snapshot. No Python runtime needed, which is
+# what previously ruled Netlify out.
+#
+# No build step: no bundler, no transpile, no framework. `public/` IS the site.
+# Security headers come from public/_headers, which Netlify reads automatically.
+
+[build]
+  publish = "public"
+  command = ""
+
+[build.processing]
+  skip_processing = true
