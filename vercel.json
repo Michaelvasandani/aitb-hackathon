@@ -3,7 +3,7 @@
   "functions": {
     "api/plan.js": {
       "maxDuration": 300,
-      "includeFiles": ".claude/skills/**"
+      "includeFiles": "{.claude/skills/**,node_modules/@anthropic-ai/**}"
     }
   },
   "headers": [
