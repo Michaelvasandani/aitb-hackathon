@@ -167,6 +167,47 @@ table, read at standup before lanes are assigned.
 
 ---
 
+## 9 — Reversed our own optimisation target for sponsor recommendations
+
+**We first built:** `min_sponsors()` minimising **overshoot** — find the combination of
+sponsor tiers that most exactly covers the gap.
+
+**We changed it to:** minimise the **number of asks**, with overshoot only breaking ties.
+
+**Why:** overshoot is not a cost to the organizer. Raising $10,000 when you need $7,500 is
+strictly good. We had optimised against a number that looked like waste but isn't, and in
+doing so recommended two asks where one would do.
+
+**But the reversal exposed a second thing**, so both are now returned: for a first-time
+organizer with no warm contacts in a cold city, three $2,500 asks are often far more winnable
+than one $10,000 ask. Fewest-asks is the primary answer; `alternatives` carries the exact-fit
+and smallest-single-ask options with a `why`. Hiding the smaller-asks route behind "fewest
+sponsors" would have been the same mistake in the other direction.
+
+**Decided by:** Jorge, prompted by a failing test that disagreed with the docstring.
+**Evidence:** [`core/budget.py`](../core/budget.py), `tests/test_budget.py`
+
+---
+
+## 10 — Three bugs the tests caught before a demo could
+
+Logged because "we wrote tests" is a claim and these are the evidence.
+
+1. **`date` was flagged as a compressed phase on every single plan.** It is a milestone with
+   zero duration, and it had a 1-day viability floor. Every plan, including comfortable ones,
+   would have rendered a false risk warning. Fixed by giving milestones a floor of 0 and
+   skipping them.
+2. **`min_sponsors` minimised the wrong quantity** — see entry 9.
+3. **The generated sentence said "requirements invalidates."** The sponsor lead clause was a
+   plural noun phrase where every other clause was a gerund. A subject-verb disagreement in
+   the one sentence the whole product is built around.
+
+None of these would have failed loudly. All three would have been visible on stage.
+
+**Evidence:** commit `a1275d1`, `tests/` (109 tests)
+
+---
+
 ## Standing kill switch
 
 No agent on this project sends email, posts publicly, submits a form, or contacts a human.
