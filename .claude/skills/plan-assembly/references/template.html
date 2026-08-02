@@ -1,0 +1,166 @@
+<!doctype html>
+<!--
+  Self-contained plan page skeleton for plan-assembly.
+  Fill the {{PLACEHOLDERS}} and repeatable <!-- CARD --> / <!-- ROW --> blocks from plan.json,
+  then write the result to plan.html. Keep everything inline: no external fonts/scripts/CDNs/images.
+  Placeholder convention: {{FIELD}} = single value; blocks marked "repeat per X" are cloned per item.
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{CITY}} Hackathon Plan</title>
+<style>
+  :root {
+    --bg: #ffffff; --fg: #14181f; --muted: #5b6472; --line: #e6e9ef;
+    --card: #f7f8fa; --accent: #4f46e5; --accent-soft: #eef0ff;
+    --hi: #0f8a4f; --hi-bg: #e6f6ec; --med: #b7791f; --med-bg: #fdf3e2;
+    --lo: #b23b3b; --lo-bg: #fbebeb; --warn: #b23b3b; --warn-bg: #fbebeb;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0f1319; --fg: #e8ebf0; --muted: #9aa4b2; --line: #232a35;
+      --card: #171c24; --accent: #8b85f5; --accent-soft: #1e2130;
+      --hi: #4ade80; --hi-bg: #10281b; --med: #eab308; --med-bg: #2a2410;
+      --lo: #f87171; --lo-bg: #2a1414; --warn: #f87171; --warn-bg: #2a1414;
+    }
+  }
+  :root[data-theme="dark"]  { color-scheme: dark; }
+  :root[data-theme="light"] { color-scheme: light; }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--fg);
+    font: 16px/1.55 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+  .wrap { max-width: 900px; margin: 0 auto; padding: 32px 20px 80px; }
+  header.hero { border-bottom: 1px solid var(--line); padding-bottom: 20px; margin-bottom: 8px; }
+  h1 { font-size: 1.9rem; margin: 0 0 6px; letter-spacing: -0.01em; }
+  .shape { color: var(--muted); font-size: 1.05rem; }
+  .countdown { display: inline-block; margin-top: 10px; padding: 4px 12px; border-radius: 999px;
+    background: var(--accent-soft); color: var(--accent); font-weight: 600; font-size: 0.9rem; }
+  .principles { margin: 16px 0 0; padding: 10px 14px; border-radius: 10px; background: var(--accent-soft);
+    color: var(--fg); font-size: 0.85rem; }
+  .principles b { color: var(--accent); }
+  section { margin-top: 40px; }
+  h2 { font-size: 1.3rem; margin: 0 0 14px; padding-bottom: 6px; border-bottom: 2px solid var(--line); }
+  .thin { display: inline-block; margin-left: 8px; padding: 2px 8px; border-radius: 6px;
+    background: var(--warn-bg); color: var(--warn); font-size: 0.72rem; font-weight: 700; vertical-align: middle; }
+  .answer { padding: 12px 0; border-bottom: 1px solid var(--line); }
+  .answer .q { font-weight: 600; }
+  .answer .impl { color: var(--muted); font-size: 0.92rem; }
+  table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+  .scroll { overflow-x: auto; }
+  th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--line); }
+  th { color: var(--muted); font-weight: 600; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.03em; }
+  .phase-bar { display: flex; align-items: center; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--line); }
+  .phase-bar .name { font-weight: 600; min-width: 130px; }
+  .phase-bar .win { color: var(--muted); font-size: 0.85rem; min-width: 120px; }
+  .phase-bar .acts { color: var(--fg); font-size: 0.85rem; }
+  .cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 14px; }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 14px; }
+  .card .top { display: flex; justify-content: space-between; align-items: start; gap: 8px; }
+  .card .name { font-weight: 700; font-size: 1.02rem; }
+  .card .one { color: var(--muted); font-size: 0.88rem; margin: 4px 0 8px; }
+  .badge { padding: 2px 8px; border-radius: 999px; font-size: 0.72rem; font-weight: 700; white-space: nowrap; }
+  .badge.high { background: var(--hi-bg); color: var(--hi); }
+  .badge.med  { background: var(--med-bg); color: var(--med); }
+  .badge.low  { background: var(--lo-bg); color: var(--lo); }
+  .signals { display: flex; flex-wrap: wrap; gap: 6px; margin: 8px 0; }
+  .sig { background: var(--accent-soft); color: var(--accent); font-size: 0.74rem; padding: 2px 8px; border-radius: 6px; }
+  .card a.src { color: var(--accent); font-size: 0.82rem; text-decoration: none; word-break: break-all; }
+  .card a.src:hover { text-decoration: underline; }
+  .move { font-size: 0.85rem; margin-top: 8px; padding-top: 8px; border-top: 1px dashed var(--line); }
+  .move b { color: var(--muted); font-weight: 600; }
+  .warnbox { background: var(--warn-bg); border: 1px solid var(--warn); border-radius: 10px;
+    padding: 12px 14px; margin-bottom: 10px; color: var(--warn); font-size: 0.9rem; }
+  ul.actions { padding-left: 20px; } ul.actions li { margin: 4px 0; }
+  footer { margin-top: 60px; color: var(--muted); font-size: 0.8rem; text-align: center; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="hero">
+    <h1>{{CITY}} Hackathon Plan</h1>
+    <div class="shape">{{EVENT_SHAPE}}</div>
+    <span class="countdown">{{DATE_OR_WINDOW}} · {{RUNWAY_DAYS}} days out</span>
+    <div class="principles">
+      <b>Fixed principles (every plan):</b> {{FIXED_PRINCIPLES}}
+    </div>
+  </header>
+
+  <!-- Top warnings banner: render if plan.warnings is non-empty (esp. below-floor runway) -->
+  <section id="top-warnings">
+    <!-- repeat per warning -->
+    <div class="warnbox">⚠ {{WARNING_TEXT}}</div>
+  </section>
+
+  <section id="answers">
+    <h2>Your answers</h2>
+    <!-- repeat per input (city, date, budget, audience, purpose) -->
+    <div class="answer">
+      <div class="q">{{INPUT_LABEL}}: {{INPUT_VALUE}}</div>
+      <div class="impl">→ {{INPUT_IMPLICATION}}</div>
+    </div>
+  </section>
+
+  <section id="timeline">
+    <h2>Timeline <!--{{THIN_BADGE_IF_ANY}}--></h2>
+    <!-- repeat per plan.timeline[] entry -->
+    <div class="phase-bar">
+      <span class="name">{{PHASE_NAME}}</span>
+      <span class="win">{{WINDOW}} · {{DURATION}}</span>
+      <span class="acts">{{ACTIONS_JOINED}}</span>
+    </div>
+
+    <h3 style="margin-top:24px;font-size:1.05rem;">Event-day run of show</h3>
+    <div class="scroll"><table>
+      <thead><tr><th>Section</th><th>Start</th><th>End</th><th>Lead</th></tr></thead>
+      <tbody>
+        <!-- repeat per plan.run_of_show[] -->
+        <tr><td>{{SECTION}}</td><td>{{START}}</td><td>{{END}}</td><td>{{LEAD}}</td></tr>
+      </tbody>
+    </table></div>
+  </section>
+
+  <section id="leads">
+    <h2>Local leads</h2>
+
+    <!-- Render one subsection per lead type: Venues, Sponsors, In-kind partners, Mentors.
+         Add <span class="thin">⚠ thin</span> to the h3 when below the done-signal. -->
+    <h3 style="font-size:1.05rem;">Venues</h3>
+    <div class="cards">
+      <!-- repeat per lead -->
+      <div class="card">
+        <div class="top">
+          <span class="name">{{LEAD_NAME}}</span>
+          <span class="badge {{CONF_CLASS}}">{{CONFIDENCE}}</span>
+        </div>
+        <div class="one">{{ONE_LINER}}</div>
+        <div class="signals">
+          <!-- repeat per signal --><span class="sig">{{SIGNAL}}</span>
+        </div>
+        <a class="src" href="{{SOURCE_URL}}" target="_blank" rel="noopener">{{SOURCE_URL}}</a>
+        <div class="move"><b>First move:</b> {{SUGGESTED_FIRST_MOVE}}</div>
+        <!-- optional: <div class="move"><b>Warm path:</b> {{WARM_PATH}}</div> -->
+      </div>
+    </div>
+  </section>
+
+  <section id="templates">
+    <h2>Templates</h2>
+    <!-- repeat per plan.templates[] — mark stubs -->
+    <div class="answer"><div class="q">{{TEMPLATE_NAME}} <span class="thin">{{STATUS}}</span></div></div>
+  </section>
+
+  <section id="next">
+    <h2>Do this first</h2>
+    <ul class="actions">
+      <!-- repeat per top action --><li>{{NEXT_ACTION}}</li>
+    </ul>
+    <!-- repeat every plan.warnings[] entry here too, prominently -->
+    <div class="warnbox">⚠ {{WARNING_TEXT}}</div>
+  </section>
+
+  <footer>Generated by Hack-AI-Thon in a Box · {{GENERATED_AT}} · Agents draft; you send.</footer>
+</div>
+</body>
+</html>
