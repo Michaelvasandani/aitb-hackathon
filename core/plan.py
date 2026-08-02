@@ -112,6 +112,10 @@ def state(facts, today=None):
         out["warnings"].extend(out["timeline"]["warnings"])
         if out["weeks_out"] < model.COMFORTABLE_WEEKS:
             out["warnings"].append(out["risk_sentence"])
+        out["date_hazards"] = timeline.date_hazards(event_date)
+        hazard = timeline.date_warning(event_date)
+        if hazard:
+            out["warnings"].append(hazard)
 
     headcount = facts.get("PARTICIPANT_CAP") or facts.get("HEADCOUNT")
     if headcount:

@@ -208,6 +208,59 @@ None of these would have failed loudly. All three would have been visible on sta
 
 ---
 
+## 11 — The demo date was wrong twice, and the second catch became a feature
+
+**Entry 7 locked 31 October 2026.** That fixed the runway problem and introduced a worse one:
+**31 October is Halloween.** Caught by the research agent while sourcing Fresno leads — it
+checked the day of week, noticed the date, and flagged that it would compete for attendees.
+
+**Why this one stings:** our pitch includes that the tool scores dates against holidays and
+competing local events. Maria named holidays as a top external risk. AITB's own
+`finding-event-dates` skill does exactly this scoring. We demoed on Halloween anyway, twice
+over, and a third party had to tell us.
+
+**What we did:** moved to **Saturday 7 November 2026** — 97 days, 13.9 weeks, clear. Then wrote
+the check into the product: `timeline.date_hazards()` and `date_warning()` now score any date
+against US federal holidays, the long weekends they create, and the observances that reliably
+cost attendance, with a one-day radius either side. It renders as a warning, not a veto —
+*"Run it anyway if you mean to; just mean to."*
+
+**The pattern worth naming:** three date errors now (11.86 weeks, Halloween, and the
+`2026-10-24` example value in the data contract that seeded the first one). Every one was a
+human picking a date by eye. The fix is not more care; it is that picking a date by eye is no
+longer how this is done — `python3 -m core.cli timeline --event-date <date>` checks both, and
+`OWNERSHIP.md` now requires it.
+
+**Decided by:** the research agent flagged it; Jorge verified 31 Oct is Halloween and 7 Nov is a
+clear Saturday, then built the check.
+**Evidence:** [`core/timeline.py`](../core/timeline.py) `date_hazards`,
+`tests/test_timeline.py::TestDateHazards`, [`OWNERSHIP.md`](OWNERSHIP.md)
+
+---
+
+## 12 — Killed a bankrupt company off the sponsor list
+
+**Would have shipped:** **Bitwise Industries** — the obvious "Fresno tech company" answer, and
+the one any quick list would lead with.
+
+**Verification found:** Chapter 7 bankruptcy, June 2023. $252.03M in liabilities, ~900 people
+furloughed. It has not existed for three years.
+
+**Why it matters more than one bad row:** this is precisely the failure the sourced-or-omitted
+rule exists to catch, and it is the one that would have been noticed. Handing a Fresno organizer
+a sponsor list led by a company that collapsed in a well-covered bankruptcy ends the
+conversation, and it would have ended it in front of a pilot partner rather than in a test.
+
+Six more were dropped the same way (unloadable HQ claim, 403, no named grant program,
+invitation-only foundation, wrong city, 404'd student chapter), and four were downgraded rather
+than dropped with the contradiction left visible — the library's capacity is cited as 140, 6,
+and ~50 by three different sources, so the lead says so instead of picking one.
+
+**Decided by:** the research agent's verify pass, run separately from sourcing.
+**Evidence:** [`data/fresno-leads.json`](../data/fresno-leads.json) `verification_notes`
+
+---
+
 ## Standing kill switch
 
 No agent on this project sends email, posts publicly, submits a form, or contacts a human.

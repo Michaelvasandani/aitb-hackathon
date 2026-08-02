@@ -135,6 +135,45 @@ CHUNKS = [
 # the nonprofit track early and loudly.
 # --------------------------------------------------------------------------------------
 
+# --------------------------------------------------------------------------------------
+# Date hazards. Maria named local events, holidays, and weather as the external risks to
+# plan around, and AITB's own finding-event-dates skill scores candidates against holidays
+# and competing events. This is the portable subset: US federal holidays, the long weekends
+# they create, and the handful of observances that reliably cost you attendance.
+#
+# We encode it because we picked Halloween for our own demo date and did not notice.
+#
+# (month, day) -> label, for fixed-date hazards.
+# --------------------------------------------------------------------------------------
+
+FIXED_DATE_HAZARDS = {
+    (1, 1):   "New Year's Day",
+    (2, 14):  "Valentine's Day",
+    (6, 19):  "Juneteenth",
+    (7, 4):   "Independence Day",
+    (10, 31): "Halloween",
+    (11, 11): "Veterans Day",
+    (12, 24): "Christmas Eve",
+    (12, 25): "Christmas Day",
+    (12, 31): "New Year's Eve",
+}
+
+# label -> (month, weekday [Mon=0], nth occurrence; -1 = last)
+FLOATING_HAZARDS = {
+    "Martin Luther King Jr. Day": (1, 0, 3),
+    "Presidents' Day":            (2, 0, 3),
+    "Mother's Day":               (5, 6, 2),
+    "Memorial Day":               (5, 0, -1),
+    "Father's Day":               (6, 6, 3),
+    "Labor Day":                  (9, 0, 1),
+    "Indigenous Peoples' / Columbus Day": (10, 0, 2),
+    "Thanksgiving":               (11, 3, 4),
+}
+
+# How many days either side of a hazard still costs you attendance. A Saturday event on
+# Memorial Day weekend competes with everyone's travel plans, not just the Monday.
+HAZARD_RADIUS_DAYS = 1
+
 # countback.py emits two rows that are not 1:1 with PHASES — it bundles setup+vision, and
 # adds a production row. Label them here so nothing renders a raw identifier at an organizer.
 COUNTBACK_ROW_LABELS = {

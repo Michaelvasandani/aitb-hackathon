@@ -8,7 +8,7 @@ DEMO_DAY = "2026-08-02"
 FACTS = {
     "ORG_NAME": "Fresno Public Library",
     "CITY": "Fresno, CA",
-    "EVENT_DATE": "2026-10-31",
+    "EVENT_DATE": "2026-11-07",
     "EVENT_LENGTH": 1,
     "PARTICIPANT_CAP": 60,
     "VENUE_NAME": "Fresno Library, Community Room",

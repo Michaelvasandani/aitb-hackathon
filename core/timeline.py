@@ -95,6 +95,64 @@ def at_risk_phases(event_date, today):
     return out
 
 
+def _nth_weekday(year, month, weekday, nth):
+    """The nth `weekday` of a month. nth=-1 means the last one."""
+    first = dt.date(year, month, 1)
+    offset = (weekday - first.weekday()) % 7
+    if nth == -1:
+        d = first + dt.timedelta(days=offset + 28)
+        return d - dt.timedelta(days=7) if d.month != month else d
+    return first + dt.timedelta(days=offset + 7 * (nth - 1))
+
+
+def date_hazards(event_date):
+    """Holidays and observances on or near the event date.
+
+    Not a veto — plenty of good events run on holiday weekends deliberately. But an
+    organizer should choose it rather than discover it, and a first-time organizer will
+    not think to check. We know, because we picked Halloween for our own demo and had to
+    be told.
+    """
+    d = _as_date(event_date)
+    hits = []
+
+    for delta in range(-model.HAZARD_RADIUS_DAYS, model.HAZARD_RADIUS_DAYS + 1):
+        day = d + dt.timedelta(days=delta)
+        label = model.FIXED_DATE_HAZARDS.get((day.month, day.day))
+        if label:
+            hits.append((label, day, delta))
+
+    for label, (month, weekday, nth) in model.FLOATING_HAZARDS.items():
+        day = _nth_weekday(d.year, month, weekday, nth)
+        if abs((day - d).days) <= model.HAZARD_RADIUS_DAYS:
+            hits.append((label, day, (day - d).days))
+        # Thanksgiving's cost lands on the whole four-day weekend, not just the Thursday.
+        if label == "Thanksgiving" and 0 <= (d - day).days <= 3:
+            hits.append(("Thanksgiving weekend", day, (day - d).days))
+
+    out, seen = [], set()
+    for label, day, delta in hits:
+        if label in seen:
+            continue
+        seen.add(label)
+        when = ("falls on your event day" if delta == 0
+                else f"is the day {'before' if delta > 0 else 'after'} your event")
+        out.append({"label": label, "date": day.isoformat(), "offset_days": delta,
+                    "note": f"{label} {when} ({day.isoformat()})."})
+    return out
+
+
+def date_warning(event_date):
+    """One sentence, or None when the date is clear."""
+    hits = date_hazards(event_date)
+    if not hits:
+        return None
+    names = ", ".join(h["label"] for h in hits)
+    return (f"{names} — check this against your date. Holidays and long weekends were named "
+            f"by AITB's organizers as a top external risk, and they compete for exactly the "
+            f"attendees you are trying to recruit. Run it anyway if you mean to; just mean to.")
+
+
 def risk_sentence(event_date, today):
     """One plain-English sentence naming what the runway costs.
 

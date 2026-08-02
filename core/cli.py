@@ -31,7 +31,7 @@ DEMO_CHUNK1_GATE = {
     "ROLES_NAMED": True,
 }
 DEMO_CHUNK2 = {
-    "EVENT_DATE": "2026-10-31",
+    "EVENT_DATE": "2026-11-07",
     "EVENT_LENGTH": 1,
     "PARTICIPANT_CAP": 60,
     "VENUE_NAME": "Fresno County Public Library — Community Room",

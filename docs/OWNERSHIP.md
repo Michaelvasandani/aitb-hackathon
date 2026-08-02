@@ -9,16 +9,22 @@ checkpoint. If a lane is not on this page, it is not being built today.
 Work backwards from 14:00, not from 16:00. The two hours after freeze are not slack. They are
 the difference between built and scored.
 
-**The demo target is decided and does not get relitigated:** Fresno, CA · **Saturday 31 October
+**The demo target is decided and does not get relitigated:** Fresno, CA · **Saturday 7 November
 2026** · room cap 60. Fresno because no AITB chapter, not San Diego, not Tucson — a city nobody
 on this team has a relationship in. That coldness is the product claim.
 
-31 October 2026 because it is 90 days out — **12.9 weeks**, which clears the 56-day lead-time
-floor *and* clears the `WEEKS_OUT < 12` conditional with headroom. The obvious pick, 24 October,
-is 83 days = **11.86 weeks**, which trips the compression warning and would have the tool
-contradicting the demo's own payoff line ("twelve weeks of dated plan") on screen, live, in front
-of judges. Verified against `countback.py` before this doc was written. Do not move this date
-without re-running the countback.
+7 November 2026 is 97 days out — **13.9 weeks** — a Saturday, and clear of holidays. It is the
+third date we picked, and the two we rejected are why the rule below exists:
+
+- **24 October** — 83 days = **11.86 weeks**, which trips the `WEEKS_OUT < 12` conditional. The
+  tool would have printed a compression warning on screen while the presenter said "twelve weeks
+  of dated plan." Both halves individually correct; the demo looks broken.
+- **31 October** — clears the runway, and is **Halloween**. A tool that scores dates against
+  holidays, demoing on Halloween, is the same error one layer up. Caught during lead research,
+  not by us.
+
+**Do not move this date without running `python3 -m core.cli timeline --event-date <date>`.**
+It now checks the runway *and* the holiday calendar, because we made both mistakes by hand.
 
 ---
 
@@ -57,7 +63,7 @@ One owner per lane. A second name on a lane means nobody owns it.
 
 | Lane | Owner | Deliverable (named artifact) | Depends on | Due | Definition of done |
 |---|---|---|---|---|---|
-| **1. Deterministic core** | Michael | Phase DAG + countback + gate predicates + template-unlock table, as data, extending `countback.py`; emits `plan.timeline[]` | Nothing. `countback.py` exists. | 10:00 | Run it twice on `--event-date 2026-10-31 --today 2026-08-02`; output is byte-identical, shows 8 dated phase windows, and reports 90d / 12.9w. Zero model calls in this path. |
+| **1. Deterministic core** | Michael | Phase DAG + countback + gate predicates + template-unlock table, as data, extending `countback.py`; emits `plan.timeline[]` | Nothing. `countback.py` exists. | 10:00 | Run it twice on `--event-date 2026-11-07 --today 2026-08-02`; output is byte-identical, shows 8 dated phase windows, and reports 97d / 13.9w. Zero model calls in this path. |
 | **2. Chunks 1+2 collection → timeline (CRITICAL PATH)** | Michael | `plan.html` — one self-contained file: chunk 1 DECIDE → gate → chunk 2 LOCK → gate → dated timeline renders | Lane 1 | 10:00 (v0 on screen) · **11:00 (live URL)** | v0: chunk 1 accepts input and something renders. Live: a stranger opens the URL on a phone, completes both chunks unaided, and the dated timeline appears. No login. Zero external requests in the network tab. **The path must be completable with exactly four typed values — city, anchor org, date, cap. Every other field ships with a working default.** |
 | **3. Lock/unlock visual** | Jorge | `fragments/locks.html` — locked-template component, each lock rendering its own reason string | Lane 1's unlock table (data); Lane 2 (integration slot) | 13:00 hand-off | At chunk 1, six or more templates are visible and locked, each showing a plain-English reason. After chunk 2's gate passes, at least two visibly unlock. Reason strings read from Lane 1's table, never hardcoded prose. |
 | **4. Chunks 3–6 static previews** | Jorge | `fragments/previews.html` — four screens (FUND, FILL, RUN, LAND), real content, no collection | Lane 6 for six card titles (by 10:00) | 13:00 hand-off | All four open, show real authored content, and each carries the label "preview — not yet collected." No input fields anywhere. No lorem. |

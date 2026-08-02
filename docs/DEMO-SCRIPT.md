@@ -3,13 +3,15 @@
 Frozen at 14:00 with everything else. After 14:00 the wording can change. **The click path
 cannot.**
 
-**Demo target:** Fresno, CA · **Saturday 31 October 2026** · room cap 60. A city nobody on this
+**Demo target:** Fresno, CA · **Saturday 7 November 2026** · room cap 60. A city nobody on this
 team has a relationship in. That is the claim.
 
-The date is load-bearing and was checked against `countback.py`. 31 October is 90 days out —
-12.9 weeks — which clears the 56-day floor *and* stays above the `WEEKS_OUT < 12` conditional.
-24 October is 11.86 weeks and would make the tool print a compression warning while the presenter
-says "twelve weeks of dated plan." Do not change this date.
+The date is load-bearing and it took three tries. 7 November is 97 days out — 13.9 weeks — a
+Saturday, clear of holidays. **24 October** is 11.86 weeks and would make the tool print a
+compression warning while the presenter says "twelve weeks of dated plan." **31 October** clears
+the runway and is Halloween, which a tool that scores dates against holidays should not be
+demoing on. Do not change this date without running
+`python3 -m core.cli timeline --event-date <date>` — it checks both now.
 
 **The payoff beat is beat 3** — ending chunk 2, when the tool hands over a whole twelve-week
 timeline in exchange for four answers. Everything before it sets that up. Everything after it is
@@ -81,7 +83,7 @@ at 3:30. No verbal interruptions, ever.
 1. Type city: `Fresno, CA`
 2. Type the anchor: `Fresno County Public Library`
 3. Click **Next** — gate 1 passes, chunk 2 opens
-4. Type date: `31 October 2026`
+4. Type date: `7 November 2026`
 5. Type cap: `60`
 6. Click **Next** — gate 2 passes
 
@@ -107,7 +109,7 @@ never apologize on stage.*
 
 **Say, as it appears — then stop talking for three full seconds:**
 
-> "Four answers. Twelve weeks of dated plan."
+> "Four answers. Fourteen weeks of dated plan."
 
 *The three seconds of silence is the single most important instruction in this document. Let the
 room read the screen. Do not fill it.*
@@ -118,7 +120,9 @@ room read the screen. Do not fill it.*
 > math never touch a model, because an organizer who catches us being wrong about a date stops
 > trusting us about venues too."
 
-*Screen reads 90 days. Say "twelve weeks." Both are true, and the screen never contradicts you.*
+*Screen reads 97 days (13.9 weeks). Say "fourteen weeks." Both are true, and the screen never
+contradicts you. Never say a number the screen does not support — that is the whole reason this
+date moved twice.*
 
 ---
 

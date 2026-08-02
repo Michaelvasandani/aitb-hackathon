@@ -14,7 +14,7 @@ CHUNK1 = {
 }
 CHUNK1_GATE = {"WHY_ONE_SENTENCE": "Build something real for a local nonprofit in one weekend.",
                "ROLES_NAMED": True}
-CHUNK2 = {"EVENT_DATE": "2026-10-31", "EVENT_LENGTH": 1,
+CHUNK2 = {"EVENT_DATE": "2026-11-07", "EVENT_LENGTH": 1,
           "PARTICIPANT_CAP": 60, "VENUE_NAME": "Fresno Library, Community Room"}
 CHUNK2_GATE = {"DATE_IN_WRITING": True, "VENUE_IN_WRITING": True}
 
