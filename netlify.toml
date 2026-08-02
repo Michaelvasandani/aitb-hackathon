@@ -1,0 +1,31 @@
+# Netlify does NOT run Python functions — its Functions runtimes are JavaScript,
+# TypeScript, and Go. `core/` is pure-stdlib Python, so the interactive API cannot run
+# here without porting it.
+#
+# This config therefore ships the STATIC half only: the generated, self-contained
+# plan.html artifact. That is a real deliverable — it opens offline on any device — but
+# it is a fixed plan, not the six-chunk collection flow.
+#
+# To get the interactive product, either:
+#   1. Deploy to Vercel (see docs/DEPLOY.md) — it runs the Python function as-is; or
+#   2. Point the frontend at a Vercel/Fly/Render-hosted API by setting API in
+#      public/index.html to that origin, and host only `public/` here; or
+#   3. Port core/ to TypeScript. It is ~600 lines of pure logic with no I/O, so this is
+#      tractable — but it forks the determinism guarantee across two implementations,
+#      which is exactly the thing the architecture is built to avoid. Do it only if
+#      Netlify is a hard requirement.
+
+[build]
+  publish = "public"
+  command = "python3 -m core.cli render --demo --out public/plan.html"
+
+[build.environment]
+  PYTHON_VERSION = "3.12"
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "no-referrer"
+    X-Frame-Options = "SAMEORIGIN"
+    Content-Security-Policy = "default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; base-uri 'none'; form-action 'none'"

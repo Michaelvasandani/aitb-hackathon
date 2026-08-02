@@ -1,0 +1,302 @@
+<!doctype html>
+<html lang=en>
+<head>
+<meta charset=utf-8>
+<meta name=viewport content="width=device-width,initial-scale=1">
+<title>Hack-AI-Thon in a Box</title>
+<meta name=description content="Plan a hackathon in your city. Six questions at a time.">
+<style>
+:root{--bg:#fff;--fg:#14181f;--muted:#5b6472;--line:#e6e9ef;--card:#f7f8fa;
+--accent:#4f46e5;--accent-soft:#eef0ff;--hi:#0f8a4f;--hi-bg:#e6f6ec;
+--warn:#b23b3b;--warn-bg:#fbebeb;--lock:#8a8f98;--lock-bg:#f0f1f4}
+@media(prefers-color-scheme:dark){:root{--bg:#0f1319;--fg:#e8ebf0;--muted:#9aa4b2;
+--line:#232a35;--card:#171c24;--accent:#8b85f5;--accent-soft:#1e2130;--hi:#4ade80;
+--hi-bg:#10281b;--warn:#f87171;--warn-bg:#2a1414;--lock:#6b7280;--lock-bg:#161a21}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);
+font:16px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+.wrap{max-width:820px;margin:0 auto;padding:28px 18px 80px}
+h1{font-size:1.6rem;margin:0 0 4px;letter-spacing:-.01em}
+.sub{color:var(--muted);margin:0 0 22px}
+ol.chunks{list-style:none;display:flex;gap:5px;padding:0;margin:0 0 26px;flex-wrap:wrap}
+ol.chunks li{flex:1 1 110px;padding:9px 11px;border-radius:9px;border:1px solid var(--line);
+background:var(--card);font-size:.8rem}
+ol.chunks li .n{font-size:.68rem;font-weight:700;text-transform:uppercase;
+letter-spacing:.05em;color:var(--muted)}
+ol.chunks li .t{font-weight:700;margin-top:2px}
+ol.chunks li.complete{border-color:var(--hi);background:var(--hi-bg)}
+ol.chunks li.complete .n,ol.chunks li.complete .t{color:var(--hi)}
+ol.chunks li.active{border-color:var(--accent);background:var(--accent-soft)}
+ol.chunks li.active .n,ol.chunks li.active .t{color:var(--accent)}
+ol.chunks li.locked{opacity:.55}
+.panel{border:1px solid var(--line);border-radius:14px;padding:20px;background:var(--card)}
+.panel h2{margin:0 0 3px;font-size:1.15rem}
+.panel .q{color:var(--muted);margin:0 0 18px;font-size:.95rem}
+.field{margin-bottom:15px}
+label{display:block;font-weight:600;font-size:.9rem;margin-bottom:5px}
+input[type=text],input[type=date],input[type=number],input[type=email]{
+width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:9px;
+background:var(--bg);color:var(--fg);font:inherit;font-size:.95rem}
+input:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.yn{display:flex;gap:8px}
+.yn button{flex:1;padding:10px;border:1px solid var(--line);border-radius:9px;
+background:var(--bg);color:var(--fg);font:inherit;cursor:pointer}
+.yn button[aria-pressed=true]{border-color:var(--accent);background:var(--accent-soft);
+color:var(--accent);font-weight:700}
+button.primary{width:100%;margin-top:6px;padding:13px;border:0;border-radius:10px;
+background:var(--accent);color:#fff;font:inherit;font-weight:700;font-size:1rem;cursor:pointer}
+button.primary:disabled{opacity:.45;cursor:not-allowed}
+button.ghost{padding:10px 14px;border:1px solid var(--line);border-radius:9px;
+background:var(--bg);color:var(--fg);font:inherit;cursor:pointer}
+section{margin-top:34px}
+h3{font-size:1.05rem;margin:0 0 12px;padding-bottom:6px;border-bottom:2px solid var(--line)}
+.sentence{background:var(--accent-soft);border-left:4px solid var(--accent);
+border-radius:8px;padding:13px 15px;margin-bottom:14px}
+.sentence .why{font-size:.82rem;color:var(--muted);margin-top:6px}
+.warnbox{background:var(--warn-bg);border:1px solid var(--warn);border-radius:9px;
+padding:11px 13px;margin-bottom:9px;color:var(--warn);font-size:.9rem}
+.blocking{border:2px solid var(--warn);background:var(--warn-bg);border-radius:9px;
+padding:13px 15px;margin-bottom:12px}
+.blocking b{color:var(--warn)}
+.gantt .row{display:flex;align-items:center;gap:10px;padding:6px 0;
+border-bottom:1px solid var(--line)}
+.gantt .nm{min-width:140px;font-weight:600;font-size:.85rem}
+.gantt .track{position:relative;flex:1;height:15px;background:var(--lock-bg);border-radius:4px}
+.gantt .bar{position:absolute;height:15px;background:var(--accent);border-radius:4px;opacity:.85}
+.gantt .bar.risk{background:var(--warn)}
+.gantt .dt{min-width:92px;text-align:right;color:var(--muted);font-size:.76rem}
+ul.tpl{list-style:none;padding:0;margin:0;display:grid;
+grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:9px}
+ul.tpl li{border:1px solid var(--line);border-radius:9px;padding:11px 13px;background:var(--card)}
+ul.tpl li.on{border-color:var(--hi)}
+ul.tpl li.off{background:var(--lock-bg);border-style:dashed}
+ul.tpl .tag{font-size:.66rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em}
+ul.tpl li.on .tag{color:var(--hi)}
+ul.tpl li.off .tag{color:var(--lock)}
+ul.tpl .nm{font-weight:700;font-size:.88rem;margin-top:2px}
+ul.tpl li.off .nm{color:var(--lock)}
+ul.tpl .why{font-size:.78rem;color:var(--muted);margin-top:3px}
+.actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:16px}
+.err{color:var(--warn);font-size:.88rem;margin-top:8px}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+@media(max-width:560px){.gantt .dt{display:none}.gantt .nm{min-width:100px}}
+</style>
+</head>
+<body>
+<div class=wrap>
+  <h1>Hack-AI-Thon in a Box</h1>
+  <p class=sub>Plan a hackathon in your city. Six questions at a time — never more.</p>
+
+  <ol class=chunks id=chunks aria-label="Progress"></ol>
+
+  <div class=panel id=panel>
+    <h2 id=chunkTitle>Loading…</h2>
+    <p class=q id=chunkQ></p>
+    <form id=form></form>
+    <button class=primary id=next>Next</button>
+    <div class=err id=err role=alert></div>
+  </div>
+
+  <div id=out></div>
+  <p class=sub id=live aria-live=polite class=sr></p>
+</div>
+
+<script>
+const API = location.origin;
+let facts = {};
+
+/* The plan lives in the URL, not in a database. That keeps the architecture's promise:
+   no account, no server-side session, and a link an organizer can bookmark or send to a
+   colleague. It also means we never hold anyone's data. */
+function saveHash(){
+  const s = btoa(unescape(encodeURIComponent(JSON.stringify(facts))));
+  history.replaceState(null,'','#'+s);
+}
+function loadHash(){
+  if(!location.hash) return {};
+  try{ return JSON.parse(decodeURIComponent(escape(atob(location.hash.slice(1))))); }
+  catch(e){ return {}; }
+}
+
+async function api(path, body){
+  const r = await fetch(API+path, {
+    method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(body)
+  });
+  const j = await r.json();
+  if(!r.ok) throw new Error(j.error || 'request failed');
+  return j;
+}
+
+const el = (t,c,x) => { const n=document.createElement(t); if(c)n.className=c;
+  if(x!==undefined)n.textContent=x; return n; };
+
+function inputFor(q){
+  const wrap = el('div','field');
+  const id = 'f_'+q.field;
+  const lab = el('label',null,q.prompt); lab.htmlFor = id; wrap.appendChild(lab);
+
+  if(q.type === 'bool'){
+    const box = el('div','yn'); box.id = id;
+    ['Yes','No'].forEach(v=>{
+      const b = el('button',null,v); b.type='button';
+      b.setAttribute('aria-pressed', String(facts[q.field] === (v==='Yes')));
+      b.onclick = () => { facts[q.field] = (v==='Yes');
+        [...box.children].forEach(c=>c.setAttribute('aria-pressed',String(c===b))); };
+      box.appendChild(b);
+    });
+    wrap.appendChild(box);
+  } else {
+    const i = document.createElement('input');
+    i.id = id; i.name = q.field;
+    i.type = q.type==='date' ? 'date' : q.type==='int' ? 'number' : 'text';
+    if(q.field === 'ORGANIZER_EMAIL') i.type = 'email';
+    if(q.type === 'int') i.min = '0';
+    if(facts[q.field] != null) i.value = facts[q.field];
+    i.oninput = () => {
+      const v = i.value.trim();
+      facts[q.field] = q.type==='int' ? (v===''?null:Number(v)) : v;
+    };
+    wrap.appendChild(i);
+  }
+  return wrap;
+}
+
+function renderChunks(progress){
+  const ol = document.getElementById('chunks'); ol.innerHTML='';
+  progress.states.forEach(s=>{
+    const li = el('li', s.state);
+    li.appendChild(el('div','n', s.n+' · '+(s.state==='active'?'you are here':s.state)));
+    li.appendChild(el('div','t', s.title));
+    ol.appendChild(li);
+  });
+}
+
+function renderPlan(st){
+  const out = document.getElementById('out'); out.innerHTML='';
+
+  (st.blocking_tasks||[]).forEach(t=>{
+    const d = el('div','blocking');
+    d.appendChild(el('b',null,t.title));
+    d.appendChild(el('div',null,t.why));
+    out.appendChild(d);
+  });
+
+  /* The payoff: four answers, and the whole dated timeline appears. */
+  if(st.timeline){
+    const s = el('section');
+    s.appendChild(el('h3',null,'Your timeline'));
+    if(st.risk_sentence) s.appendChild(el('div','sentence', st.risk_sentence));
+
+    const rows = st.timeline.timeline;
+    const t0 = new Date(rows[0].start_date), t1 = new Date(rows[rows.length-1].end_date);
+    const span = Math.max(1,(t1-t0)/864e5);
+    const risky = new Set((st.at_risk||[]).map(r=>r.phase));
+    const g = el('div','gantt');
+    rows.forEach(r=>{
+      const row = el('div','row');
+      row.appendChild(el('div','nm', r.phase.replace(/_/g,' ')));
+      const track = el('div','track');
+      const bar = el('div','bar'+(risky.has(r.phase)?' risk':''));
+      bar.style.left = ((new Date(r.start_date)-t0)/864e5/span*100).toFixed(1)+'%';
+      bar.style.width = Math.max(1.5,(new Date(r.end_date)-new Date(r.start_date))/864e5/span*100).toFixed(1)+'%';
+      track.appendChild(bar); row.appendChild(track);
+      row.appendChild(el('div','dt', r.start_date));
+      g.appendChild(row);
+    });
+    s.appendChild(g);
+    out.appendChild(s);
+  }
+
+  if((st.warnings||[]).length){
+    const s = el('section');
+    s.appendChild(el('h3',null,'What this plan is honest about'));
+    st.warnings.forEach(w=> s.appendChild(el('div','warnbox', w)));
+    out.appendChild(s);
+  }
+
+  const unlocked = st.templates.filter(t=>t.unlocked).length;
+  const s = el('section');
+  s.appendChild(el('h3',null,`Your templates — ${unlocked} of ${st.templates.length} unlocked`));
+  const ul = el('ul','tpl');
+  st.templates.forEach(t=>{
+    const li = el('li', t.unlocked?'on':'off');
+    li.appendChild(el('div','tag', t.unlocked?'Unlocked':'Locked'));
+    li.appendChild(el('div','nm', t.label));
+    if(!t.unlocked) li.appendChild(el('div','why', t.reason));
+    ul.appendChild(li);
+  });
+  s.appendChild(ul);
+  out.appendChild(s);
+
+  const acts = el('div','actions');
+  const dl = el('button','ghost','Download your plan');
+  dl.type='button'; dl.onclick = download;
+  acts.appendChild(dl);
+  const copy = el('button','ghost','Copy shareable link');
+  copy.type='button';
+  copy.onclick = () => navigator.clipboard.writeText(location.href)
+    .then(()=>{ copy.textContent='Link copied'; setTimeout(()=>copy.textContent='Copy shareable link',1600); });
+  acts.appendChild(copy);
+  out.appendChild(acts);
+}
+
+async function download(){
+  const {html} = await api('/api/render',{facts});
+  const url = URL.createObjectURL(new Blob([html],{type:'text/html'}));
+  const a = document.createElement('a');
+  a.href=url; a.download='hackathon-plan.html'; a.click();
+  URL.revokeObjectURL(url);
+}
+
+async function refresh(){
+  const err = document.getElementById('err'); err.textContent='';
+  let st;
+  try{ st = await api('/api/state',{facts}); }
+  catch(e){ err.textContent = e.message; return; }
+
+  facts = st.facts; saveHash();
+  renderChunks(st.progress);
+
+  const active = st.progress.states.find(s=>s.state==='active');
+  const form = document.getElementById('form'); form.innerHTML='';
+  const nextBtn = document.getElementById('next');
+
+  if(!active){
+    document.getElementById('chunkTitle').textContent = 'Every gate has passed';
+    document.getElementById('chunkQ').textContent = 'Your plan is complete below.';
+    nextBtn.style.display='none';
+  } else {
+    document.getElementById('chunkTitle').textContent =
+      `Chunk ${active.n} — ${active.title}`;
+    document.getElementById('chunkQ').textContent = active.question;
+
+    /* Once the fields are in, the chunk stops collecting and starts confirming. Say so —
+       a hard gate answered "No" legitimately re-asks, and without this the organizer just
+       sees the same question again and assumes the tool is broken. */
+    if(st.next_action.kind === 'gate'){
+      const g = el('div','sentence');
+      g.appendChild(el('b',null,'Gate: '));
+      g.appendChild(document.createTextNode(st.next_action.gate_text));
+      g.appendChild(el('div','why', 'All of the next chunk stays locked until this is true. '
+        + 'Answering "No" is a real answer — it keeps you here on purpose.'));
+      form.appendChild(g);
+    }
+
+    st.next_questions.forEach(q=> form.appendChild(inputFor(q)));
+    nextBtn.style.display = st.next_questions.length ? '' : 'none';
+  }
+
+  document.getElementById('live').textContent = st.next_action.say;
+  renderPlan(st);
+}
+
+document.getElementById('next').onclick = refresh;
+document.getElementById('form').addEventListener('keydown', e=>{
+  if(e.key==='Enter'){ e.preventDefault(); refresh(); }
+});
+
+facts = loadHash();
+refresh();
+</script>
+</body>
+</html>
