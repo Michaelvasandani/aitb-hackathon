@@ -16,6 +16,7 @@ import {
   initState,
   reduce,
   toView,
+  permalinkFor,
   RECOGNIZED_STAGES,
 } from '../../public/js/activity-log.js';
 import { STAGES } from '../../api/_lib/handler.js';
@@ -183,6 +184,87 @@ test('before completion there is no plan payload on state', () => {
   const running = run('Boise, ID', [{ type: 'stage', stage: 'intake' }]);
   assert.equal(running.plan, null);
   assert.equal(toView(running).plan, null);
+});
+
+// Ticket #10 — the `complete` frame now also carries the run's permalink identity:
+//   { type:'complete', id, saved, plan_json, plan_html }
+// The reducer must retain `id`/`saved` alongside the plan and stay pure; `toView` derives a
+// ready-to-link `permalink` so the UI has one shape to read. A permalink exists ONLY when
+// the run was saved AND a usable id came back — otherwise the UI shows a soft "not saved"
+// note instead of a broken link.
+
+test('permalinkFor builds /plan/:id ONLY for a saved run with a usable id', () => {
+  assert.equal(permalinkFor('abc-123', true), '/plan/abc-123');
+  // saved:false -> no permalink (soft-note state), regardless of id.
+  assert.equal(permalinkFor('abc-123', false), null);
+  // saved:true but no / blank / non-string id -> no broken link.
+  assert.equal(permalinkFor('', true), null);
+  assert.equal(permalinkFor('   ', true), null);
+  assert.equal(permalinkFor(null, true), null);
+  assert.equal(permalinkFor(undefined, true), null);
+  assert.equal(permalinkFor(42, true), null);
+  // Only a strict boolean `true` counts as saved.
+  assert.equal(permalinkFor('abc-123', 'true'), null);
+  assert.equal(permalinkFor('abc-123', 1), null);
+});
+
+test('a complete event with id + saved:true exposes the permalink and saved state', () => {
+  const state = run('Boise, ID', [
+    { type: 'stage', stage: 'assembling' },
+    {
+      type: 'complete',
+      id: '11111111-2222-3333-4444-555555555555',
+      saved: true,
+      plan_json: { ok: true },
+      plan_html: '<!doctype html>plan',
+    },
+  ]);
+  // Retained on state alongside the existing plan payload.
+  assert.equal(state.plan.id, '11111111-2222-3333-4444-555555555555');
+  assert.equal(state.plan.saved, true);
+  // Existing plan fields are untouched.
+  assert.deepEqual(state.plan.plan_json, { ok: true });
+  assert.equal(state.plan.plan_html, '<!doctype html>plan');
+  // Surfaced on the view so the UI reads one shape.
+  const view = toView(state);
+  assert.equal(view.plan.id, '11111111-2222-3333-4444-555555555555');
+  assert.equal(view.plan.saved, true);
+  assert.equal(view.plan.permalink, '/plan/11111111-2222-3333-4444-555555555555');
+});
+
+test('a complete event with saved:false yields the soft-note state (no permalink)', () => {
+  const state = run('Boise, ID', [
+    { type: 'complete', id: 'abc', saved: false, plan_json: {}, plan_html: '<x>' },
+  ]);
+  const view = toView(state);
+  assert.equal(view.plan.saved, false);
+  assert.equal(view.plan.permalink, null, 'a failed save must not render a link');
+  // The plan itself is unaffected — download still works off plan_html/plan_json.
+  assert.equal(view.plan.plan_html, '<x>');
+  assert.deepEqual(view.plan.plan_json, {});
+});
+
+test('a complete event with saved:true but a missing id degrades to no permalink', () => {
+  const state = run('Boise, ID', [
+    { type: 'complete', saved: true, plan_json: {}, plan_html: '<x>' },
+  ]);
+  const view = toView(state);
+  // saved is reflected, but with no id there is no link to build — soft-note, not broken link.
+  assert.equal(view.plan.id, null);
+  assert.equal(view.plan.permalink, null);
+});
+
+test('an old-shaped complete frame (no id/saved) degrades to no permalink (back-compat)', () => {
+  // The #6 frame carried only plan_json/plan_html. Such a frame must still render the plan
+  // and simply show the soft note (saved:false, permalink:null) — never a broken link.
+  const state = run('Boise, ID', [
+    { type: 'complete', plan_json: { ok: 1 }, plan_html: '<!doctype html>legacy' },
+  ]);
+  const view = toView(state);
+  assert.equal(view.plan.plan_html, '<!doctype html>legacy');
+  assert.equal(view.plan.id, null);
+  assert.equal(view.plan.saved, false);
+  assert.equal(view.plan.permalink, null);
 });
 
 test('a missing city degrades gracefully (no dangling "in")', () => {
