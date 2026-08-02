@@ -147,6 +147,44 @@ test('a complete event ends the run (done) and stops the active pulse', () => {
   assert.equal(view.lines.some((l) => l.active), false);
 });
 
+test('a complete event RETAINS the plan payload (plan_json + plan_html) on state (ticket #6)', () => {
+  // #6: the terminal frame carries the deliverable; the reducer must keep it, not discard
+  // it, so the page can render plan_html and hold plan_json for later regeneration.
+  const planJson = { inputs: { city: 'Boise, ID' }, leads: [{ name: 'X', source_url: 'u' }] };
+  const planHtml = '<!doctype html><title>Plan</title><body>ready</body>';
+  const state = run('Boise, ID', [
+    { type: 'stage', stage: 'assembling' },
+    { type: 'complete', plan_json: planJson, plan_html: planHtml },
+  ]);
+  assert.ok(state.plan, 'the plan payload must survive on state');
+  assert.deepEqual(state.plan.plan_json, planJson);
+  assert.equal(state.plan.plan_html, planHtml);
+  // Also surfaced on the display view so the renderer reads one shape.
+  assert.equal(toView(state).plan.plan_html, planHtml);
+  assert.deepEqual(toView(state).plan.plan_json, planJson);
+});
+
+test('a later event does not clobber the retained plan payload (ticket #6)', () => {
+  const planJson = { ok: true };
+  const planHtml = '<!doctype html>plan';
+  const state = run('Boise, ID', [
+    { type: 'complete', plan_json: planJson, plan_html: planHtml },
+    // Late-arriving noise / a straggler stage from a parallel subagent after complete.
+    { type: 'stage', stage: 'verifying' },
+    { type: 'stage', stage: 'not_a_real_stage' },
+    null,
+  ]);
+  assert.equal(state.plan.plan_html, planHtml, 'a straggler event must not drop the plan');
+  assert.deepEqual(state.plan.plan_json, planJson);
+});
+
+test('before completion there is no plan payload on state', () => {
+  assert.equal(initState('Boise, ID').plan, null);
+  const running = run('Boise, ID', [{ type: 'stage', stage: 'intake' }]);
+  assert.equal(running.plan, null);
+  assert.equal(toView(running).plan, null);
+});
+
 test('a missing city degrades gracefully (no dangling "in")', () => {
   const view = toView(run(null, [{ type: 'stage', stage: 'researching_venues' }]));
   assert.doesNotMatch(view.lines[0].label, /\bin\s*$/);

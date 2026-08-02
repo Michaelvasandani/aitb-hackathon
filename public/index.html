@@ -63,6 +63,16 @@ overflow-wrap:anywhere}
 .log-error{margin-top:12px;padding:12px 15px;border:1px solid var(--warn);
 border-radius:10px;background:var(--warn-bg);color:var(--warn);
 font-size:.9rem;font-weight:600}
+.plan{margin-top:20px}
+.plan-head{display:flex;align-items:center;justify-content:space-between;gap:12px;
+flex-wrap:wrap;margin-bottom:12px}
+.plan-head .ready{font-weight:700;font-size:1.05rem;color:var(--hi)}
+.plan-actions{display:flex;gap:8px;flex-wrap:wrap}
+button.dl{padding:10px 15px;border:1px solid var(--accent);border-radius:9px;
+background:var(--accent);color:#fff;font:inherit;font-weight:700;font-size:.9rem;cursor:pointer}
+button.dl.ghost{background:var(--bg);color:var(--accent)}
+.plan-frame{width:100%;height:75vh;min-height:460px;border:1px solid var(--line);
+border-radius:12px;background:var(--bg);display:block}
 .watch{display:inline-flex;align-items:center;gap:8px;margin:2px 0 22px;padding:9px 15px;
 border:1px solid var(--line);border-radius:999px;background:var(--card);color:var(--fg);
 font:inherit;font-size:.88rem;font-weight:600;cursor:pointer}
@@ -168,6 +178,7 @@ display:flex;align-items:center;justify-content:center;transition:transform .15s
    render. Inline ES import of a same-origin local module is allowed by the CSP
    (script-src 'self') and keeps the page self-contained — no external script/style tags. */
 import { initState, reduce, toView } from './js/activity-log.js';
+import { downloadName } from './js/plan-download.js';
 
 /* Set this after uploading the demo video to YouTube as UNLISTED (see docs/DEPLOY.md).
    The ID is the part after "v=" in the video's URL, e.g. "dQw4w9WgXcQ". Leave it empty
@@ -283,9 +294,72 @@ async function readStream(res, onEvent) {
   }
 }
 
+/* Save `text` to disk as a self-contained file via a one-shot Blob URL. The object URL is
+   created on click and revoked right after, so nothing leaks and no persistent URL is held.
+   The downloaded plan.html is self-contained (inline CSS, no external requests), so it opens
+   standalone on any device — no login, no broken assets. */
+function download(filename, text, mime) {
+  const url = URL.createObjectURL(new Blob([text], { type: mime }));
+  const a = el('a');
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 0);
+}
+
+/* Ticket #6: render the finished deliverable. `plan.plan_html` is shown VERBATIM in a
+   sandboxed <iframe srcdoc> — the sandbox attribute is empty, i.e. maximally restrictive
+   (no scripts, no same-origin, no forms): the plan is static self-contained HTML that needs
+   none of those, and the empty sandbox keeps its inline CSS from colliding with the site and
+   stops it touching the page. We render via the srcdoc PROPERTY, never by injecting into the
+   parent DOM. A Download button saves that same HTML; plan_json is offered as a second
+   download and, more importantly, is retained in `logState.plan` for later per-section
+   regeneration. */
+function renderPlan(box, plan, city) {
+  const wrap = el('div', 'plan');
+
+  const head = el('div', 'plan-head');
+  head.appendChild(el('div', 'ready', 'Your plan is ready.'));
+  const actions = el('div', 'plan-actions');
+
+  const dlHtml = el('button', 'dl', 'Download plan (HTML)');
+  dlHtml.type = 'button';
+  dlHtml.onclick = () =>
+    download(downloadName(city, 'html'), plan.plan_html, 'text/html');
+  actions.appendChild(dlHtml);
+
+  if (plan.plan_json != null) {
+    const dlJson = el('button', 'dl ghost', 'Download data (JSON)');
+    dlJson.type = 'button';
+    dlJson.onclick = () =>
+      download(
+        downloadName(city, 'json'),
+        JSON.stringify(plan.plan_json, null, 2),
+        'application/json',
+      );
+    actions.appendChild(dlJson);
+  }
+  head.appendChild(actions);
+  wrap.appendChild(head);
+
+  const frame = document.createElement('iframe');
+  frame.className = 'plan-frame';
+  frame.title = 'Your hackathon plan';
+  // Empty value = every sandbox restriction on. Do NOT grant allow-scripts/allow-same-origin.
+  frame.setAttribute('sandbox', '');
+  frame.setAttribute('referrerpolicy', 'no-referrer');
+  frame.srcdoc = plan.plan_html;
+  wrap.appendChild(frame);
+
+  box.appendChild(wrap);
+}
+
 /* The live activity-log state (ticket #5). A read-only view of the run: the reducer owns
    the logic, this renderer only paints `toView(logState)`. There are NO mid-run controls —
-   the organizer submits once and watches. */
+   the organizer submits once and watches. On completion the run state also carries the
+   finished plan (ticket #6), which we render below and keep in `logState.plan`. */
 let logState = initState('');
 
 function renderLog() {
@@ -320,8 +394,12 @@ function renderLog() {
     return;
   }
   if (view.status === 'done') {
-    box.appendChild(el('div', 'note',
-      'Your plan is ready. (Rendering it in the page arrives in a later update.)'));
+    if (view.plan && view.plan.plan_html) {
+      renderPlan(box, view.plan, logState.city);
+    } else {
+      // Completed but no HTML came back — say so honestly rather than showing a blank frame.
+      box.appendChild(el('div', 'note', 'The run finished but returned no plan. Please try again.'));
+    }
     $('live').textContent = 'Your plan is ready.';
     return;
   }
@@ -378,9 +456,9 @@ async function generate(ev) {
   try {
     await readStream(res, (event) => {
       logState = reduce(logState, event);
-      // Ticket #6 replaces THIS branch: on `complete` the stream carries
-      // { plan_json, plan_html } — render plan_html in a sandboxed <iframe srcdoc> plus a
-      // Download button. For now the reducer just marks the run done.
+      // On `complete` the reducer retains { plan_json, plan_html } on logState.plan; renderLog
+      // then paints the finished plan in a sandboxed <iframe srcdoc> with Download buttons
+      // (ticket #6). plan_json stays in logState.plan for later per-section regeneration.
       renderLog();
     });
   } catch (_) {

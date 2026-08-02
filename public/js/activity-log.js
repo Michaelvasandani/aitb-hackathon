@@ -44,6 +44,11 @@ export function initState(city) {
     entries: Object.freeze([]), // [{ stage, detail: string|null }]
     active: null,
     error: null,
+    // The finished deliverable, set once by a `complete` event (ticket #6): the
+    // { plan_json, plan_html } the front-end renders and holds for later regeneration.
+    // null until the run completes; every other reducer branch spreads state, so once set
+    // it survives a late-arriving straggler event and is never clobbered.
+    plan: null,
   });
 }
 
@@ -67,8 +72,18 @@ export function reduce(state, event) {
             : FALLBACK_ERROR,
       });
     case 'complete':
-      // Rendering plan_html is ticket #6; here we only close out the log.
-      return Object.freeze({ ...state, status: 'done', active: null });
+      // Terminal success (ticket #6): close out the log AND retain the deliverable so the
+      // page can render plan_html in a sandboxed iframe and hold plan_json for later
+      // per-section regeneration. plan_html is rendered verbatim, so it is kept as-is.
+      return Object.freeze({
+        ...state,
+        status: 'done',
+        active: null,
+        plan: Object.freeze({
+          plan_json: 'plan_json' in event ? event.plan_json : null,
+          plan_html: typeof event.plan_html === 'string' ? event.plan_html : null,
+        }),
+      });
     default:
       return state; // unknown event type -> ignore
   }
@@ -114,6 +129,7 @@ export function toView(state) {
   return {
     status: state.status,
     error: state.error,
+    plan: state.plan, // the finished { plan_json, plan_html }, or null until complete
     lines: state.entries.map((e) => ({
       stage: e.stage,
       label: labelFor(e.stage, state.city),
