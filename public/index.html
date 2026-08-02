@@ -73,6 +73,13 @@ background:var(--accent);color:#fff;font:inherit;font-weight:700;font-size:.9rem
 button.dl.ghost{background:var(--bg);color:var(--accent)}
 .plan-frame{width:100%;height:75vh;min-height:460px;border:1px solid var(--line);
 border-radius:12px;background:var(--bg);display:block}
+.permalink{display:block;margin:0 0 12px;padding:11px 14px;border:1px solid var(--hi);
+border-radius:10px;background:var(--hi-bg);color:var(--hi);font-size:.9rem;font-weight:600;
+text-decoration:none;overflow-wrap:anywhere}
+.permalink:hover{text-decoration:underline}
+.permalink .url{font-weight:700}
+.soft-note{margin:0 0 12px;padding:11px 14px;border:1px solid var(--line);border-radius:10px;
+background:var(--card);color:var(--muted);font-size:.86rem}
 .watch{display:inline-flex;align-items:center;gap:8px;margin:2px 0 22px;padding:9px 15px;
 border:1px solid var(--line);border-radius:999px;background:var(--card);color:var(--fg);
 font:inherit;font-size:.88rem;font-weight:600;cursor:pointer}
@@ -273,7 +280,7 @@ function collectInputs() {
 /* Parse the Server-Sent-Events stream frame by frame, handing each decoded event to
    `onEvent`. This is the seam ticket #5 builds the live activity log on. Event shapes:
      { type:'stage',    stage, detail? }
-     { type:'complete', plan_json, plan_html }
+     { type:'complete', id, saved, plan_json, plan_html }
      { type:'error',    message } */
 async function readStream(res, onEvent) {
   const reader = res.body.getReader();
@@ -343,6 +350,23 @@ function renderPlan(box, plan, city) {
   }
   head.appendChild(actions);
   wrap.appendChild(head);
+
+  // Ticket #10: the run's permalink. `plan.permalink` is the pure reducer's derivation —
+  // non-null ONLY when the run was saved (ADR-0003) AND a usable id came back — so a failed
+  // save or an old-shaped frame lands here as null and we show a soft, non-alarming note
+  // instead of a link that would 404. The plan + Download buttons above are unaffected either
+  // way. `href` is set from the SAME already-validated string, so no broken/blank link ships.
+  if (plan.permalink) {
+    const link = el('a', 'permalink');
+    link.href = plan.permalink;
+    link.appendChild(el('span', null, 'Saved → '));
+    link.appendChild(el('span', 'url', plan.permalink));
+    link.setAttribute('aria-label', 'Saved — open or share this plan at ' + plan.permalink);
+    wrap.appendChild(link);
+  } else {
+    wrap.appendChild(el('div', 'soft-note',
+      'We couldn’t save a permalink for this one — you can still download it above.'));
+  }
 
   const frame = document.createElement('iframe');
   frame.className = 'plan-frame';
@@ -456,9 +480,10 @@ async function generate(ev) {
   try {
     await readStream(res, (event) => {
       logState = reduce(logState, event);
-      // On `complete` the reducer retains { plan_json, plan_html } on logState.plan; renderLog
-      // then paints the finished plan in a sandboxed <iframe srcdoc> with Download buttons
-      // (ticket #6). plan_json stays in logState.plan for later per-section regeneration.
+      // On `complete` the reducer retains { plan_json, plan_html, id, saved } on logState.plan;
+      // renderLog then paints the finished plan in a sandboxed <iframe srcdoc> with Download
+      // buttons plus the run's permalink or a soft "not saved" note (tickets #6, #10). plan_json
+      // stays in logState.plan for later per-section regeneration.
       renderLog();
     });
   } catch (_) {

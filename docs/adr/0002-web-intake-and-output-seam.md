@@ -2,7 +2,10 @@
 
 ## Status
 
-accepted
+accepted — **amended by [ADR-0003](0003-persist-runs-public-gallery.md)**, which reverses
+the "**No server persistence in v1**" clause: finished runs are now persisted to Neon Postgres
+and browsable in a public gallery. Everything else here (one-shot form, streamed activity log,
+self-contained HTML in a sandboxed iframe, key-rotation as the kill switch) still stands.
 
 ## Decision
 

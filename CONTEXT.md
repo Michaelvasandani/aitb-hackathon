@@ -56,6 +56,33 @@ The end-to-end agentic run: intake → research fan-out (venue + sponsor + talen
 verification pass → timeline → plan-assembly. Runs live in the Agent SDK per ADR-0001.
 _Avoid_: the workflow, the chain, the flow.
 
+**run**:
+One completed execution of **the pipeline**, persisted as a single Neon row (ADR-0003):
+its verbatim `plan.html`, its `plan.json`, the seed `inputs`, a `created_at`, and a
+`hidden` flag. Identified by the UUID minted in `sdk-runner`, addressable at its
+**permalink**. A run exists only if the pipeline wrote a valid plan; failed executions are
+never saved.
+_Avoid_: session, job, result, execution.
+
+**the gallery**:
+The public, login-free index of all non-hidden **runs**, newest-first, at `/plan/`. Cards
+show id, city, audience, and date — never the large blobs. Everything is listed by default
+(ADR-0003); the `hidden` column is the only prune hatch.
+_Avoid_: the list, the feed, the archive, the dashboard.
+
+**permalink**:
+A **run**'s stable URL, `/plan/:id`, keyed by its UUID. Opening it fetches the run via
+`GET /api/plan/:id` and shows the stored `plan.html` in the same sandboxed `<iframe srcdoc>`
+as the live path. This is the "a plan is a link" property ADR-0003 restores.
+_Avoid_: share link, the URL, deep link.
+
+**the store seam**:
+The single boundary through which all run persistence flows — `saveRun()`, `getRun(id)`,
+`listRuns()` in `api/_lib/store.js` — the only place SQL / the Neon client is touched, exactly
+as `sdk-runner.js` is the only place the Agent SDK is touched. Injectable, so tests use a fake
+store and never hit a real database.
+_Avoid_: the DB layer, the repository, the DAO, the model.
+
 **the deterministic core**:
 The no-LLM code that computes timeline, gates, template unlocks, and render identically
 every run (`core/*.py`, `public/js/*.js`). Set aside as of ADR-0001; the live product is

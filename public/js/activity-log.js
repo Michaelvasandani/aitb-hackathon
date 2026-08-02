@@ -13,7 +13,7 @@
 //
 // Event shapes (from api/_lib/handler.js):
 //   { type: 'stage',    stage, detail? }
-//   { type: 'complete', plan_json, plan_html }
+//   { type: 'complete', id, saved, plan_json, plan_html }   (id/saved added in ticket #10)
 //   { type: 'error',    message }
 
 // Human-readable label per stage. `%city%` (when present) is interpolated for the
@@ -75,6 +75,13 @@ export function reduce(state, event) {
       // Terminal success (ticket #6): close out the log AND retain the deliverable so the
       // page can render plan_html in a sandboxed iframe and hold plan_json for later
       // per-section regeneration. plan_html is rendered verbatim, so it is kept as-is.
+      //
+      // Ticket #10: the frame also carries the run's permalink identity — `id` (the run's
+      // UUID) and `saved` (did persistence succeed, ADR-0003). We normalize them here so the
+      // reducer keeps ONE clean shape: a usable string `id` or null, and a strict boolean
+      // `saved`. An old-shaped frame (no id/saved) therefore degrades to { id:null,
+      // saved:false } — a soft "not saved" note, never a broken link. toView derives the
+      // ready-to-link permalink from these; the plan is delivered regardless of `saved`.
       return Object.freeze({
         ...state,
         status: 'done',
@@ -82,6 +89,8 @@ export function reduce(state, event) {
         plan: Object.freeze({
           plan_json: 'plan_json' in event ? event.plan_json : null,
           plan_html: typeof event.plan_html === 'string' ? event.plan_html : null,
+          id: typeof event.id === 'string' && event.id.trim() ? event.id.trim() : null,
+          saved: event.saved === true,
         }),
       });
     default:
@@ -123,13 +132,32 @@ function labelFor(stage, city) {
   return template.replace(/\s*in %city%/, '').replace('%city%', '');
 }
 
+// Build the run's shareable permalink — the URL the #9 viewer resolves at `/plan/:id`.
+// Returns a path ONLY when the run was actually saved (`saved === true`, strictly — a save
+// that failed must not read as success) AND a usable string id came back. Otherwise null, so
+// the UI shows a soft "not saved" note instead of rendering a link that would 404. Pure and
+// side-effect-free so it is unit-tested directly and reused by the renderer.
+export function permalinkFor(id, saved) {
+  if (saved !== true) return null;
+  if (typeof id !== 'string' || !id.trim()) return null;
+  return `/plan/${id.trim()}`;
+}
+
 // Derive the display-ready shape the DOM renders. Pure: no mutation of `state`.
 export function toView(state) {
   const running = state.status === 'running';
   return {
     status: state.status,
     error: state.error,
-    plan: state.plan, // the finished { plan_json, plan_html }, or null until complete
+    // The finished plan, or null until complete. Beyond { plan_json, plan_html } it now also
+    // carries the run's permalink identity — `id`, `saved`, and the derived `permalink`
+    // (null unless the run saved with a usable id) — so the renderer reads one shape.
+    plan: state.plan
+      ? {
+          ...state.plan,
+          permalink: permalinkFor(state.plan.id, state.plan.saved),
+        }
+      : null,
     lines: state.entries.map((e) => ({
       stage: e.stage,
       label: labelFor(e.stage, state.city),

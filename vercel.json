@@ -29,5 +29,8 @@
       ]
     }
   ],
+  "rewrites": [
+    { "source": "/plan/:id([^/]+)", "destination": "/plan-view.html" }
+  ],
   "outputDirectory": "public"
 }

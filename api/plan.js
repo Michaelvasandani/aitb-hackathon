@@ -8,8 +8,9 @@
 
 import { createPlanHandler } from './_lib/handler.js';
 import { runPlan } from './_lib/sdk-runner.js';
+import * as store from './_lib/store.js';
 
-export default createPlanHandler({ runPlan });
+export default createPlanHandler({ runPlan, store });
 
 // A single request can run for minutes (research fan-out + assembly), so give the function
 // the full 800s Vercel Pro/Fluid ceiling. Runs were dropping mid-research at the 300s
