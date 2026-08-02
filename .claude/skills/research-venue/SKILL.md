@@ -12,7 +12,7 @@ deterministic rubric.**
 
 Writes `Lead` objects (shape in [`../_shared/data-contract.md`](../_shared/data-contract.md))
 into `plan.leads.venues`. Every venue carries a `source_url` and `confidence`. A shortlist of
-5 real, weekend-bookable rooms beats 30 plausible ones.
+3 real, weekend-bookable rooms beats 30 plausible ones.
 
 ## Inputs (read from `plan.inputs`)
 
@@ -93,6 +93,6 @@ For each venue, a `Lead` object with: `name`, `one_liner`, `signals[]`, `score`,
 (**required**), `confidence`, `warm_path` (usually null for venues), and a specific
 `suggested_first_move` (e.g. *"Email events@ to confirm Sat 8am–8pm access for 40 + wifi"*).
 
-Aim for **≥ 3 sourced venues** (the orchestrator's done-signal). If you can't find 3 with
-source URLs, return what you have and add a `warnings[]` entry — do not pad the list with
-invented spaces.
+Return **exactly the top 3 sourced venues** — cap the list at 3 to keep the run fast (the
+orchestrator's done-signal). If you can't find 3 with source URLs, return what you have and add
+a `warnings[]` entry — do not pad the list with invented spaces, and never exceed 3.

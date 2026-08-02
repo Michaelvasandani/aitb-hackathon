@@ -82,6 +82,7 @@ Each `Lead`: `name`, `one_liner` (role + why they fit), `signals[]` (dims fired,
 public**), `confidence`, `warm_path` (usually null; note the public channel to reach them),
 and a specific `suggested_first_move`.
 
-Aim for **≥ 6 prospects, ≥ 3 you'd actually invite** (the orchestrator's done-signal). Below
-that, return what's real and add a `warnings[]` entry. **No invented people** — sourced or
-omitted, and the organizer sends the actual invite.
+Return **exactly the top 3 prospects you'd actually invite** — cap the list at 3 to keep the
+run fast (the orchestrator's done-signal). Below that, return what's real and add a `warnings[]`
+entry, and never exceed 3. **No invented people** — sourced or omitted, and the organizer sends
+the actual invite.

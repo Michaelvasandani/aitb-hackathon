@@ -99,6 +99,7 @@ Each sponsor `Lead`: `name`, `one_liner`, `signals[]` (dims fired), `score`, tie
 intro route or null), and a specific `suggested_first_move` (e.g. *"Reach [Company] DevRel via
 their community Slack — offer an API-credits + judging tier"*).
 
-Aim for **≥ 10 cash-capable prospects** (the orchestrator's done-signal). Below that, return
-what's real and add a `warnings[]` entry — never pad with orgs that fail the gate. Remember the
-guardrail: **agents draft, the organizer sends** — this skill stops at the prospect list.
+Return **exactly the top 3 cash-capable prospects** — cap the list at 3 to keep the run fast
+(the orchestrator's done-signal). Below that, return what's real and add a `warnings[]` entry —
+never pad with orgs that fail the gate, and never exceed 3. Remember the guardrail: **agents
+draft, the organizer sends** — this skill stops at the prospect list.

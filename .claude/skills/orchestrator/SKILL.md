@@ -69,9 +69,9 @@ is thin" guardrail).
 
 | Phase | Done signal |
 |---|---|
-| venue | ≥ 3 sourced venues, each with a source URL |
-| sponsors | ≥ 10 cash-capable prospects (post revenue gate) |
-| judges_mentors | ≥ 6 prospects / ≥ 3 you'd actually invite |
+| venue | 3 sourced venues, each with a source URL (capped at 3 for speed) |
+| sponsors | 3 cash-capable prospects, post revenue gate (capped at 3 for speed) |
+| judges_mentors | 3 prospects you'd actually invite (capped at 3 for speed) |
 | date | a scored date or window above the lead-time floor |
 
 ## Verification pass (adversarial — run before plan-assembly)
