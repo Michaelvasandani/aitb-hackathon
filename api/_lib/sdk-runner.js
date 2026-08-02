@@ -17,10 +17,11 @@ import { randomUUID } from 'node:crypto';
 const HERE = path.dirname(fileURLToPath(import.meta.url)); // api/_lib
 export const REPO_ROOT = path.resolve(HERE, '..', '..'); // where .claude/skills lives
 
-// Haiku 4.5: fastest tier — chosen to keep a full fan-out research run inside the 300s
-// function ceiling (ADR-0001 timeout risk). Bump to 'claude-sonnet-5' (or 'claude-opus-4-8')
-// if lead quality disappoints and the run still finishes in time.
-export const DEFAULT_MODEL = 'claude-haiku-4-5-20251001';
+// Sonnet 5: capable enough to drive the full multi-skill orchestration to completion (Haiku
+// 4.5 finished early without ever writing plan.json). The original timeout is addressed by the
+// 800s ceiling (Vercel Pro) + the 3-lead caps, so Sonnet now has time AND less work. Escalate
+// to 'claude-opus-4-8' only if lead quality disappoints.
+export const DEFAULT_MODEL = 'claude-sonnet-5';
 
 // ---- pure event mapping -------------------------------------------------------------
 
@@ -92,7 +93,7 @@ function buildPrompt(inputs, jsonPath, htmlPath) {
     '   research-sponsor, and research-talent as PARALLEL subagents (one Task tool call per',
     '   specialist, sent together) so they run concurrently. Use web search for every lead.',
     '   Every lead MUST carry a real, working `source_url`; OMIT any lead you cannot source.',
-    '   Keep each list SHORT — aim for 3-5 well-sourced leads per category to stay fast.',
+    '   Keep each list SHORT — EXACTLY 3 well-sourced leads per category (the skills cap at 3).',
     '3. Run the adversarial verification pass on the leads (drop/downgrade confidence).',
     '4. Build the timeline counting back from the event window (timeline).',
     '5. Assemble the final plan (plan-assembly) as ONE self-contained HTML file.',
@@ -136,8 +137,20 @@ export async function runPlan(inputs, emit) {
     },
   });
 
+  // Diagnostics: the SDK's terminal `result` message tells us how the run ended (success,
+  // max_turns, error). We log a summary so a failed run is explainable from Vercel logs
+  // instead of a generic error. Never logs env / the API key.
+  let msgCount = 0;
+  let result = null;
+  let lastAssistantText = '';
   try {
     for await (const msg of response) {
+      msgCount += 1;
+      if (msg && msg.type === 'result') result = msg;
+      if (msg && msg.type === 'assistant' && msg.message && Array.isArray(msg.message.content)) {
+        const text = msg.message.content.filter((b) => b && b.type === 'text').map((b) => b.text).join(' ');
+        if (text) lastAssistantText = text;
+      }
       const mapped = mapMessage(msg);
       if (mapped && mapped.stage !== lastStage) {
         lastStage = mapped.stage;
@@ -148,18 +161,38 @@ export async function runPlan(inputs, emit) {
     abortController.abort();
   }
 
+  const summary = {
+    messages: msgCount,
+    result_subtype: result ? result.subtype : null,
+    is_error: result ? result.is_error : null,
+    num_turns: result ? result.num_turns : null,
+    last_stage: lastStage,
+    last_assistant_text: lastAssistantText.slice(0, 400),
+  };
+  console.log('[runPlan] run finished', JSON.stringify(summary));
+
   // The deliverable is whatever plan-assembly wrote. If it is absent or unparseable, the
   // run did not produce a plan — surface that as a failure (handler -> error event).
   let plan_json;
   try {
     plan_json = JSON.parse(await fs.readFile(jsonPath, 'utf8'));
-  } catch {
+  } catch (err) {
+    let tmpListing = [];
+    try {
+      tmpListing = (await fs.readdir(os.tmpdir())).filter((f) => f.startsWith('plan-'));
+    } catch { /* ignore */ }
+    console.error('[runPlan] no valid plan.json at', jsonPath, JSON.stringify({
+      read_error: String(err && err.message || err),
+      tmp_plan_files: tmpListing,
+      ...summary,
+    }));
     throw new Error('Pipeline finished without writing a valid plan.json');
   }
   let plan_html;
   try {
     plan_html = await fs.readFile(htmlPath, 'utf8');
   } catch {
+    console.error('[runPlan] plan.json present but plan.html missing at', htmlPath);
     throw new Error('Pipeline finished without writing plan.html');
   }
 
