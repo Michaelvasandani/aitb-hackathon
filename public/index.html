@@ -131,25 +131,35 @@ display:flex;align-items:center;justify-content:center;transition:transform .15s
       </div>
 
       <div class=field>
-        <label for=budget_usd>Budget (USD)</label>
+        <label for=budget_usd>Budget to spend (USD) <span class=hint>— what you can put toward the event</span></label>
         <input type=number id=budget_usd min=0 step=100 placeholder="e.g. 500">
         <label class=check for=budget_free>
-          <input type=checkbox id=budget_free> Free / $0 budget
+          <input type=checkbox id=budget_free> No budget to spend ($0)
         </label>
       </div>
 
       <div class=field>
-        <label for=audience>Who is it for?</label>
-        <select id=audience>
-          <option value=anyone>Anyone — open to all</option>
-          <option value=non-technical selected>Non-technical folks</option>
-          <option value=technical>Technical / builders</option>
-          <option value=mixed>A mix</option>
-        </select>
+        <label>Is it free for people to take part?</label>
+        <label class=check for=free_to_participate>
+          <input type=checkbox id=free_to_participate checked> Free for participants to join
+        </label>
+        <p class=hint>Separate from your budget above. Uncheck if you'll charge attendees a ticket or entry fee.</p>
       </div>
 
       <div class=field>
-        <label for=purpose>Why should someone give up a Saturday for this?</label>
+        <label for=concept>What's the concept? <span class=hint>— format, length, and any theme</span></label>
+        <textarea id=concept
+          placeholder="e.g. A one-day build sprint where teams ship a working AI tool. Could be a weekend, an evening series, or a themed challenge — your call."></textarea>
+      </div>
+
+      <div class=field>
+        <label for=audience>Who is it for? <span class=hint>— describe them in your own words</span></label>
+        <input type=text id=audience
+          placeholder="e.g. local nonprofit staff, high-school students, first-time builders">
+      </div>
+
+      <div class=field>
+        <label for=purpose>Why should someone show up for this?</label>
         <textarea id=purpose
           placeholder="e.g. Help local nonprofits build practical AI tools they actually need."></textarea>
       </div>
@@ -271,7 +281,14 @@ function collectInputs() {
     if (b !== '') inputs.budget_usd = Number(b);
   }
 
-  inputs.audience = $('audience').value;
+  // Free-to-participate is a SEPARATE axis from the organizer's budget: it's whether
+  // attendees pay to join, not whether the organizer has money to spend. Default free;
+  // send `false` only when they'll charge a ticket/entry fee.
+  inputs.free_to_participate = $('free_to_participate').checked;
+
+  // Audience is open-ended now — the organizer describes who it's for in their own words.
+  const audience = $('audience').value.trim(); if (audience) inputs.audience = audience;
+  const concept = $('concept').value.trim(); if (concept) inputs.concept = concept;
   const purpose = $('purpose').value.trim(); if (purpose) inputs.purpose = purpose;
   inputs.has_local_anchor = $('anchor').value === 'yes';
   return inputs;

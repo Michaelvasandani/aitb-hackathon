@@ -16,9 +16,11 @@
     "event_date": "2026-10-24",       // ISO date, or null if only a window
     "date_window": null,              // e.g. "late October 2026" when no hard date
     "runway_days": 84,                // days from today to event_date
-    "budget_usd": 1500,               // integer USD, 0 allowed
-    "audience": "non-technical",      // "anyone" | "technical" | "non-technical" | "mixed"
-    "audience_keywords": ["nonprofit leaders", "small business owners"],
+    "budget_usd": 1500,               // integer USD the organizer can SPEND, 0 allowed
+    "free_to_participate": true,      // is it free for ATTENDEES to join? separate from budget_usd
+    "audience": "nonprofit staff and first-time builders", // FREE TEXT — organizer's own words
+    "audience_keywords": ["nonprofit leaders", "small business owners"], // derived from `audience`
+    "concept": "A one-day build sprint where teams ship a working AI tool", // free text; format/length/theme
     "purpose": "…",                   // free text, the organizer's own words
     "event_shape": "one-day, one-room, ~40 people, catered-light, heavy mentor ratio",
     "expected_headcount": 40          // inferred int, or null
@@ -27,8 +29,8 @@
   "timeline": [
     {
       "phase": "venue",               // one of the 8 phases (see below)
-      "window": "weeks 12–10",        // human window, counting back from event day
-      "start_date": "2026-08-01",     // ISO — computed by timeline skill
+      "window": "Weeks 3–6",          // FORWARD planning weeks from today (Week 1 = first week); NOT "weeks before event"
+      "start_date": "2026-08-01",     // ISO — computed by timeline skill (still dated by counting back from event day)
       "end_date": "2026-08-15",
       "duration": "2 weeks",
       "owner": null,                  // filled by coordination agent (stubbed)

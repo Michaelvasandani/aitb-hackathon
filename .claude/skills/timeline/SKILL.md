@@ -33,32 +33,34 @@ recruitment are cut. Consider a smaller format or a later date."*) and produce t
 plan with the dropped phases flagged. An organizer with 3 weeks gets a real 3-week plan, not a
 fantasy 8-week one.
 
-## Count back from event day (the core mechanic)
+## Phase windows (the core mechanic)
+
+Dates are still pinned by counting **back** from event day — that's what keeps every phase
+anchored to the deadline. But the `window` LABEL each phase shows the organizer must read
+**FORWARD**: "Week 1", "Weeks 3–6", measured from today (today = **Week 1**, the first planning
+week). Say *"during Week 1"*, **never** *"10 weeks left"* — forward framing is what an organizer
+can actually act on, and counting down to zero reads as a countdown clock, not a plan.
 
 The real shape (from AITB's compressed SD timeline): **months** for anchor/date/venue/sponsors,
-**weeks** for people, **last ten days** for pure production logistics. Default windows for a
-healthy runway (scale proportionally when the runway is shorter):
+**weeks** for people, **final stretch** for pure production logistics. Default sequence for a
+healthy ~16-week runway (scale proportionally when the runway is shorter — fewer total weeks,
+same order and dependencies):
 
-| Phase | Window (before event) | Duration |
+| Phase | Window (forward from today) | Duration |
 |---|---|---|
-| setup + vision (PR-FAQ) | weeks 16–14 | 2 wks |
-| date locked | week 14 | — |
-| venue | weeks 14–10 | 4 wks |
-| sponsors | weeks 12–6 | 6 wks (overlaps venue) |
-| judges & mentors | weeks 8–4 | 4 wks (starts after sponsor list exists) |
-| marketing kickoff | weeks 6–event | 6 wks (SOP below) |
-| registration | weeks 6–1 | ramp |
-| **production logistics** | **last 10 days** | print kit, parking map, check-in runbook, food count, welcome emails |
+| setup + vision (PR-FAQ) | Weeks 1–2 | 2 wks |
+| date locked | by end of Week 2 | — |
+| venue | Weeks 3–6 | 4 wks |
+| sponsors | Weeks 5–10 | 6 wks (overlaps venue) |
+| judges & mentors | Weeks 9–12 | 4 wks (starts after sponsor list exists) |
+| marketing kickoff | Week 11 → event | ~6 wks (SOP below) |
+| registration | Week 11 → final week | ramp |
+| **production logistics** | **final 10 days** | print kit, parking map, check-in runbook, food count, welcome emails |
 
+Compute each phase's `start_date`/`end_date` by counting back from event day, then set `window`
+to the **forward** planning-week span those dates fall in (Week 1 = the week containing today).
 Each `plan.timeline` entry gets `phase`, `window`, `start_date`, `end_date`, `duration`,
-`status: "todo"`, `blocks_on[]`, and 1–3 concrete `actions[]`. Use the helper to compute dates.
-
-### Helper: `scripts/countback.py`
-
-`python3 scripts/countback.py --event-date 2026-10-24 --today 2026-08-01` prints the phase
-windows with ISO start/end dates, compressed to the actual runway, and flags the lead-time
-floor. Pure Python, no dependencies — runs in Claude Code and the Agent SDK alike. It's a
-convenience; the same math can be done inline.
+`status: "todo"`, `blocks_on[]`, and 1–3 concrete `actions[]`. The date math can be done inline.
 
 ## Marketing SOP track (from aitb-event-promotion)
 
@@ -74,16 +76,22 @@ Fold these into the marketing/registration phases as dated milestones:
 ## Event-day run-of-show (`plan.run_of_show`)
 
 Emit the schema `Section | Duration | Buffer | Start | End | Lead`, times formula-chained:
-`End = Start + (Duration + Buffer)`; next `Start = prev End`. A typical one-day hackathon:
+`End = Start + (Duration + Buffer)`; next `Start = prev End`. **Shape it to `inputs.concept`
+and `inputs.event_shape`** — a one-day sprint, a full weekend, or an evening series each get a
+different run-of-show; do NOT force a single-day template. A typical one-day build looks like:
 
 check-in & breakfast → kickoff & rules → team formation *(do NOT improvise this in the room —
 Aaron's hardest-learned lesson)* → build block → lunch → build block → submissions freeze →
-demos → judging → awards. Render as HTML, not a Sheet.
+demos → judging → awards. For a multi-day or evening-series concept, spread these across the
+sessions the organizer described. Render as HTML, not a Sheet.
 
 ## Day-of-week fit (tiebreaker only, ±5 max)
 
-For hackathons, Sat is best (+5), Sun +3, Fri +2, weekdays negative. This only breaks ties —
-it never overrides a real conflict or the lead-time floor.
+**Honour the organizer's chosen day and concept first** — never override a stated `event_date`,
+or a weekday/evening concept, just to land on a weekend. Hackathons are not limited to Saturdays.
+Only when the day is genuinely open AND the concept is a full-day event does a weekend tend to
+score a little higher (more people free); use this solely to break ties, and don't privilege
+Saturday over other days. It never overrides a real conflict or the lead-time floor.
 
 ## Output
 

@@ -16,7 +16,9 @@ const VALID = Object.freeze({
   city: 'Fresno, CA',
   event_date: '2026-11-07',
   budget_usd: 1500,
+  free_to_participate: true,
   audience: 'non-technical',
+  concept: 'A one-day build sprint where teams ship a working AI tool.',
   purpose: 'Build something a local nonprofit actually needs.',
   has_local_anchor: false,
 });
@@ -72,6 +74,18 @@ test('a $0 / free budget is valid and preserved', () => {
 
 test('false booleans survive (has_local_anchor: false must not be dropped)', () => {
   assert.equal(cleanInputs({ city: 'Fresno, CA', has_local_anchor: false }).has_local_anchor, false);
+});
+
+test('free_to_participate is a separate axis from budget; its false survives', () => {
+  // A funded event can still charge admission — the two must not collapse into one field.
+  const got = cleanInputs({ city: 'Fresno, CA', budget_usd: 5000, free_to_participate: false });
+  assert.equal(got.free_to_participate, false);
+  assert.equal(got.budget_usd, 5000);
+});
+
+test('concept is free text and passes through', () => {
+  const got = cleanInputs({ city: 'Fresno, CA', concept: 'Evening AI workshop series, four Tuesdays' });
+  assert.equal(got.concept, 'Evening AI workshop series, four Tuesdays');
 });
 
 test('overlong strings are rejected', () => {

@@ -17,8 +17,10 @@ Intake is **chat-style Q&A**: ask conversationally, let the user answer in natur
 |---|---|---|
 | **City** | `"City, ST"` | "SD" → "San Diego, CA"; "the bay" → ask which city |
 | **Time constraints** | `event_date` (ISO) or `date_window` + `runway_days` | "next month, a weekend" → concrete window; compute runway from today |
-| **Budget** | `budget_usd` (int) | "$1.5k" → 1500; "shoestring" → ask for a number, $0 is valid |
-| **Target audience** | `audience` enum + `audience_keywords` | "anyone" / "technical" / "non-technical" / "mixed" |
+| **Budget to spend** | `budget_usd` (int) | "$1.5k" → 1500; "shoestring" → ask for a number, $0 *to spend* is valid |
+| **Free to participate** | `free_to_participate` (bool) | is it free for ATTENDEES to join? Default `true`. This is **separate** from budget — a funded event can still charge admission, and a $0-budget event is usually free to attend. |
+| **Concept** | `concept` (free text) | the format/length/theme in the organizer's own words — "one-day build sprint", "weekend AI challenge", "four Tuesday evenings". **Do NOT assume a one-day Saturday**; let the concept and `event_date` decide the shape and day. |
+| **Target audience** | `audience` (free text) + derived `audience_keywords` | keep the organizer's own words ("nonprofit staff", "high-school students", "first-time builders"); derive keywords from them |
 | **Purpose** | `purpose` (their own words) | keep verbatim; it drives pitch framing later |
 
 ## Audience first — it's the north star
@@ -35,14 +37,17 @@ If the audience is ambiguous, that's a question worth asking. If it's clear, mov
 
 ## Infer the event's shape (be opinionated, not generic)
 
-From budget + audience + headcount, infer a one-line `event_shape` and an
-`expected_headcount`. Examples:
+Start from the organizer's stated `concept` when they gave one — honour their format, length,
+and theme rather than overriding it. Only INFER the shape when `concept` is thin. From
+concept + budget + audience + headcount, write a one-line `event_shape` and an
+`expected_headcount`. Examples (when inferring):
 
 - sub-$2K + non-technical + ~40 people → *one-day, one-room, catered-light, heavy mentor ratio*
 - $10K + technical + ~120 people → *two-day, multi-track, overnight-optional, prize pool*
 - $0 + anyone + unknown → *half-day, borrowed room, potluck, volunteer mentors* (+ a warning)
 
-The shape makes the plan opinionated. Write it into `inputs.event_shape`.
+**Do NOT assume a Saturday or a single day** — the concept and `event_date`'s actual weekday
+drive the run-of-show. The shape makes the plan opinionated. Write it into `inputs.event_shape`.
 
 ## Ask 3–5 clarifying questions MAX — only ones that branch the plan
 

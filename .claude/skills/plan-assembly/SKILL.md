@@ -22,11 +22,16 @@ field is missing, show a placeholder and a "regenerate this section" note — do
 
 1. **Header** — city, date/window, and `event_shape` in one line. If a date is set, show a
    countdown to event day.
-2. **Your answers** — echo each of the five inputs *with its inferred plan implication*
-   (e.g. *"Budget $1,500 → one-day, one-room, catered-light, heavy mentor ratio"*). This is the
-   whiteboard's "every input is sectioned out with an answer."
-3. **Timeline** — the `plan.timeline[]` milestones as a visual, duration-blocked schedule
-   counting to event day, plus the `plan.run_of_show[]` as an hour-by-hour table.
+2. **Your answers** — echo each input the organizer gave *with its inferred plan implication*
+   (e.g. *"Budget $1,500 → one-day, one-room, catered-light, heavy mentor ratio"*). Include
+   `concept` (the format/length/theme, in their words) and `free_to_participate` (*"Free for
+   participants to join"* vs *"Ticketed — $X at the door"*) — and keep `free_to_participate`
+   distinct from `budget_usd`: budget is what the organizer can spend, free-to-participate is
+   whether attendees pay. This is the whiteboard's "every input is sectioned out with an answer."
+3. **Timeline** — the `plan.timeline[]` milestones as a visual, duration-blocked schedule.
+   Label each milestone by its **forward** `window` ("Week 1", "Weeks 3–6") — count planning
+   weeks up from today, do NOT show "N weeks left". Plus the `plan.run_of_show[]` as an
+   hour-by-hour table, shaped to the organizer's concept (not assumed to be one Saturday).
 4. **Local leads** — venues / sponsors / in-kind partners / mentors, each a **card** with:
    signals, a **clickable `source_url`**, a **confidence badge** (high/med/low), a warm-path
    guess where present, and the `suggested_first_move`. This is the demo centerpiece — real,

@@ -11,7 +11,7 @@
 // `audience_keywords`, `event_shape`, `expected_headcount`. Those are the pipeline's job.
 // This function only validates and maps what the form collected.
 
-// The eight fields the intake form is allowed to set. Anything else is dropped rather
+// The fields the intake form is allowed to set. Anything else is dropped rather
 // than trusted (an unknown key is a bug or an attempt, never a feature). Names match the
 // data-contract `inputs` keys exactly, so the map is a filter + validate, not a rename.
 export const ALLOWED_INPUTS = Object.freeze([
@@ -19,8 +19,10 @@ export const ALLOWED_INPUTS = Object.freeze([
   'city',
   'event_date', // ISO date "YYYY-MM-DD" when the organizer has a hard date
   'date_window', // free text ("late October 2026") when they only have a rough window
-  'budget_usd', // integer USD; 0 (free) is valid
-  'audience',
+  'budget_usd', // integer USD the organizer can SPEND; 0 ($0 to spend) is valid
+  'free_to_participate', // boolean — is it free for attendees to join? separate from budget_usd
+  'audience', // free text — who it's for, in the organizer's own words
+  'concept', // free text — the hackathon's format/length/theme (not assumed to be a Saturday)
   'purpose',
   'has_local_anchor', // boolean
 ]);
