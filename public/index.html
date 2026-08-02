@@ -45,13 +45,24 @@ button.primary:disabled{opacity:.45;cursor:not-allowed}
 .err{color:var(--warn);font-size:.9rem;margin-top:10px}
 .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
 .run{margin-top:26px}
-.run .status{display:inline-flex;align-items:center;gap:9px;padding:11px 15px;
-border:1px solid var(--line);border-radius:10px;background:var(--card);
-font-size:.92rem;font-weight:600}
-.run .status .dot{width:9px;height:9px;border-radius:50%;background:var(--accent);
-animation:pulse 1.2s ease-in-out infinite}
 .run .note{color:var(--muted);font-size:.85rem;margin-top:10px}
 @keyframes pulse{0%,100%{opacity:.35}50%{opacity:1}}
+.log{border:1px solid var(--line);border-radius:12px;background:var(--card);overflow:hidden}
+.log-item{display:flex;gap:11px;padding:12px 15px;border-top:1px solid var(--line)}
+.log-item:first-child{border-top:0}
+.log-dot{flex:none;width:9px;height:9px;margin-top:6px;border-radius:50%;
+background:var(--hi)}
+.log-item.pending .log-dot{background:var(--lock)}
+.log-item.active .log-dot{background:var(--accent);animation:pulse 1.2s ease-in-out infinite}
+.log-body{min-width:0}
+.log-label{font-weight:600;font-size:.92rem}
+.log-item.pending .log-label,.log-item:not(.active) .log-label{color:var(--muted)}
+.log-item.active .log-label{color:var(--fg)}
+.log-detail{color:var(--muted);font-size:.82rem;margin-top:2px;
+overflow-wrap:anywhere}
+.log-error{margin-top:12px;padding:12px 15px;border:1px solid var(--warn);
+border-radius:10px;background:var(--warn-bg);color:var(--warn);
+font-size:.9rem;font-weight:600}
 .watch{display:inline-flex;align-items:center;gap:8px;margin:2px 0 22px;padding:9px 15px;
 border:1px solid var(--line);border-radius:999px;background:var(--card);color:var(--fg);
 font:inherit;font-size:.88rem;font-weight:600;cursor:pointer}
@@ -143,14 +154,20 @@ display:flex;align-items:center;justify-content:center;transition:transform .15s
   <p id=live aria-live=polite class=sr></p>
 </div>
 
-<script>
+<script type=module>
 /* The live product is the agentic pipeline (ADR-0001): this form collects the five inputs
    plus org name and the local-anchor question, POSTs them ONCE to /api/plan, and the server
    streams the run back. The old deterministic-core UX (six chunks, gates, client-side
    render) is set aside — public/js/*.js stay in the repo as legacy but are no longer on the
-   live path. Ticket #4 keeps the front-end minimal: submit, validate, and a "run started"
-   placeholder. The live activity log (ticket #5) and the plan render (ticket #6) build on
-   the stream reader below. */
+   live path. Ticket #4 kept the front-end minimal; ticket #5 adds the live activity log,
+   whose event->state logic lives in the pure module below (unit-tested, no DOM). The plan
+   render (ticket #6) builds on the `complete` branch of the stream handler. */
+
+/* The event->activity-log-state mapping is a pure reducer in ./js/activity-log.js — no DOM,
+   no I/O — so it is unit-tested without a browser. Here we only fold events into it and
+   render. Inline ES import of a same-origin local module is allowed by the CSP
+   (script-src 'self') and keeps the page self-contained — no external script/style tags. */
+import { initState, reduce, toView } from './js/activity-log.js';
 
 /* Set this after uploading the demo video to YouTube as UNLISTED (see docs/DEPLOY.md).
    The ID is the part after "v=" in the video's URL, e.g. "dQw4w9WgXcQ". Leave it empty
@@ -266,16 +283,53 @@ async function readStream(res, onEvent) {
   }
 }
 
-function setStatus(text) {
+/* The live activity-log state (ticket #5). A read-only view of the run: the reducer owns
+   the logic, this renderer only paints `toView(logState)`. There are NO mid-run controls —
+   the organizer submits once and watches. */
+let logState = initState('');
+
+function renderLog() {
+  const view = toView(logState);
   const box = $('run');
   box.innerHTML = '';
-  const s = el('div', 'status');
-  s.appendChild(el('span', 'dot'));
-  s.appendChild(document.createTextNode(text));
-  box.appendChild(s);
-  box.appendChild(el('div', 'note',
-    'Watching the run live. The full activity log and your finished plan land in a later update.'));
-  $('live').textContent = text;
+
+  const list = el('div', 'log');
+  if (view.lines.length === 0 && view.status === 'running') {
+    // Before the first stage lands, show a pending placeholder rather than an empty box.
+    const item = el('div', 'log-item pending');
+    item.appendChild(el('span', 'log-dot'));
+    const body = el('div', 'log-body');
+    body.appendChild(el('div', 'log-label', 'Starting the run…'));
+    item.appendChild(body);
+    list.appendChild(item);
+  }
+  for (const line of view.lines) {
+    const item = el('div', 'log-item' + (line.active ? ' active' : ''));
+    item.appendChild(el('span', 'log-dot'));
+    const body = el('div', 'log-body');
+    body.appendChild(el('div', 'log-label', line.active ? line.label + '…' : line.label));
+    if (line.detail) body.appendChild(el('div', 'log-detail', line.detail));
+    item.appendChild(body);
+    list.appendChild(item);
+  }
+  box.appendChild(list);
+
+  if (view.status === 'error') {
+    box.appendChild(el('div', 'log-error', view.error));
+    $('live').textContent = 'The run failed: ' + view.error;
+    return;
+  }
+  if (view.status === 'done') {
+    box.appendChild(el('div', 'note',
+      'Your plan is ready. (Rendering it in the page arrives in a later update.)'));
+    $('live').textContent = 'Your plan is ready.';
+    return;
+  }
+  box.appendChild(el('div', 'note', 'Watching the run live — researching your city.'));
+  const active = view.lines.find((l) => l.active);
+  $('live').textContent = active
+    ? active.label + (active.detail ? ' — ' + active.detail : '')
+    : 'Starting the run…';
 }
 
 async function generate(ev) {
@@ -316,20 +370,29 @@ async function generate(ev) {
     return;
   }
 
-  setStatus('Run started — normalizing your inputs…');
+  // Open the read-only activity log. Every stream frame — recognized stage, terminal
+  // complete, surfaced error, or noise — folds through the pure reducer; the reducer
+  // ignores what it does not recognize, so a noisy event can never break the log.
+  logState = initState(inputs.city);
+  renderLog();
   try {
     await readStream(res, (event) => {
-      if (event.type === 'stage') {
-        setStatus('Working: ' + String(event.stage).replace(/_/g, ' '));
-      } else if (event.type === 'complete') {
-        setStatus('Your plan is ready. (Rendering it in the page arrives in a later update.)');
-      } else if (event.type === 'error') {
-        $('err').textContent = 'The run failed: ' + event.message;
-        $('run').innerHTML = '';
-      }
+      logState = reduce(logState, event);
+      // Ticket #6 replaces THIS branch: on `complete` the stream carries
+      // { plan_json, plan_html } — render plan_html in a sandboxed <iframe srcdoc> plus a
+      // Download button. For now the reducer just marks the run done.
+      renderLog();
     });
   } catch (_) {
-    err.textContent = 'The run was interrupted. Please try again.';
+    // A dropped/closed reader mid-run: surface it as an error rather than freezing.
+    logState = reduce(logState, { type: 'error', message: 'The run was interrupted. Please try again.' });
+    renderLog();
+  }
+  // The stream can also close cleanly WITHOUT a terminal event (server died mid-write).
+  // Without this the log would sit forever on the last stage — a hang. Surface it.
+  if (toView(logState).status === 'running') {
+    logState = reduce(logState, { type: 'error', message: 'The run ended unexpectedly. Please try again.' });
+    renderLog();
   }
   resetButton();
 }
