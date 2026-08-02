@@ -1,0 +1,675 @@
+{
+  "city": "Fresno, CA",
+  "generated_for": "2026-11-07",
+  "researched_on": "2026-08-01",
+  "leads": {
+    "venues": [
+      {
+        "name": "Every Neighborhood Partnership",
+        "type": "venue",
+        "one_liner": "Fresno nonprofit that explicitly opens its building to other nonprofits and community groups, with a meeting area for up to 100 people.",
+        "signals": [
+          "large meeting area up to 100 people",
+          "explicitly offers space to nonprofits and community groups",
+          "full kitchen on site",
+          "published facility-use request form",
+          "central Fresno, 1631 N Van Ness Ave"
+        ],
+        "score": 8.6,
+        "source_url": "https://everyneighborhood.org/space/",
+        "confidence": "high",
+        "warm_path": null,
+        "suggested_first_move": "Submit the facility-use request form for Saturday 31 Oct 2026, asking for a 8am-7pm hold and confirming wifi, power, and cost in the same message.",
+        "verified": true,
+        "notes": "Best $0-budget fit found: capacity (100) clears the 60-person cap with room for mentors and judges, and the org's own page states it opened the building specifically so nonprofits could stop struggling to find affordable venues. Two things are NOT published and must be asked on first contact: the fee (if any) and weekend availability. No individual staff member is named on the page, so the request form is the only documented route."
+      },
+      {
+        "name": "Fresno Ideaworks",
+        "type": "venue",
+        "one_liner": "All-volunteer 501(c)(3) community makerspace in the historic Crown Plunge building downtown, with a dedicated tech classroom/hackerspace.",
+        "signals": [
+          "downtown Fresno, 1730 H Street",
+          "dedicated tech classroom / hackerspace area",
+          "runs public classes and monthly Art Hop events",
+          "active class calendar through September 2026",
+          "501(c)(3), operating since 2013, owns its building"
+        ],
+        "score": 7.8,
+        "source_url": "https://www.fresnoideaworks.org/",
+        "confidence": "high",
+        "warm_path": "Their CoderDojo youth-coding program and tech classroom mean they already host software teaching — lead with that, not with 'we need a room'.",
+        "suggested_first_move": "Email info@fresnoideaworks.org (559-833-4332) asking whether the tech classroom plus main floor can host 60 people on Sat 31 Oct 2026, and what a partner/member rate looks like.",
+        "verified": true,
+        "notes": "Organization is unambiguously live: the site shows classes scheduled into August and September 2026 and current membership signup. What I could NOT verify is seated capacity — no square footage or occupancy figure is published on their site, and a makerspace floorplan (welding, ceramics, woodshop) may not seat 60 people at tables. Treat capacity as an open question on the call. Board roster is published but undated; see mentor entry for Ryan Madron."
+      },
+      {
+        "name": "Fresno Unified School District facilities (via Facilitron)",
+        "type": "venue",
+        "one_liner": "District-wide Civic Center Act rentals — classrooms, theaters, gyms and more at Fresno high schools — bookable online through Facilitron.",
+        "signals": [
+          "live online booking system for the district",
+          "classrooms, theaters, gyms available to community groups",
+          "nine named Fresno high schools listed",
+          "Civic Center Act permits weekend and holiday use",
+          "clustered classrooms suit a hackathon's breakout-team shape"
+        ],
+        "score": 6.5,
+        "source_url": "https://www.facilitron.com/frusd93721",
+        "confidence": "med",
+        "warm_path": "Fresno Unified already takes tech-education money locally (Amazon funded robotics clubs there), so the district has a live interest in student-facing tech events.",
+        "suggested_first_move": "Create a Facilitron requester account and price a Saturday booking at two schools (e.g. Fresno High, Sunnyside High) to see the real nonprofit rate before committing.",
+        "verified": true,
+        "notes": "Genuinely weekend-accessible, but not free: the district requires a Commercial General Liability policy of at least $1M per occurrence / $2M aggregate with the district named as additional insured, plus a $50 cancellation fee. Against a $0 budget the insurance requirement alone may be disqualifying unless a partner org lends its policy. Specific room capacities and rates are not published on the platform's landing page."
+      },
+      {
+        "name": "Fresno County Public Library — Woodward Park and Sunnyside branch meeting rooms",
+        "type": "venue",
+        "one_liner": "County library branches whose published policy lists free meeting rooms, including rooms rated for 140 and 70 people.",
+        "signals": [
+          "no charge during open hours",
+          "policy document lists Woodward Park at 140 and Sunnyside at 70",
+          "nonprofits and community groups may reserve",
+          "Woodward Park open Saturdays 9am-5pm",
+          "online reservation system (LibCal)"
+        ],
+        "score": 4.8,
+        "source_url": "https://www.fresnolibrary.org/serv/roomreserve/index.html",
+        "confidence": "low",
+        "warm_path": null,
+        "suggested_first_move": "Call (559) 600-7323 and ask one question first: is the Woodward Park meeting room rated for 140 still bookable, and until what time on a Saturday.",
+        "verified": true,
+        "notes": "Downgraded to low on purpose — the sources contradict each other. The library's own meeting-room policy document lists Woodward Park Meeting Room at 140 and Sunnyside at 70, but the Woodward Park branch page describes only a 6-person conference room and a 2-person study room, and the LibCal booking system's capacity filters top out around 50. Two further constraints even if a large room exists: Saturday hours end at 5pm, which truncates an all-day event, and the policy forbids charging admission or soliciting donations, which can conflict with sponsor tabling. Real, free, and worth one phone call — but do not build the plan on it."
+      },
+      {
+        "name": "Fresno State campus space (Student Recreation Center / Peters Educational Center)",
+        "type": "venue",
+        "one_liner": "Campus venue path — a 300-seat auditorium and the Lyles Center sit in the Student Recreation Center — reachable only through a campus co-sponsor.",
+        "signals": [
+          "300-seat Peters Educational Center auditorium",
+          "Lyles Center for Innovation and Entrepreneurship in the same building",
+          "50,000+ sq ft facility, campus 25Live scheduling system",
+          "student volunteer pipeline on site"
+        ],
+        "score": 5.0,
+        "source_url": "https://auxiliary.fresnostate.edu/association/src/facilities/index.html",
+        "confidence": "low",
+        "warm_path": "Fresno State's Computer Science department and the Lyles Center are both plausible co-sponsors, and Corporate & Foundation Relations (see sponsors) is the same institution.",
+        "suggested_first_move": "Do not call facilities first. Ask the CS department or Lyles Center to co-host, then let them book the room through campus scheduling (559-278-2491).",
+        "verified": true,
+        "notes": "Listed as a path, not a booking. Verification found a hard barrier: Fresno State Library's space policy states spaces cannot be reserved by organizations or individuals not affiliated with Fresno State, and the SRC auditorium page directs on-campus departments to campus scheduling. So an outside organizer cannot book this directly — the lead is only live if a campus partner fronts it. Rates are not published anywhere I could load."
+      }
+    ],
+    "sponsors": [
+      {
+        "name": "Central Valley Community Foundation",
+        "type": "sponsor",
+        "one_liner": "Fresno-based community foundation running the region's flagship workforce and inclusive-economy programs.",
+        "signals": [
+          "foundation with documented workforce/economic-development grantmaking",
+          "Fresno DRIVE: $4.2B, 14 initiatives, human-capital pillar",
+          "F3 (Farms Food Future) and Sierra San Joaquin Jobs (S2J2)",
+          "$200M+ raised since 2017, 900+ grants in the past decade",
+          "based in Fresno at 1260 Fulton Street"
+        ],
+        "score": 8.4,
+        "source_url": "https://centralvalleycf.org/community-impact/",
+        "confidence": "med",
+        "warm_path": "Pitch into the Fresno DRIVE human-capital pillar rather than as a generic event — DRIVE explicitly counts workers trained as its outcome.",
+        "suggested_first_move": "Email info@centralvalleycf.org (559-226-5600) referencing the DRIVE human-capital pillar and ask for 20 minutes; use the 'Partner With Us' route on the same page.",
+        "verified": true,
+        "notes": "Clears the revenue gate as a foundation with named workforce and economic-development programs, and it is the single best door-opener in this file — CVCF convenes roughly 150 organizations through DRIVE, so one meeting is a map of the rest of the city. Downgraded from high to med by the verification pass: the community-impact page describes convening and advocacy ('advocates for $4.2B of investment') more than it documents an open grant cycle, states no application process, eligibility, or deadline for outside organizations, and its clearest funding evidence is indirect (nearly $5M in small-business loans via PRO Neighborhoods). Treat as a relationship and referral lead, not an application lead."
+      },
+      {
+        "name": "Educational Employees Credit Union (EECU)",
+        "type": "sponsor",
+        "one_liner": "Fresno-headquartered credit union serving 12 Central California counties, with a long-running education-sponsorship habit.",
+        "signals": [
+          "serves Fresno plus 11 other Central California counties",
+          "documented event sponsorships (Bridge2College, Latino Student Success Conference)",
+          "education is its stated giving focus",
+          "2026 Fresno Compact Business-Education Partnership Award",
+          "financial-wellness workshops delivered in schools"
+        ],
+        "score": 8.2,
+        "source_url": "https://www.myeecu.org/about/news-community/community",
+        "confidence": "med",
+        "warm_path": "Their giving is education-shaped. Frame the hackathon as workforce/skills for local students and nonprofit staff, not as a tech conference.",
+        "suggested_first_move": "Use the Contact Us form on their community page to ask who handles event sponsorship requests and what the lead time is — no public sponsorship form exists.",
+        "verified": true,
+        "notes": "Gate note: a credit union is member-owned rather than for-profit, so I am admitting it on scale and demonstrated cash sponsorship rather than on the letter of the for-profit test — third-party 990 data puts assets at roughly $4.7B. That asset figure is NOT on EECU's own pages, which is why confidence is med rather than high. Their own page confirms the sponsorship behavior and the education focus; it does not confirm headquarters address or size."
+      },
+      {
+        "name": "Granville Homes",
+        "type": "sponsor",
+        "one_liner": "Fresno-headquartered homebuilder with a formal foundation and an open community-sponsorship application.",
+        "signals": [
+          "headquartered in Fresno, 1306 W Herndon Ave",
+          "Granville Foundation — food, shelter, healthcare, education",
+          "Granville Home of Hope has raised $8.4M+ for local nonprofits",
+          "online Community Sponsorship application portal",
+          "~$35M revenue / ~104 employees (third-party data) clears the $5M gate"
+        ],
+        "score": 8.0,
+        "source_url": "https://gvhomes.com/philanthropy/",
+        "confidence": "high",
+        "warm_path": "Home of Hope proceeds go to Fresno nonprofits — several of your likely attendees are probably already recipients, which is a real introduction if you find one.",
+        "suggested_first_move": "Submit the Community Sponsorship application on the philanthropy page, and name which local nonprofits are attending.",
+        "verified": true,
+        "notes": "One of only a few Fresno companies with a published, self-serve route to ask for money — that matters more than size for a cold organizer. Verification confirmed the live application link and the Fresno HQ address on the page itself. Two caveats it does NOT state: any eligibility criteria, deadline, or decision timeline for the sponsorship application; and the '60+ organizations assisted' figure is dated 2019, so current giving volume is unknown. Giving is framed around food/shelter/healthcare/education, so the ask should be education/workforce, not innovation. Revenue and headcount come from third-party business data, not their own site."
+      },
+      {
+        "name": "Community West Bank (Community West Bancshares, NASDAQ: CWBC)",
+        "type": "sponsor",
+        "one_liner": "Publicly traded community bank headquartered in Fresno with roughly $5B in assets and 34 banking centers.",
+        "signals": [
+          "headquartered in Fresno",
+          "publicly traded (NASDAQ: CWBC)",
+          "nearly $5B in assets, 34 banking centers",
+          "states it supports community organizations with financial donations",
+          "documented local giving, incl. $500K toward Fresno County supportive housing"
+        ],
+        "score": 7.8,
+        "source_url": "https://www.communitywestbank.com/about/our-bank",
+        "confidence": "high",
+        "warm_path": "Banks fund financial-literacy and small-business outcomes; a nonprofit-facing AI hackathon maps to CRA-friendly community development.",
+        "suggested_first_move": "Call a Fresno banking center and ask for the marketing/community relations contact who approves event sponsorships — there is no public sponsorship form.",
+        "verified": true,
+        "notes": "Clears the gate cleanly (public company, Fresno HQ, ~$5B assets). Formerly Central Valley Community Bancorp; the rename followed a 2024 merger, so older references to 'CVCB' are the same institution — worth knowing so you don't pitch them twice. No named community-giving program is published, so the first call is a routing call."
+      },
+      {
+        "name": "PG&E Corporation Foundation",
+        "type": "sponsor",
+        "one_liner": "The utility's charitable arm — ~$36M in annual giving with STEM education and workforce development as a named priority pillar.",
+        "signals": [
+          "nearly 900 grants totalling $36M+ in 2025",
+          "'Prosperity' pillar is explicitly STEM education and workforce development",
+          "service area covers Fresno and Central California",
+          "501(c)(3)s, schools, government agencies and tribes are eligible",
+          "named programs: Better Together Nature Positive, Resilience Hubs"
+        ],
+        "score": 7.5,
+        "source_url": "https://www.pge.com/en/about/giving-locally.html",
+        "confidence": "med",
+        "warm_path": "PG&E local public affairs staff attend Fresno civic events; the community foundation and the chambers both sit near them.",
+        "suggested_first_move": "Email communityrelations@pge.com to ask for the Central Valley community relations representative by name — do not send a proposal, they do not accept unsolicited requests.",
+        "verified": true,
+        "notes": "Passes the gate as a foundation with a documented workforce/STEM program. The blocker is procedural and stated plainly on their page: 'we do not accept unsolicited grant requests by email.' So this is a relationship lead, not an application lead, and it is unlikely to convert inside a 13-week runway. Scored for quality, flagged for timing."
+      },
+      {
+        "name": "Fresno State — Corporate and Foundation Relations (University Advancement)",
+        "type": "sponsor",
+        "one_liner": "The university's corporate-engagement arm — the correct place to ask Fresno State for money, with a named director.",
+        "signals": [
+          "named contact: Daryl Fitzgerald, Director of Development, Corporate and Foundation Relations",
+          "direct line 559.278.4036 and email published",
+          "office exists to broker corporate and foundation partnerships",
+          "also the route to campus space and student volunteers"
+        ],
+        "score": 7.2,
+        "source_url": "https://advancement.fresnostate.edu/giving/corpandfoundations.html",
+        "confidence": "med",
+        "warm_path": "This office and the Computer Science department are the same institution — a faculty mentor who says yes makes this call much warmer.",
+        "suggested_first_move": "Email dfitzgerald@csufresno.edu asking which corporate partners fund student-facing tech programming, and whether the university would co-host.",
+        "verified": true,
+        "notes": "Per the revenue gate, the university's corporate-engagement/foundation arm is the sponsorable entity — a professor is not. This office may also route you to corporate partners rather than write a check itself, which is arguably more valuable in a cold city. Title and contact details verified on the university's own page; I have not confirmed the person is still in post beyond that page."
+      },
+      {
+        "name": "Comcast California",
+        "type": "sponsor",
+        "one_liner": "Regional operator with an active Fresno County digital-skills giving record under its Project UP banner.",
+        "signals": [
+          "$40,000 to Boys & Girls Clubs of Fresno County (Sept 2025)",
+          "funding earmarked for student digital-skills programming",
+          "Project UP national digital-equity initiative",
+          "Lift Zones deployed across Fresno County",
+          "for-profit, far above the $5M gate"
+        ],
+        "score": 7.0,
+        "source_url": "https://corporate.comcast.com/stories/local/california/comcast-donates-40000-to-boys-girls-clubs-of-fresno-county-to-support-digital-opportunities-for-students",
+        "confidence": "med",
+        "warm_path": "Boys & Girls Clubs of Fresno County is the documented grantee — if any of them attend, that is a live reference.",
+        "suggested_first_move": "Contact Comcast California external affairs and ask how Fresno County Project UP funds are allocated for 2026, citing the BGCFC grant.",
+        "verified": true,
+        "notes": "Verified the grant, recipient, purpose and county from Comcast's own newsroom. Caveat: the page I loaded rendered mostly as a headline, so the executive quotes and the Lift Zone counts come from search summaries, not from text I read in full — treat the $40K/BGCFC/digital-skills facts as solid and the rest as unconfirmed. The original california.comcast.com URL 301-redirects here."
+      },
+      {
+        "name": "Kaiser Permanente — Fresno service area",
+        "type": "sponsor",
+        "one_liner": "Health system with a documented grants-and-sponsorships program for Fresno, Madera, Kings and Tulare, with two named local contacts.",
+        "signals": [
+          "sponsorships explicitly cover education and workforce development",
+          "named: Kiran Sandhu, Community Health Manager (grants)",
+          "named: Samantha Schuh, Senior Public Affairs Rep (sponsorships)",
+          "service area covers Fresno County",
+          "separate grants, sponsorships and in-kind tracks"
+        ],
+        "score": 7.0,
+        "source_url": "https://about.kaiserpermanente.org/expertise-and-impact/healthy-communities/communities-we-serve/northern-california-community/service-areas/fresno",
+        "confidence": "med",
+        "warm_path": "Frame around health and social inequity — that is the stated filter — e.g. nonprofits building tools for food access, clinic access, or benefits navigation.",
+        "suggested_first_move": "Email samantha.schuh@kp.org THIS WEEK — sponsorship requests must be submitted at least 3 months before the event, and 31 Oct 2026 is ~13 weeks out.",
+        "verified": true,
+        "notes": "Time-critical: the documented 3-month minimum lead time is barely satisfied by today's date, so this lead expires within days. Gate note: Kaiser is a nonprofit health system, admitted on the strength of a documented, named sponsorship program that explicitly lists education and workforce development — not on the for-profit test. The ask must be tied to a health-equity priority or it will not clear their filter."
+      },
+      {
+        "name": "Amazon — Fresno fulfillment center (FAT1)",
+        "type": "sponsor",
+        "one_liner": "Major Fresno employer with a current, documented record of local community giving.",
+        "signals": [
+          "FAT1 fulfillment center located in Fresno",
+          "$95,000 donated to a Fresno food bank (July 2026)",
+          "part of $925,000 across seven California food banks",
+          "855,000 sq ft facility, large local workforce",
+          "for-profit, far above the $5M gate"
+        ],
+        "score": 6.0,
+        "source_url": "https://press.aboutamazon.com/2026/7/feed-california-how-amazon-employees-are-fighting-hunger-across-the-state",
+        "confidence": "med",
+        "warm_path": "Site-level community engagement at FAT1 is the realistic door; corporate philanthropy is not reachable cold.",
+        "suggested_first_move": "Ask the FAT1 site's community engagement contact whether local giving in 2026 extends beyond food security to STEM/skills programming.",
+        "verified": true,
+        "notes": "Verified current (July 2026 press release naming FAT1 in Fresno). Honest caveat: the documented Fresno giving I could load is food-security, not tech education. Reports of a $10K Amazon donation for Fresno Unified robotics clubs came from local media summaries I did not fetch, so I have not counted them as evidence. Big employer, real local footprint, uncertain fit."
+      },
+      {
+        "name": "Producers Dairy Foods",
+        "type": "sponsor",
+        "one_liner": "Family-owned Fresno-headquartered dairy processor with regional distribution and a stated local-jobs identity.",
+        "signals": [
+          "headquartered in Fresno, 250 E Belmont Ave",
+          "processing plant plus regional distribution fleet",
+          "supplier farms average 26 miles from the plant",
+          "public identity built on local employment"
+        ],
+        "score": 5.0,
+        "source_url": "https://www.producersdairy.com/",
+        "confidence": "low",
+        "warm_path": null,
+        "suggested_first_move": "Call media/public relations at 559-457-4697 and ask whether they sponsor community events and who decides — expect in-kind (breakfast/dairy) before cash.",
+        "verified": true,
+        "notes": "The weakest entry in this list and marked accordingly. Fresno HQ is confirmed on their own site, but the revenue-gate evidence is INFERRED from plant and fleet scale rather than a filing or headcount figure — I found no filing, no employee count, and no giving program, sponsorship page, or request route on any page I could load. Kept because the HQ and operating status are solid; treat the cash ask as speculative and the in-kind ask as the realistic one."
+      }
+    ],
+    "in_kind_partners": [
+      {
+        "name": "GDG Fresno (Google Developer Group)",
+        "type": "partner",
+        "one_liner": "823-member Fresno developer community that has run Build with AI workshops and DevFest — the single best source of technical volunteers in the city.",
+        "signals": [
+          "823 members",
+          "recent Build with AI hands-on workshop (May 2026)",
+          "runs DevFest Fresno annually in the fall",
+          "three named organizers with employer affiliations",
+          "independent community group, not a vendor"
+        ],
+        "score": 8.5,
+        "source_url": "https://gdg.community.dev/gdg-fresno/",
+        "confidence": "high",
+        "warm_path": "Their organizers are individually listed — approach the people (see mentors), not the group inbox.",
+        "suggested_first_move": "Ask the chapter leads whether GDG Fresno will co-promote the hackathon to its 823 members and nominate 5-6 mentors.",
+        "verified": true,
+        "notes": "Partner ask only: promotion, mentors, and technical credibility — no cash. Two flags. First, DevFest Fresno traditionally runs in the fall, so 31 Oct 2026 may collide with their own event; ask early. Second, the chapter page showed NO upcoming events at the time of checking, with the most recent past event in June 2026 — activity may be seasonal, but confirm the chapter is currently running before depending on it."
+      },
+      {
+        "name": "Fresno Economic Opportunities Commission (Fresno EOC)",
+        "type": "partner",
+        "one_liner": "One of the region's largest nonprofits — a Community Action Agency running 35+ human-services and workforce programs across Fresno County.",
+        "signals": [
+          "35+ programs spanning workforce training, education, health, housing",
+          "county-wide reach into exactly the nonprofit audience you want",
+          "established Community Action Agency",
+          "existing workforce-training infrastructure"
+        ],
+        "score": 8.0,
+        "source_url": "https://fresnoeoc.org/sponsorship-request/",
+        "confidence": "high",
+        "warm_path": null,
+        "suggested_first_move": "Approach program directors about sending staff as participants, not the sponsorship desk — their programs ARE the use cases an AI hackathon should build for.",
+        "verified": true,
+        "notes": "Explicitly a partner, not a sponsor: their own sponsorship page states they are NOT currently accepting sponsorship requests, and their criteria cap requests at one per organization per year with 45 days' notice. The value here is audience and problem statements — 35+ frontline programs is a deep well of real nonprofit workflows for teams to build against."
+      },
+      {
+        "name": "Fresno Regional Workforce Development Board",
+        "type": "partner",
+        "one_liner": "City/County joint powers authority administering federal WIOA workforce funding through a one-stop system of a dozen-plus local agencies.",
+        "signals": [
+          "Joint Powers Authority of City and County of Fresno",
+          "administers US Dept of Labor WIOA funding",
+          "one-stop system links a dozen-plus local agencies",
+          "adult, young adult, and business service tracks",
+          "existing employer relationships"
+        ],
+        "score": 7.5,
+        "source_url": "https://frwdb.net/about-us/",
+        "confidence": "high",
+        "warm_path": "Their one-stop partner network includes the community colleges and county social services — one conversation reaches many of your target orgs.",
+        "suggested_first_move": "Ask the business services team to promote the event to job seekers and employer partners as a skills-signal event.",
+        "verified": true,
+        "notes": "Deliberately placed in-kind rather than sponsors. It is a government agency, but its money is WIOA-restricted and moves through competitive RFPs and contracts, not event sponsorships — asking for a check would burn the relationship and waste your runway. Ask instead for participant recruitment and employer introductions. No executive director is named on the page I loaded."
+      },
+      {
+        "name": "Fresno State — Lyles Center for Innovation and Entrepreneurship",
+        "type": "partner",
+        "one_liner": "The university's entrepreneurship center, running student incubator, K-12, and community programs from the Student Recreation Center.",
+        "signals": [
+          "Student Hatchery incubator program",
+          "K-12 youth innovation programs",
+          "explicit university-and-community program track",
+          "located in the same building as a 300-seat auditorium",
+          "long-running community luncheon series with business leaders"
+        ],
+        "score": 7.5,
+        "source_url": "https://craig.fresnostate.edu/lyles/index.html",
+        "confidence": "high",
+        "warm_path": "The most plausible campus co-sponsor for booking on-campus space you cannot book yourself.",
+        "suggested_first_move": "Call 559.278.3735 and ask whether the Lyles Center will co-host — the space problem and the student-volunteer problem both resolve if they say yes.",
+        "verified": true,
+        "notes": "Partner ask, never a cash ask: per the revenue gate a university department cannot sponsor — that is Corporate and Foundation Relations' job (see sponsors). No individual staff member is named on the pages I loaded, only a 'Meet the Staff' link, so the phone number is the documented route."
+      },
+      {
+        "name": "Fresno State — Department of Computer Science",
+        "type": "partner",
+        "one_liner": "CS department in the College of Science and Mathematics with multiple faculty working directly in AI, ML and data science.",
+        "signals": [
+          "four+ faculty with published AI/ML/data-science specialisms",
+          "department chair and contacts publicly listed with emails",
+          "student pipeline for technical volunteers",
+          "campus route to space via 25Live"
+        ],
+        "score": 7.5,
+        "source_url": "https://csm.fresnostate.edu/csci/faculty-staff/faculty.html",
+        "confidence": "high",
+        "warm_path": "Faculty who agree to mentor become the internal advocates for campus space and for Corporate & Foundation Relations.",
+        "suggested_first_move": "Email the chair (shliu@csufresno.edu) asking to circulate a mentor/volunteer call to faculty and students.",
+        "verified": true,
+        "notes": "Partner ask only — mentors, students, promotion, and a campus co-host. Individual faculty are listed separately as mentor leads. Note the department sits in the College of Science and Mathematics, not the Lyles College of Engineering; addressing mail to the wrong college is an avoidable own-goal."
+      },
+      {
+        "name": "Valley Community SBDC",
+        "type": "partner",
+        "one_liner": "SBA- and CalOSBA-funded Small Business Development Center hosted by Clovis Community College, serving Fresno, Madera, Kings and Tulare counties at no cost.",
+        "signals": [
+          "no-cost one-on-one business advising",
+          "serves Fresno County plus three neighbours",
+          "hosted by Clovis Community College, SBA/CalOSBA funded",
+          "runs its own workshops and events calendar",
+          "staff and business advisor roster maintained"
+        ],
+        "score": 7.0,
+        "source_url": "https://valleycommunitysbdc.com/",
+        "confidence": "high",
+        "warm_path": null,
+        "suggested_first_move": "Email vcsbdc@cloviscollege.edu (559-324-6403) asking whether advisors would mentor nonprofit teams on the operations side and co-promote to their client list.",
+        "verified": true,
+        "notes": "Community-college-hosted and federally funded, so in-kind by the gate — never a cash ask. Strong fit for the non-technical half of a mixed audience: their advisors mentor on the business/ops problems nonprofit teams will actually hit. Address is in Clovis, adjacent to Fresno. No individual advisor is named on the page I loaded."
+      },
+      {
+        "name": "Fresno Chamber of Commerce",
+        "type": "partner",
+        "one_liner": "The regional business chamber — member directory, events, newsletter, and a boardroom, all useful for reach.",
+        "signals": [
+          "member directory and e-newsletter for promotion",
+          "runs Leadership Fresno and Small Business University",
+          "boardroom rental available to members",
+          "visibly active — 2026 State of the County on sale"
+        ],
+        "score": 7.0,
+        "source_url": "https://www.fresnochamber.com/",
+        "confidence": "high",
+        "warm_path": "The chamber's member directory is the fastest public map of which Fresno companies are large enough to sponsor anything.",
+        "suggested_first_move": "Ask about a newsletter mention and whether the chamber will introduce you to member companies with community-giving budgets.",
+        "verified": true,
+        "notes": "In-kind by rule — chambers are promotion and introduction engines, not funders. Membership may be required for the newsletter and boardroom; that cost is not published. Confirmed currently active (2026 State of the County tickets on sale on the homepage)."
+      },
+      {
+        "name": "Downtown Fresno Partnership",
+        "type": "partner",
+        "one_liner": "Downtown district nonprofit running ArtHop and a busy public events calendar, with deep knowledge of downtown spaces.",
+        "signals": [
+          "runs ArtHop and downtown events year-round",
+          "maintains listings of available downtown retail and office space",
+          "active events calendar (concerts, markets) into Aug 2026",
+          "recognized Nonprofit of the Year, CA 31st Assembly District"
+        ],
+        "score": 6.8,
+        "source_url": "https://www.downtownfresno.org/",
+        "confidence": "high",
+        "warm_path": "Fresno Ideaworks participates in ArtHop, which the Partnership runs — a shared reference point when you approach either.",
+        "suggested_first_move": "Ask which downtown spaces host 60 people on a Saturday and whether they will list the hackathon on the downtown events calendar.",
+        "verified": true,
+        "notes": "In-kind: promotion plus local venue intelligence. Their space listings are aimed at commercial tenants rather than event rental, so treat them as a source of leads and introductions, not a booking channel."
+      },
+      {
+        "name": "The Fresno Center",
+        "type": "partner",
+        "one_liner": "Long-running Fresno nonprofit serving Southeast Asian and immigrant communities across education, health, and economic empowerment.",
+        "signals": [
+          "programs in education, health, economic empowerment",
+          "4879 E Kings Canyon Rd, Fresno",
+          "documented recent activity through July 2026",
+          "established partnerships with local organizations",
+          "direct line into a community your outreach will otherwise miss"
+        ],
+        "score": 6.8,
+        "source_url": "https://www.fresnocenter.org/",
+        "confidence": "high",
+        "warm_path": null,
+        "suggested_first_move": "Ask their programs team whether staff would attend as a nonprofit team, and what language-access support attendees would need.",
+        "verified": true,
+        "notes": "Operating status confirmed by dated activity in July 2026. Included because a mixed-audience event in Fresno that reaches only English-speaking tech volunteers has missed the city. No event or meeting space is advertised on their site, so this is an audience and credibility partner, not a venue."
+      },
+      {
+        "name": "Community Health System (Community Medical Centers)",
+        "type": "partner",
+        "one_liner": "The largest employer in the Central Valley — four hospitals in the Fresno area, serving the region since 1897.",
+        "signals": [
+          "largest employer in the Central Valley",
+          "fifth-largest health system in California",
+          "four inpatient hospitals in Fresno/Clovis",
+          "runs residencies, fellowships and clinical training programs"
+        ],
+        "score": 6.0,
+        "source_url": "https://www.communitymedical.org/",
+        "confidence": "med",
+        "warm_path": null,
+        "suggested_first_move": "Ask community benefit staff whether employees can volunteer as mentors and whether they will contribute a real operational problem statement.",
+        "verified": true,
+        "notes": "Deliberately NOT in sponsors: it is a nonprofit health system, and no named grant or sponsorship program appears on any page I loaded — only a 'Community Benefit' section reference. Placing it here keeps the cash ask off the table until someone can point to an actual program. Its value is scale: mentors, problem statements, and employer credibility."
+      }
+    ],
+    "mentors": [
+      {
+        "name": "Csaba Toth",
+        "type": "mentor",
+        "one_liner": "GDG Fresno chapter lead and Women Techmakers ambassador, listed at Booz Allen Hamilton — the most visible technical community organizer in Fresno.",
+        "signals": [
+          "GDG Fresno lead (823-member chapter)",
+          "Women Techmakers ambassador",
+          "industry employer affiliation (Booz Allen Hamilton)",
+          "ran a Build with AI hands-on workshop in 2026",
+          "experienced running local technical events"
+        ],
+        "score": 8.7,
+        "source_url": "https://gdg.community.dev/gdg-fresno/",
+        "confidence": "high",
+        "warm_path": null,
+        "suggested_first_move": "Reach out via the GDG Fresno chapter page and ask him to co-sign the mentor call to the chapter's 823 members.",
+        "verified": true,
+        "notes": "Highest-value single name in this file: mentor, likely judge, and the fastest route to a technical volunteer bench in a city where you have no relationships. Role and affiliation are as published on the chapter's organizer list; I did not independently confirm current employment beyond that listing. No email is published — the chapter page and its linked socials are the documented contact route."
+      },
+      {
+        "name": "Xayaphone Salinthone",
+        "type": "mentor",
+        "one_liner": "GDG Fresno co-lead, listed as working at Ameritech Business Systems — a local-industry counterweight to the academic bench.",
+        "signals": [
+          "GDG Fresno co-lead",
+          "local Fresno employer affiliation",
+          "co-organizes chapter events incl. AI workshops",
+          "hands-on practitioner rather than academic"
+        ],
+        "score": 7.8,
+        "source_url": "https://gdg.community.dev/gdg-fresno/",
+        "confidence": "high",
+        "warm_path": "Approach alongside the chapter lead — co-leads generally decide together whether the chapter backs an event.",
+        "suggested_first_move": "Include in the same outreach as the chapter lead; ask specifically about mentor training the week before.",
+        "verified": true,
+        "notes": "Fits the mid-career, hands-on mentor profile the role brief calls for. Employer size unverified, so treat Ameritech Business Systems as a mentor affiliation, not a sponsor prospect. Contact route is the chapter page; no direct email is published."
+      },
+      {
+        "name": "Jacob Tonna",
+        "type": "mentor",
+        "one_liner": "GDG Fresno team member, listed on the chapter's organizer roster.",
+        "signals": [
+          "GDG Fresno organizing team",
+          "involved in chapter event delivery",
+          "embedded in the local developer community"
+        ],
+        "score": 7.0,
+        "source_url": "https://gdg.community.dev/gdg-fresno/",
+        "confidence": "med",
+        "warm_path": "Comes with the chapter — if GDG Fresno backs the event, the organizing team is the natural mentor core.",
+        "suggested_first_move": "Ask the chapter leads to introduce the wider organizing team once the chapter agrees to participate.",
+        "verified": true,
+        "notes": "Confidence is med rather than high because the chapter page lists no title, employer, or specialism for him beyond team membership — a real person in a real public role, but I know less about him than the two leads."
+      },
+      {
+        "name": "Dr. Hubert Cecotti",
+        "type": "mentor",
+        "one_liner": "Fresno State computer science faculty working in pattern recognition, machine learning, and brain-machine interfaces.",
+        "signals": [
+          "machine learning and pattern recognition specialism",
+          "Fresno State Department of Computer Science",
+          "public university email listed",
+          "brings student volunteers with him"
+        ],
+        "score": 7.6,
+        "source_url": "https://csm.fresnostate.edu/csci/faculty-staff/faculty.html",
+        "confidence": "high",
+        "warm_path": "Same institution as Corporate and Foundation Relations — a faculty yes strengthens the university sponsor conversation.",
+        "suggested_first_move": "Email hcecotti@csufresno.edu asking whether he would mentor teams and encourage students to volunteer.",
+        "verified": true,
+        "notes": "Name, title, email and specialism taken from the department's own current faculty directory. Scored with the sponsor-overlap bonus the role brief describes: Fresno State appears in the sponsor list via its corporate-engagement arm, so faculty outreach doubles as sponsor pipeline. Academic rather than industry-practitioner — see the warning about bench composition."
+      },
+      {
+        "name": "Dr. David Ruby",
+        "type": "mentor",
+        "one_liner": "Fresno State computer science faculty whose stated research areas are machine learning and artificial intelligence.",
+        "signals": [
+          "AI and machine learning research areas",
+          "Fresno State Department of Computer Science",
+          "public university email listed",
+          "direct topical fit for an AI hackathon"
+        ],
+        "score": 7.4,
+        "source_url": "https://csm.fresnostate.edu/csci/faculty-staff/faculty.html",
+        "confidence": "high",
+        "warm_path": "Approach the department chair first so faculty outreach arrives with internal endorsement.",
+        "suggested_first_move": "Email druby@csufresno.edu with the date and the mentor commitment (hours, training expectation) stated up front.",
+        "verified": true,
+        "notes": "Sourced from the department's current faculty directory. Same sponsor-overlap bonus as the other Fresno State faculty. I have not contacted him and have no evidence of availability on 31 Oct 2026."
+      },
+      {
+        "name": "Dr. Athanasios Aris Panagopoulos",
+        "type": "mentor",
+        "one_liner": "Fresno State computer science faculty in machine learning, data mining, and intelligent systems.",
+        "signals": [
+          "machine learning and intelligent systems specialism",
+          "data mining expertise relevant to nonprofit data problems",
+          "Fresno State Department of Computer Science",
+          "public university email listed"
+        ],
+        "score": 7.3,
+        "source_url": "https://csm.fresnostate.edu/csci/faculty-staff/faculty.html",
+        "confidence": "high",
+        "warm_path": "Same campus route as the other faculty — chair first, then individuals.",
+        "suggested_first_move": "Email apanagopoulos@csufresno.edu; his data-mining focus suits teams working with messy nonprofit records.",
+        "verified": true,
+        "notes": "Sourced from the department's current faculty directory. Good fit for the non-technical half of a mixed audience, whose problems are usually data-cleanup problems rather than model problems."
+      },
+      {
+        "name": "Dr. Matin Pirouz Nia",
+        "type": "mentor",
+        "one_liner": "Fresno State computer science faculty focused on big data analytics, data science, and data mining.",
+        "signals": [
+          "big data analytics and data science specialism",
+          "Fresno State Department of Computer Science",
+          "public university email listed",
+          "applied analytics fit for civic datasets"
+        ],
+        "score": 7.2,
+        "source_url": "https://csm.fresnostate.edu/csci/faculty-staff/faculty.html",
+        "confidence": "high",
+        "warm_path": "Same campus route as the other faculty.",
+        "suggested_first_move": "Email mpirouz@csufresno.edu asking about mentoring and whether graduate students would volunteer as team helpers.",
+        "verified": true,
+        "notes": "Sourced from the department's current faculty directory. Graduate students supervised by faculty are often the most effective floor mentors at a one-day event — ask for the lab, not just the professor."
+      },
+      {
+        "name": "Dr. Shih-Hsi \"Alex\" Liu",
+        "type": "mentor",
+        "one_liner": "Chair of the Fresno State Department of Computer Science; software engineering and evolutionary computation.",
+        "signals": [
+          "department chair — controls internal distribution",
+          "software engineering specialism",
+          "public university email listed",
+          "route to campus space and student volunteers"
+        ],
+        "score": 7.0,
+        "source_url": "https://csm.fresnostate.edu/csci/faculty-staff/faculty.html",
+        "confidence": "high",
+        "warm_path": "The chair is the single email that reaches every other faculty name in this list.",
+        "suggested_first_move": "Email shliu@csufresno.edu first — before the individual faculty — asking him to circulate a mentor and volunteer call.",
+        "verified": true,
+        "notes": "Listed as a mentor prospect but his real value is as a door-opener: departmental endorsement, student volunteers, and the campus co-sponsor needed to book on-campus space. Chair role and email confirmed on the department's own directory page."
+      },
+      {
+        "name": "Ryan Madron",
+        "type": "mentor",
+        "one_liner": "Listed as President/Director of Fresno Ideaworks, the downtown nonprofit makerspace.",
+        "signals": [
+          "President/Director of a 501(c)(3) makerspace",
+          "organization runs CoderDojo youth coding programs",
+          "leads an org with a tech classroom/hackerspace",
+          "downtown Fresno base"
+        ],
+        "score": 6.0,
+        "source_url": "https://www.fresnoideaworks.org/page-18192",
+        "confidence": "low",
+        "warm_path": "Same organization as the Fresno Ideaworks venue lead — one conversation covers venue and mentors.",
+        "suggested_first_move": "Confirm who currently holds the president role when you call about the space (559-833-4332); do not address mail to a name before that.",
+        "verified": true,
+        "notes": "Deliberately downgraded to low. The board page names him President/Director, but the page carries no revision date and its only dated asset is a 2021 header image, while a separate public interview described a different person as president. The ORGANIZATION is verified and active; the CURRENT officeholder is not. Confirm the name before using it — this is exactly the sort of detail that makes an outreach email land badly."
+      }
+    ]
+  },
+  "verification_notes": [
+    "Method: sourcing and verification were run as separate passes. Every URL in this file was fetched and read; nothing is included on the strength of a search-result snippet alone. Where a fact came only from a search summary or third-party aggregator (revenue figures, asset totals), it is labelled as such in the lead's notes and the confidence is capped at med.",
+    "SECOND-PASS RESULT: every source_url was re-requested and all 26 unique URLs returned HTTP 200. Four highest-stakes leads were then re-fetched with adversarial prompts. Every Neighborhood Partnership held (the page literally states 'accommodates up to 100 people' and 'open the doors of our new building to other nonprofits and community groups', Fresno address in footer, blog activity June-July 2026). Granville Homes held (live application link, Fresno HQ address on page). The GDG Fresno organizer roster held unchanged (all three organizers, 823 members, no upcoming events, no emails published). Central Valley Community Foundation did NOT fully hold and was downgraded from high to med — see its notes.",
+    "DROPPED — Bitwise Industries: the obvious 'Fresno tech' answer and completely dead. Filed Chapter 7 on 29 June 2023 listing $252.03M in liabilities after furloughing ~900 employees; co-founders removed by the board. Any lead list for Fresno that includes Bitwise is a list nobody verified.",
+    "DROPPED — Lyons Magnus: $617M revenue and reportedly Fresno-headquartered, which would have made it a strong sponsor, but its own homepage does not state a headquarters location and its /contact/ page returned 404. No page I could load backs the Fresno claim, so it is out under sourced-or-omitted.",
+    "DROPPED — Fresno First Bank: a plausible Fresno-headquartered bank prospect; fresnofirstbank.com returned HTTP 403 and I could not load any page of its own to confirm it currently operates under that name. Dropped rather than cited unread.",
+    "DROPPED — Table Mountain Rancheria: considered as a government/tribal sponsor. Its community page describes partnerships and a general commitment but names no grant program, focus areas, application process, or amounts. Fails the 'government agency ONLY with a specific named grant program' gate. Dropped rather than softened.",
+    "DROPPED — James B. McClatchy Foundation: a real, well-funded Fresno foundation, but its documented programs are English Learners, First Amendment/journalism, arts and civic education — no tech or workforce program — and it accepts proposals by invitation only. Fails the foundation gate on both counts.",
+    "DROPPED — Valley Children's Healthcare Foundation: its published corporate route is cause marketing and gala sponsorship benefiting the hospital, not sponsorship of third-party community events, and no corporate-partnership contact is named on the page. Also Madera, not Fresno. Not worth an organizer's limited runway.",
+    "DROPPED — GDG on Campus, CSU Fresno: the student chapter page returned HTTP 404, so I could not confirm the chapter currently exists. The city chapter (GDG Fresno) is verified and retained.",
+    "DOWNGRADED — Fresno County Public Library: the library's own meeting-room policy lists Woodward Park at 140 and Sunnyside at 70 seats, free of charge, but the Woodward Park branch page describes only a 6-person conference room and the LibCal booking system's capacity filters top out near 50. Sources contradict each other on the central claim, so confidence is low and the lead carries the contradiction in its notes rather than picking the flattering number.",
+    "DOWNGRADED — Fresno State campus space: kept only as a co-sponsor path, not a booking. The library's space policy explicitly bars reservations by organizations not affiliated with Fresno State, and the 300-seat auditorium is routed through on-campus departments. An outside organizer cannot book campus space directly.",
+    "RECLASSIFIED — Fresno Economic Opportunities Commission: initially a sponsor candidate; its own sponsorship page states it is not currently accepting sponsorship requests. Moved to in-kind with a partner ask.",
+    "RECLASSIFIED — Fresno Regional Workforce Development Board: a government agency administering named WIOA programs, so it arguably clears the gate, but its funds move through competitive RFPs rather than event sponsorship. Moved to in-kind so nobody spends runway asking it for a check.",
+    "RECLASSIFIED — Community Health System: largest employer in the Central Valley, but a nonprofit health system with no named grant or sponsorship program on any page I loaded. In-kind, not sponsor.",
+    "GATE EXCEPTIONS, stated openly: two sponsors are admitted on grounds other than the for-profit $5M test. EECU is a member-owned credit union admitted on scale (~$4.7B assets per third-party 990 data) plus a demonstrated record of cash event sponsorship. Kaiser Permanente is a nonprofit health system admitted on a documented, named sponsorship program that explicitly covers education and workforce development. Both are flagged in their notes; neither figure appears on the organization's own pages.",
+    "TIME-CRITICAL: Kaiser Permanente requires sponsorship requests at least 3 months before the event. With the event on 31 Oct 2026 and research dated 1 Aug 2026 (91 days out), this lead expires within days of this file being written.",
+    "Venue reality check against a $0 budget: of five venue leads, only Every Neighborhood Partnership combines a published capacity above the 60-person cap with an explicit invitation to nonprofits. Fresno Unified via Facilitron requires $1M/$2M liability insurance naming the district as additional insured. The library is free but forbids soliciting donations and closes at 5pm Saturday. Fresno State needs a campus co-sponsor. Ideaworks publishes no capacity figure.",
+    "The event date moved to Saturday 7 November 2026 during this research pass. 31 October was verified as a Saturday but is Halloween, which competes for volunteer and attendee attention; 7 November is a Saturday, 97 days out, and clear of holidays. Library Saturday hours, the Civic Center Act weekend provision, and weekend venue access all still apply.",
+    "No individuals were invented. Every named person comes from the employing or hosting organization's own web page: the GDG Fresno chapter organizer list, the Fresno State CS faculty directory, the Fresno State Advancement staff listing, the Kaiser Permanente Fresno service-area contacts, and the Fresno Ideaworks board page. Where an organization published no individual (Every Neighborhood Partnership, Lyles Center, Valley Community SBDC, FRWDB, Fresno EOC), the organization is listed and the absence of a named contact is stated rather than filled in.",
+    "No one was contacted. No emails sent, no forms submitted, no reservations requested. Every 'first move' is an action for the organizer, not something already done.",
+    "Schema note for the assembler: in_kind_partners entries use type 'partner', which extends the data contract's venue|sponsor|mentor enum. Labelling a partner as a 'sponsor' would undercut the rule that in-kind orgs never receive a cash ask. render() does not validate type, so this renders correctly today, but the contract should be updated to include it."
+  ],
+  "warnings": [
+    "Mentors: 9 named individuals are sourced, above the 6 done-signal, but the bench is academically weighted. Only 3 (the GDG Fresno organizers) are hands-on industry practitioners of the mid-career profile mentors should have; 5 are Fresno State faculty and 1 is a makerspace board officer whose current role could not be confirmed. If GDG Fresno declines, the practitioner bench collapses to zero and this section is effectively thin.",
+    "Sponsors: 10 prospects clear the revenue gate, exactly at the done-signal, but only 4 publish a self-serve route to ask for money (Granville Homes' application portal, Kaiser Permanente's named contacts, Fresno State's named director, and CVCF's partner route). The rest require finding the right person by phone first, and PG&E states outright that it does not accept unsolicited requests. Plan for a low conversion rate inside 13 weeks.",
+    "Venues: 5 leads clear the 3 done-signal, but only 1 (Every Neighborhood Partnership) is both confirmed above 60 capacity and explicitly open to nonprofits. Every other venue carries a cost, access, capacity, or hours caveat documented in its notes. Do not treat this section as five interchangeable options.",
+    "Two leads carry unresolved source contradictions, kept visible rather than resolved by guessing: Fresno County Public Library capacity (policy document vs branch page vs booking system) and the current president of Fresno Ideaworks (undated board page vs a public interview naming someone else).",
+    "Zero warm paths are real introductions. Nobody on this team has a relationship in Fresno, and no lead in this file came from one. Every 'warm_path' is an inferred route from published information, not a person who will vouch for you. The first ten outreach attempts will be cold.",
+    "Verification confirms these organizations exist, operate, and are located in or near Fresno. It does NOT confirm availability on 31 Oct 2026, willingness to participate, current budget, or that any named individual still holds their role. No lead here has been contacted."
+  ]
+}

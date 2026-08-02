@@ -1,0 +1,15 @@
+{
+  "name": "hack-ai-thon-in-a-box",
+  "private": true,
+  "type": "module",
+  "description": "Static build of the Hack-AI-Thon-in-a-Box planner. No dependencies, no build step.",
+  "scripts": {
+    "rules": "python3 scripts/export_rules.py",
+    "test": "python3 -m unittest discover -s tests -t . -q",
+    "test:js": "node --test \"tests/js/**/*.test.js\"",
+    "dev": "python3 scripts/devserver.py"
+  },
+  "dependencies": {
+    "@anthropic-ai/claude-agent-sdk": "^0.3.220"
+  }
+}

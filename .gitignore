@@ -1,0 +1,25 @@
+# Project instructions — kept local, not tracked
+CLAUDE.md
+
+# Personal Claude Code settings
+.claude/settings.local.json
+
+# macOS
+.DS_Store
+
+# Python
+__pycache__/
+*.py[cod]
+
+# Generated plans
+plan.json
+plan.html
+.vercel
+
+# Node
+node_modules/
+
+# Secrets / local env — never commit API keys
+.env
+.env.*
+!.env.example

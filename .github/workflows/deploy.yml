@@ -1,0 +1,53 @@
+name: test & deploy
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - uses: actions/setup-node@v4
+        with: { node-version: "20" }
+
+      # No dependencies to install — core/ is stdlib-only and the browser build has no
+      # bundler. That is deliberate; `test_api_has_no_third_party_dependencies` enforces it.
+      - name: Rules are generated, not hand-copied
+        run: |
+          python3 scripts/export_rules.py
+          git diff --exit-code public/js/rules.js \
+            || (echo "::error::public/js/rules.js is stale — run scripts/export_rules.py" && exit 1)
+
+      - name: Test suite (includes Python↔JS conformance)
+        run: python3 -m unittest discover -s tests -t . -q
+
+  deploy:
+    needs: test
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/configure-pages@v5
+      # `public/` is the whole site. No build step: no bundler, no transpile, no framework.
+      - uses: actions/upload-pages-artifact@v3
+        with: { path: public }
+      - id: deployment
+        uses: actions/deploy-pages@v4
