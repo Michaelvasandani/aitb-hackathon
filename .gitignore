@@ -14,3 +14,4 @@ __pycache__/
 # Generated plans
 plan.json
 plan.html
+.vercel
