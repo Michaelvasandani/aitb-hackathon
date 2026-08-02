@@ -72,7 +72,8 @@ ok('toggles back', root.dataset.theme !== first);
 
 console.log('\nhero video — loads only on click');
 ok('nothing embedded on arrival', byId.video.children.length === 0);
-byId.playBtn.fire('click');
+let prevented = false;
+byId.playBtn.fire('click', { preventDefault: () => { prevented = true; } });
 const f = byId.video.children[0];
 ok('iframe appears on click', !!f && f.tag === 'iframe');
 ok('uses the no-cookie domain', f.src.startsWith('https://www.youtube-nocookie.com/embed/'));
@@ -80,6 +81,16 @@ ok('carries the supplied video id', f.src.includes('uNLiQLISEOo'));
 ok('autoplays once asked for', f.src.includes('autoplay=1'));
 ok('allows fullscreen', f.allowFullscreen === true);
 ok('iframe is titled', typeof f.title === 'string' && f.title.length > 0);
+ok('navigation suppressed once the embed succeeds', prevented === true);
+
+// If the embed cannot be built, the click must NOT be intercepted — the browser
+// follows the href and the video still plays on YouTube.
+const realCreate = document.createElement;
+document.createElement = () => { throw new Error('iframe blocked'); };
+let prevented2 = false;
+byId.playBtn.fire('click', { preventDefault: () => { prevented2 = true; } });
+document.createElement = realCreate;
+ok('falls through to the YouTube link when the embed fails', prevented2 === false);
 
 console.log('\nthumbnail fallback');
 thumb.fire('error');

@@ -5,7 +5,13 @@
 <meta name=viewport content="width=device-width,initial-scale=1">
 <title>AI Trailblazers — Every community, equipped to thrive in the AI economy</title>
 <meta name=description content="AI Trailblazers empowers communities to use AI and build wealth from the bottom up. No technical prerequisite. Hackathons, apprenticeships, and a kit any city can pick up.">
-<meta name=theme-color content="#0b1030">
+<meta name=theme-color content="#09073b">
+<link rel=icon type="image/png" href="/assets/aitb-logo.png">
+<link rel=apple-touch-icon href="/assets/aitb-logo.png">
+<meta property="og:title" content="AI Trailblazers">
+<meta property="og:description" content="Every community, equipped to thrive in the AI economy. No technical prerequisite. No one left behind.">
+<meta property="og:image" content="/assets/aitb-logo.png">
+<meta property="og:type" content="website">
 <style>
 /* ─────────────────────────────────────────────────────────────────────────────
    AI Trailblazers — landing page.
@@ -16,28 +22,35 @@
    deep navy — and the "trail" motif runs through the page as a recurring gradient.
    ───────────────────────────────────────────────────────────────────────────── */
 
+/* Brand colours sampled directly from the official logo asset
+   (aitrailblazers.org/assets/images/aitb-logo.png): the mark uses exactly two —
+   red #AB150A and navy #09073B. Everything below is those two, tinted and shaded.
+   No orange, amber or gold: they are not AI Trailblazers colours. */
 :root{
-  --flame:#e01b22; --flame-2:#ff6b35; --ember:#ffb03a;
-  --navy:#131a4a; --navy-2:#0b1030;
-  --bg:#ffffff; --fg:#12162e; --muted:#5b6479; --line:#e5e8f0;
-  --card:#f8f9fc; --card-2:#ffffff;
-  --hero-fg:#f2f4fb; --hero-muted:#a9b2ce;
+  --flame:#ab150a;          /* brand red, sampled */
+  --flame-2:#d4210f;        /* lighter red — hover, glow, gradient end */
+  --flame-3:#7a0f07;        /* deeper red — gradient start */
+  --navy:#09073b;           /* brand navy, sampled */
+  --navy-2:#05041f;         /* deeper navy for hero/footer grounds */
+  --bg:#ffffff; --fg:#0f0e28; --muted:#565a7a; --line:#e4e4ee;
+  --card:#f7f7fb; --card-2:#ffffff;
+  --hero-fg:#f4f4fa; --hero-muted:#a6a8c6;
   --radius:16px;
-  --trail:linear-gradient(90deg,var(--flame) 0%,var(--flame-2) 45%,var(--ember) 100%);
+  --trail:linear-gradient(90deg,var(--flame-3) 0%,var(--flame) 52%,var(--flame-2) 100%);
 }
 @media(prefers-color-scheme:dark){
   :root{
-    --bg:#0b1030; --fg:#eef1fa; --muted:#98a2bf; --line:#222a52;
-    --card:#121a40; --card-2:#0f1636;
+    --bg:#07061f; --fg:#ececf6; --muted:#9698ba; --line:#211f4c;
+    --card:#100d38; --card-2:#0b0a2b;
   }
 }
 :root[data-theme=dark]{
-  --bg:#0b1030; --fg:#eef1fa; --muted:#98a2bf; --line:#222a52;
-  --card:#121a40; --card-2:#0f1636; color-scheme:dark;
+  --bg:#07061f; --fg:#ececf6; --muted:#9698ba; --line:#211f4c;
+  --card:#100d38; --card-2:#0b0a2b; color-scheme:dark;
 }
 :root[data-theme=light]{
-  --bg:#ffffff; --fg:#12162e; --muted:#5b6479; --line:#e5e8f0;
-  --card:#f8f9fc; --card-2:#ffffff; color-scheme:light;
+  --bg:#ffffff; --fg:#0f0e28; --muted:#565a7a; --line:#e4e4ee;
+  --card:#f7f7fb; --card-2:#ffffff; color-scheme:light;
 }
 
 *{box-sizing:border-box}
@@ -62,7 +75,7 @@ header.top{position:sticky;top:0;z-index:50;background:color-mix(in srgb,var(--b
 .topbar{display:flex;align-items:center;gap:18px;padding:12px 0}
 .brand{display:flex;align-items:center;gap:11px;text-decoration:none;font-weight:800;
   letter-spacing:-.02em;flex:none}
-.brand .mark{width:34px;height:34px;flex:none}
+.brand .mark{width:28px;height:35px;flex:none;object-fit:contain}
 .brand .name{font-size:1rem;line-height:1.05}
 .brand .name b{display:block;color:var(--flame)}
 nav.main{margin-left:auto;display:flex;gap:4px;align-items:center}
@@ -88,15 +101,15 @@ nav.main a:hover{color:var(--fg);background:var(--card)}
 
 /* ── hero ────────────────────────────────────────────────────────────────── */
 .hero{position:relative;overflow:hidden;background:
-  radial-gradient(1100px 520px at 50% -12%,rgba(224,27,34,.30),transparent 62%),
-  radial-gradient(760px 420px at 88% 8%,rgba(255,176,58,.18),transparent 60%),
-  linear-gradient(180deg,var(--navy-2) 0%,#0a0e28 100%);
+  radial-gradient(1100px 520px at 50% -12%,rgba(171,21,10,.30),transparent 62%),
+  radial-gradient(760px 420px at 88% 8%,rgba(212,33,15,.16),transparent 60%),
+  linear-gradient(180deg,var(--navy) 0%,var(--navy-2) 100%);
   color:var(--hero-fg);padding:74px 0 68px;text-align:center}
-.hero .mark-lg{width:118px;height:118px;margin:0 auto 22px;display:block;
-  filter:drop-shadow(0 10px 32px rgba(224,27,34,.5))}
+.hero .mark-lg{width:101px;height:128px;margin:0 auto 22px;display:block;
+  filter:drop-shadow(0 10px 32px rgba(171,21,10,.5))}
 .eyebrow{display:inline-flex;align-items:center;gap:8px;font-size:.76rem;font-weight:800;
-  letter-spacing:.16em;text-transform:uppercase;color:var(--ember);
-  border:1px solid rgba(255,176,58,.34);border-radius:999px;padding:6px 15px;margin-bottom:20px}
+  letter-spacing:.16em;text-transform:uppercase;color:var(--flame-2);
+  border:1px solid rgba(212,33,15,.42);border-radius:999px;padding:6px 15px;margin-bottom:20px}
 .hero h1{font-size:clamp(2.1rem,6vw,3.9rem);font-weight:800;max-width:16ch;margin:0 auto}
 .hero h1 .grad{background:var(--trail);-webkit-background-clip:text;background-clip:text;
   -webkit-text-fill-color:transparent;color:transparent}
@@ -107,7 +120,7 @@ nav.main a:hover{color:var(--fg);background:var(--card)}
   font-weight:800;font-size:1rem;text-decoration:none;border:1px solid transparent;
   cursor:pointer;font-family:inherit;transition:transform .14s,filter .14s}
 .btn:hover{transform:translateY(-2px)}
-.btn-primary{background:var(--trail);color:#fff;box-shadow:0 10px 26px rgba(224,27,34,.36)}
+.btn-primary{background:var(--trail);color:#fff;box-shadow:0 10px 26px rgba(171,21,10,.36)}
 .btn-primary:hover{filter:brightness(1.08)}
 .btn-ghost{background:rgba(255,255,255,.07);color:var(--hero-fg);
   border-color:rgba(255,255,255,.24);backdrop-filter:blur(6px)}
@@ -116,7 +129,7 @@ nav.main a:hover{color:var(--fg);background:var(--card)}
 /* embers — decorative only, disabled under reduced motion */
 .embers{position:absolute;inset:0;pointer-events:none;overflow:hidden}
 .ember{position:absolute;bottom:-14px;width:5px;height:5px;border-radius:50%;
-  background:var(--ember);opacity:0;animation:rise linear infinite}
+  background:var(--flame-2);opacity:0;animation:rise linear infinite}
 @keyframes rise{
   0%{opacity:0;transform:translateY(0) scale(.5)}
   12%{opacity:.85}
@@ -135,9 +148,12 @@ nav.main a:hover{color:var(--fg);background:var(--card)}
   padding:0;color:#fff}
 .video .ring{width:82px;height:82px;border-radius:50%;background:var(--trail);
   display:flex;align-items:center;justify-content:center;
-  box-shadow:0 10px 34px rgba(224,27,34,.55);transition:transform .16s}
+  box-shadow:0 10px 34px rgba(171,21,10,.55);transition:transform .16s}
 .video .play:hover .ring{transform:scale(1.09)}
 .video .ring svg{width:30px;height:30px;fill:#fff;margin-left:5px}
+.video-alt{text-align:center;margin-top:12px;font-size:.86rem}
+.video-alt a{color:var(--hero-muted);text-decoration:underline;text-underline-offset:3px}
+.video-alt a:hover{color:var(--hero-fg)}
 .video .cap{position:absolute;left:0;right:0;bottom:0;padding:36px 20px 15px;
   background:linear-gradient(transparent,rgba(0,0,0,.82));font-weight:700;font-size:.92rem;
   text-align:left;pointer-events:none}
@@ -170,7 +186,7 @@ section{padding:76px 0}
 .card:hover{transform:translateY(-5px);border-color:transparent;
   box-shadow:0 18px 44px rgba(19,26,74,.16)}
 .card:hover::before{transform:scaleX(1)}
-.card .ico{width:46px;height:46px;border-radius:12px;background:rgba(224,27,34,.11);
+.card .ico{width:46px;height:46px;border-radius:12px;background:rgba(171,21,10,.11);
   display:flex;align-items:center;justify-content:center;margin-bottom:16px;flex:none}
 .card .ico svg{width:23px;height:23px;stroke:var(--flame);fill:none;stroke-width:2;
   stroke-linecap:round;stroke-linejoin:round}
@@ -193,8 +209,8 @@ section{padding:76px 0}
   color:var(--hero-fg);border-radius:22px;padding:clamp(32px,5vw,58px);position:relative;
   overflow:hidden}
 .mission::after{content:"";position:absolute;right:-70px;top:-70px;width:280px;height:280px;
-  border-radius:50%;background:radial-gradient(circle,rgba(224,27,34,.42),transparent 68%)}
-.mission .kicker{color:var(--ember)}
+  border-radius:50%;background:radial-gradient(circle,rgba(171,21,10,.42),transparent 68%)}
+.mission .kicker{color:var(--flame-2)}
 .mission h2{font-size:clamp(1.5rem,3.4vw,2.2rem);font-weight:800;max-width:22ch;position:relative}
 .mission blockquote{margin:24px 0 0;font-size:clamp(1.05rem,2.3vw,1.32rem);line-height:1.55;
   color:var(--hero-fg);max-width:60ch;position:relative;font-weight:500}
@@ -232,12 +248,14 @@ section{padding:76px 0}
 .inv:hover{transform:translateY(-4px);border-color:var(--flame)}
 .inv .em{font-size:1.7rem;line-height:1;margin-bottom:12px;display:block}
 .inv b{display:block;font-weight:800;margin-bottom:6px}
+.ext{color:var(--muted);font-weight:600;font-size:.85em}
+.inv:hover .ext{color:var(--flame)}
 .inv span{color:var(--muted);font-size:.9rem}
 
 /* final cta */
 .final{text-align:center;background:
-  radial-gradient(760px 340px at 50% 0%,rgba(224,27,34,.24),transparent 66%),
-  linear-gradient(180deg,var(--navy-2),#0a0e28);color:var(--hero-fg);
+  radial-gradient(760px 340px at 50% 0%,rgba(171,21,10,.24),transparent 66%),
+  linear-gradient(180deg,var(--navy),var(--navy-2));color:var(--hero-fg);
   border-radius:22px;padding:clamp(38px,6vw,68px)}
 .final h2{font-size:clamp(1.6rem,3.8vw,2.5rem);font-weight:800;max-width:20ch;margin:0 auto}
 .final p{color:var(--hero-muted);margin:16px auto 0;max-width:54ch}
@@ -268,28 +286,11 @@ footer{border-top:1px solid var(--line);padding:38px 0;margin-top:76px;
 <body>
 <a class=skip href="#main">Skip to content</a>
 
-<!-- The logo, rebuilt as vector: a rising trail that resolves into a flame.
-     Inline so it needs no network request, scales to any size, and inherits colour. -->
-<svg width=0 height=0 style="position:absolute" aria-hidden=true focusable=false>
-  <symbol id=aitb-mark viewBox="0 0 100 100">
-    <!-- sweeping trail, left and right -->
-    <path d="M14 92 C 14 58, 30 36, 47 20" fill=none stroke="#e01b22" stroke-width=9
-      stroke-linecap=round/>
-    <path d="M40 92 C 40 66, 46 50, 56 38" fill=none stroke="#e01b22" stroke-width=8
-      stroke-linecap=round opacity=".9"/>
-    <!-- the spark -->
-    <circle cx="50.5" cy="30" r="6.2" fill="#e01b22"/>
-    <!-- three flame licks -->
-    <path d="M50 22 C 44 15, 47 7, 53 2 C 51 9, 56 12, 54 20" fill="#e01b22"/>
-    <path d="M62 25 C 58 18, 62 11, 68 7 C 66 14, 70 17, 67 24" fill="#e01b22" opacity=".92"/>
-    <path d="M38 26 C 35 20, 38 13, 43 9 C 42 16, 45 19, 43 25" fill="#e01b22" opacity=".82"/>
-  </symbol>
-</svg>
 
 <header class=top>
   <div class="wrap topbar">
     <a class=brand href="#top" aria-label="AI Trailblazers home">
-      <svg class=mark aria-hidden=true><use href="#aitb-mark"/></svg>
+      <img class=mark src="/assets/aitb-mark.png" alt="" width=301 height=381>
       <span class=name>Ai<b>TRAILBLAZERS</b></span>
     </a>
     <button class=menu-btn id=menuBtn aria-expanded=false aria-controls=mainNav>☰ Menu</button>
@@ -311,7 +312,8 @@ footer{border-top:1px solid var(--line);padding:38px 0;margin-top:76px;
 <div class=hero id=top>
   <div class=embers id=embers aria-hidden=true></div>
   <div class=wrap>
-    <svg class=mark-lg aria-hidden=true><use href="#aitb-mark"/></svg>
+    <img class=mark-lg src="/assets/aitb-mark.png"
+      alt="AI Trailblazers logo — a flame rising from a trail" width=301 height=381>
     <span class=eyebrow>Community-powered AI</span>
     <h1>Every community, <span class=grad>equipped to thrive</span> in the AI economy</h1>
     <p class=lede>We run weekends that launch real ventures and graduate people fluent in
@@ -327,21 +329,32 @@ footer{border-top:1px solid var(--line);padding:38px 0;margin-top:76px;
       <a class="btn btn-ghost" href="#what-we-do">See what we do</a>
     </div>
 
-    <!-- Click-to-play. The iframe and YouTube's scripts load only when asked, so
-         arriving on this page contacts nobody. -->
+    <!-- The play control is a REAL link to YouTube that JavaScript upgrades into an
+         inline player. So it plays three ways, worst case first:
+           · scripts blocked, or the embed refused  -> the link opens YouTube
+           · scripts running                        -> it plays inline, right here
+         Nothing is contacted until someone clicks. That is why this is an <a> and not
+         a <button>: a button with no JS does nothing at all. -->
     <div class=video-wrap>
       <div class=video id=video>
         <img src="https://i.ytimg.com/vi/uNLiQLISEOo/maxresdefault.jpg"
           alt="Title card for the AI-Trailblazers Hack-AI-Thon In A Box video"
           width=1280 height=720>
-        <button class=play id=playBtn
+        <a class=play id=playBtn href="https://www.youtube.com/watch?v=uNLiQLISEOo"
+          rel="noopener noreferrer" target=_blank
           aria-label="Play the video: AI-Trailblazers, Hack-AI-Thon In A Box">
           <span class=ring>
             <svg viewBox="0 0 24 24" aria-hidden=true><path d="M8 5v14l11-7z"/></svg>
           </span>
-        </button>
+        </a>
         <div class=cap>Watch — AI-Trailblazers: Hack-AI-Thon In A Box</div>
       </div>
+      <!-- Always present, never hidden: if the embed is refused by a sandbox, an
+           extension, or a strict network, there is still a way to watch. -->
+      <p class=video-alt>
+        <a href="https://www.youtube.com/watch?v=uNLiQLISEOo" rel="noopener noreferrer"
+          target=_blank>Trouble playing? Watch on YouTube ↗</a>
+      </p>
     </div>
   </div>
 </div>
@@ -522,18 +535,27 @@ footer{border-top:1px solid var(--line);padding:38px 0;margin-top:76px;
       <p>Whether you have a Saturday, a skill, a room, or a budget — there is a door here
         for you.</p>
     </div>
+    <!-- Destinations are verified, not assumed. Only two real places exist today: the
+         planner at "/", and the AI Trailblazers site root. aitrailblazers.org is a
+         client-routed SPA whose sub-paths (/mentors, /sponsors …) all serve the same
+         shell — a made-up deep link would look fine and land nowhere. So anything
+         off-site points at the root, and anything about running an event points at the
+         planner, which genuinely does the job. -->
     <div class=involve>
-      <a class="inv reveal" id=apprenticeship href="/">
-        <span class=em aria-hidden=true>🎒</span><b>Participate</b>
+      <a class="inv reveal" id=apprenticeship href="https://aitrailblazers.org"
+        rel="noopener noreferrer" target=_blank>
+        <span class=em aria-hidden=true>🎒</span><b>Participate <span class=ext>↗</span></b>
         <span>Come build something for a local nonprofit. No experience required.</span></a>
-      <a class="inv reveal" id=mentors href="/">
-        <span class=em aria-hidden=true>🧭</span><b>Mentor or judge</b>
+      <a class="inv reveal" id=mentors href="https://aitrailblazers.org"
+        rel="noopener noreferrer" target=_blank>
+        <span class=em aria-hidden=true>🧭</span><b>Mentor or judge <span class=ext>↗</span></b>
         <span>Keep a team on track, or score final projects against the rubric.</span></a>
       <a class="inv reveal" id=chapters href="/">
         <span class=em aria-hidden=true>📍</span><b>Start a chapter</b>
-        <span>Run one in your city with the kit and our team behind you.</span></a>
-      <a class="inv reveal" id=sponsor href="/">
-        <span class=em aria-hidden=true>🤝</span><b>Sponsor</b>
+        <span>Run one in your city — the planner builds your whole timeline.</span></a>
+      <a class="inv reveal" id=sponsor href="https://aitrailblazers.org"
+        rel="noopener noreferrer" target=_blank>
+        <span class=em aria-hidden=true>🤝</span><b>Sponsor <span class=ext>↗</span></b>
         <span>Trailblazer, Champion and Presenting tiers — plus in-kind support.</span></a>
     </div>
   </div>
@@ -565,7 +587,7 @@ footer{border-top:1px solid var(--line);padding:38px 0;margin-top:76px;
 <footer>
   <div class="wrap foot">
     <a class=brand href="#top" style="text-decoration:none">
-      <svg class=mark aria-hidden=true><use href="#aitb-mark"/></svg>
+      <img class=mark src="/assets/aitb-mark.png" alt="" width=301 height=381>
       <span class=name>Ai<b>TRAILBLAZERS</b></span>
     </a>
     <span>Empowering communities with AI — from the bottom up.</span>
@@ -608,14 +630,20 @@ themeBtn.addEventListener('click', () => {
    tracking cookie until playback actually starts. */
 const VIDEO_ID = 'uNLiQLISEOo';
 const playBtn = document.getElementById('playBtn');
-playBtn.addEventListener('click', () => {
-  const box = document.getElementById('video');
-  const f = document.createElement('iframe');
-  f.src = `https://www.youtube-nocookie.com/embed/${VIDEO_ID}?autoplay=1&rel=0&modestbranding=1`;
-  f.title = 'AI Trailblazers';
-  f.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture';
-  f.allowFullscreen = true;
-  box.replaceChildren(f);
+playBtn.addEventListener('click', (e) => {
+  // Upgrade the plain YouTube link into an inline player. If anything here throws,
+  // we do NOT preventDefault, so the browser just follows the href and the video
+  // still plays — on YouTube instead of in place.
+  try {
+    const box = document.getElementById('video');
+    const f = document.createElement('iframe');
+    f.src = `https://www.youtube-nocookie.com/embed/${VIDEO_ID}?autoplay=1&rel=0&modestbranding=1`;
+    f.title = 'AI-Trailblazers: Hack-AI-Thon In A Box';
+    f.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture';
+    f.allowFullscreen = true;
+    box.replaceChildren(f);
+    e.preventDefault();
+  } catch (err) { /* let the link do its job */ }
 });
 
 /* Some uploads have no maxres thumbnail; fall back rather than showing a broken image. */

@@ -21,24 +21,56 @@ VIDEO_ID = "uNLiQLISEOo"
 
 class TestSelfContained(unittest.TestCase):
     def test_no_external_scripts_stylesheets_or_fonts(self):
-        for bad in ("<script src", "<link ", "@import", "fonts.googleapis", "cdn."):
+        for bad in ("<script src", "@import", "fonts.googleapis", "cdn."):
             self.assertNotIn(bad, PAGE, f"landing page pulls in {bad!r}")
 
+    def test_no_link_tag_points_off_site(self):
+        # A same-origin favicon is fine; a remote stylesheet or font is not. Checking the
+        # href rather than banning <link> outright, which also caught the favicon.
+        for m in re.finditer(r'<link [^>]*href="([^"]+)"', PAGE):
+            href = m.group(1)
+            self.assertTrue(href.startswith("/"),
+                            f"<link> loads something off-site: {href}")
+        self.assertNotIn("rel=stylesheet", PAGE.replace('rel="stylesheet"', "rel=stylesheet"))
+
     def test_only_csp_allowed_origins_are_loaded(self):
+        """CSP gates *subresources*, not navigation.
+
+        An `<a href>` to youtube.com or aitrailblazers.org is a link the user clicks —
+        `default-src` never sees it. What must be allow-listed is anything actually
+        fetched into the page: img src, and the iframe the play handler builds. Checking
+        every URL in the file conflated the two and failed on a plain link.
+        """
         csp = next(h["value"] for h in
                    json.loads((ROOT / "vercel.json").read_text())["headers"][0]["headers"]
                    if h["key"] == "Content-Security-Policy")
-        loaded = {m for m in re.findall(r"https?://[a-z0-9.\-]+", PAGE)}
-        for origin in loaded:
+
+        subresources = set(re.findall(r'(?:src|f\.src)\s*=\s*[`"\']?(https?://[a-z0-9.\-]+)',
+                                      PAGE))
+        self.assertTrue(subresources, "expected at least the thumbnail and the embed")
+        for origin in subresources:
             host = origin.split("//", 1)[1]
-            if host == "aitrailblazers.org":
-                continue  # a navigation link, not a subresource — CSP does not gate it
             self.assertIn(host, csp, f"{origin} is loaded but not allowed by the CSP")
 
-    def test_the_logo_is_inline_vector_not_a_binary(self):
-        # No image file to lose, no extra request, and it scales to any size.
-        self.assertIn('<symbol id=aitb-mark', PAGE)
-        self.assertIn('<use href="#aitb-mark"/>', PAGE)
+    def test_navigation_targets_are_https(self):
+        for href in re.findall(r'href="(http[^"]+)"', PAGE):
+            self.assertTrue(href.startswith("https://"), f"insecure link: {href}")
+
+    def test_uses_the_official_logo_asset(self):
+        # The real mark, cropped from the official logo, not a hand-drawn approximation.
+        self.assertIn('/assets/aitb-mark.png', PAGE)
+        for asset in ("aitb-mark.png", "aitb-logo.png"):
+            self.assertTrue((ROOT / "public" / "assets" / asset).is_file(),
+                            f"{asset} is referenced but missing from public/assets/")
+
+    def test_brand_colours_are_the_sampled_ones(self):
+        # Sampled from the official logo: red #AB150A, navy #09073B. Anything else —
+        # especially the orange/amber a generic "flame" palette reaches for — is off-brand.
+        self.assertIn("#ab150a", PAGE.lower())
+        self.assertIn("#09073b", PAGE.lower())
+        for off_brand in ("#ff6b35", "#ffb03a", "#e01b22", "255,176,58", "224,27,34"):
+            self.assertNotIn(off_brand, PAGE.lower(),
+                             f"{off_brand} is not an AI Trailblazers colour")
 
 
 class TestButtonsFunction(unittest.TestCase):
@@ -76,6 +108,23 @@ class TestHeroVideo(unittest.TestCase):
         # Arriving on the page must contact nobody. The iframe is built in the handler.
         self.assertNotIn("<iframe", PAGE, "an iframe is hard-coded; it should be click-built")
         self.assertIn("playBtn.addEventListener('click'", PAGE)
+
+    def test_the_play_control_is_a_real_link_not_a_dead_button(self):
+        # With scripts blocked a <button> does nothing at all. An <a> still plays the
+        # video — on YouTube. JS upgrades it to inline playback.
+        self.assertIn('<a class=play id=playBtn href="https://www.youtube.com/watch?v='
+                      + VIDEO_ID, PAGE)
+
+    def test_inline_upgrade_falls_through_on_failure(self):
+        # preventDefault happens only after the iframe is built, inside a try. If the
+        # embed cannot be created the browser follows the href instead.
+        js = PAGE.split("playBtn.addEventListener")[1].split("});")[0]
+        self.assertIn("try {", js)
+        self.assertLess(js.index("box.replaceChildren(f)"), js.index("e.preventDefault()"),
+                        "preventDefault must come after the embed succeeds, never before")
+
+    def test_a_visible_fallback_link_always_exists(self):
+        self.assertIn("Watch on YouTube", PAGE)
 
     def test_the_thumbnail_has_a_fallback(self):
         self.assertIn("maxresdefault", PAGE)
