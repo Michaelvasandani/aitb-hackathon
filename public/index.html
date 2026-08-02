@@ -4,7 +4,7 @@
 <meta charset=utf-8>
 <meta name=viewport content="width=device-width,initial-scale=1">
 <title>Hack-AI-Thon in a Box</title>
-<meta name=description content="Plan a hackathon in your city. Six questions at a time.">
+<meta name=description content="Type five things about your event and watch an AI research your city — real, sourced venues, sponsors, and mentors — then build your plan.">
 <style>
 :root{--bg:#fff;--fg:#14181f;--muted:#5b6472;--line:#e6e9ef;--card:#f7f8fa;
 --accent:#4f46e5;--accent-soft:#eef0ff;--hi:#0f8a4f;--hi-bg:#e6f6ec;
@@ -18,84 +18,40 @@ font:16px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Aria
 .wrap{max-width:820px;margin:0 auto;padding:28px 18px 80px}
 h1{font-size:1.6rem;margin:0 0 4px;letter-spacing:-.01em}
 .sub{color:var(--muted);margin:0 0 22px}
-ol.chunks{list-style:none;display:flex;gap:5px;padding:0;margin:0 0 26px;flex-wrap:wrap}
-ol.chunks li{flex:1 1 110px;padding:9px 11px;border-radius:9px;border:1px solid var(--line);
-background:var(--card);font-size:.8rem}
-ol.chunks li .n{font-size:.68rem;font-weight:700;text-transform:uppercase;
-letter-spacing:.05em;color:var(--muted)}
-ol.chunks li .t{font-weight:700;margin-top:2px}
-ol.chunks li.complete{border-color:var(--hi);background:var(--hi-bg)}
-ol.chunks li.complete .n,ol.chunks li.complete .t{color:var(--hi)}
-ol.chunks li.active{border-color:var(--accent);background:var(--accent-soft)}
-ol.chunks li.active .n,ol.chunks li.active .t{color:var(--accent)}
-ol.chunks li.locked{opacity:.55}
 .panel{border:1px solid var(--line);border-radius:14px;padding:20px;background:var(--card)}
 .panel h2{margin:0 0 3px;font-size:1.15rem}
 .panel .q{color:var(--muted);margin:0 0 18px;font-size:.95rem}
 .field{margin-bottom:15px}
 label{display:block;font-weight:600;font-size:.9rem;margin-bottom:5px}
-input[type=text],input[type=date],input[type=number],input[type=email]{
+.hint{font-weight:400;color:var(--muted);font-size:.82rem}
+input[type=text],input[type=date],input[type=number],select,textarea{
 width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:9px;
 background:var(--bg);color:var(--fg);font:inherit;font-size:.95rem}
-input:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
-.yn{display:flex;gap:8px}
-.yn button{flex:1;padding:10px;border:1px solid var(--line);border-radius:9px;
+textarea{min-height:74px;resize:vertical}
+input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-visible{
+outline:2px solid var(--accent);outline-offset:2px}
+.row{display:flex;gap:8px;flex-wrap:wrap}
+.seg{display:flex;gap:8px;margin-bottom:8px}
+.seg button{flex:1;padding:10px;border:1px solid var(--line);border-radius:9px;
 background:var(--bg);color:var(--fg);font:inherit;cursor:pointer}
-.yn button[aria-pressed=true]{border-color:var(--accent);background:var(--accent-soft);
+.seg button[aria-pressed=true]{border-color:var(--accent);background:var(--accent-soft);
 color:var(--accent);font-weight:700}
+.check{display:flex;align-items:center;gap:8px;font-weight:400;font-size:.9rem;
+color:var(--fg);margin-top:8px;cursor:pointer}
+.check input{width:auto}
 button.primary{width:100%;margin-top:6px;padding:13px;border:0;border-radius:10px;
 background:var(--accent);color:#fff;font:inherit;font-weight:700;font-size:1rem;cursor:pointer}
 button.primary:disabled{opacity:.45;cursor:not-allowed}
-button.ghost{padding:10px 14px;border:1px solid var(--line);border-radius:9px;
-background:var(--bg);color:var(--fg);font:inherit;cursor:pointer}
-section{margin-top:34px}
-h3{font-size:1.05rem;margin:0 0 12px;padding-bottom:6px;border-bottom:2px solid var(--line)}
-.sentence{background:var(--accent-soft);border-left:4px solid var(--accent);
-border-radius:8px;padding:13px 15px;margin-bottom:14px}
-.sentence .why{font-size:.82rem;color:var(--muted);margin-top:6px}
-.warnbox{background:var(--warn-bg);border:1px solid var(--warn);border-radius:9px;
-padding:11px 13px;margin-bottom:9px;color:var(--warn);font-size:.9rem}
-.blocking{border:2px solid var(--warn);background:var(--warn-bg);border-radius:9px;
-padding:13px 15px;margin-bottom:12px}
-.blocking b{color:var(--warn)}
-.gantt .row{display:flex;align-items:center;gap:10px;padding:6px 0;
-border-bottom:1px solid var(--line)}
-.gantt .nm{min-width:140px;font-weight:600;font-size:.85rem}
-.gantt .track{position:relative;flex:1;height:15px;background:var(--lock-bg);border-radius:4px}
-.gantt .bar{position:absolute;height:15px;background:var(--accent);border-radius:4px;opacity:.85}
-.gantt .bar.risk{background:var(--warn)}
-.gantt .dt{min-width:92px;text-align:right;color:var(--muted);font-size:.76rem}
-ul.tpl{list-style:none;padding:0;margin:0;display:grid;
-grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:9px}
-ul.tpl li{border:1px solid var(--line);border-radius:9px;padding:11px 13px;background:var(--card)}
-ul.tpl li.on{border-color:var(--hi)}
-ul.tpl li.off{background:var(--lock-bg);border-style:dashed}
-ul.tpl .tag{font-size:.66rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em}
-ul.tpl li.on .tag{color:var(--hi)}
-ul.tpl li.off .tag{color:var(--lock)}
-ul.tpl .nm{font-weight:700;font-size:.88rem;margin-top:2px}
-ul.tpl li.off .nm{color:var(--lock)}
-ul.tpl .why{font-size:.78rem;color:var(--muted);margin-top:3px}
-.actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:16px}
-.err{color:var(--warn);font-size:.88rem;margin-top:8px}
+.err{color:var(--warn);font-size:.9rem;margin-top:10px}
 .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
-.saved{margin:0 0 20px}
-.saved h4{margin:0 0 7px;font-size:.72rem;text-transform:uppercase;letter-spacing:.06em;
-color:var(--muted);font-weight:700}
-.chips{display:flex;gap:6px;flex-wrap:wrap}
-.chip{display:inline-flex;align-items:center;gap:6px;padding:5px 11px;border-radius:999px;
-border:1px solid var(--line);background:var(--card);color:var(--fg);font:inherit;
-font-size:.82rem;cursor:pointer}
-.chip:hover{border-color:var(--accent);color:var(--accent)}
-.chip .x{color:var(--muted);font-weight:700;padding:0 2px;border:0;background:none;
-cursor:pointer;font-size:.9rem}
-.chip .x:hover{color:var(--warn)}
-.star{border:1px solid var(--line);border-radius:9px;background:var(--bg);color:var(--fg);
-font:inherit;padding:10px 14px;cursor:pointer}
-.star[aria-pressed=true]{border-color:var(--accent);background:var(--accent-soft);
-color:var(--accent);font-weight:700}
-.leadsrc{font-size:.78rem;color:var(--muted);margin-top:-6px;margin-bottom:12px}
-.leadsrc.stale{color:var(--warn)}
+.run{margin-top:26px}
+.run .status{display:inline-flex;align-items:center;gap:9px;padding:11px 15px;
+border:1px solid var(--line);border-radius:10px;background:var(--card);
+font-size:.92rem;font-weight:600}
+.run .status .dot{width:9px;height:9px;border-radius:50%;background:var(--accent);
+animation:pulse 1.2s ease-in-out infinite}
+.run .note{color:var(--muted);font-size:.85rem;margin-top:10px}
+@keyframes pulse{0%,100%{opacity:.35}50%{opacity:1}}
 .watch{display:inline-flex;align-items:center;gap:8px;margin:2px 0 22px;padding:9px 15px;
 border:1px solid var(--line);border-radius:999px;background:var(--card);color:var(--fg);
 font:inherit;font-size:.88rem;font-weight:600;cursor:pointer}
@@ -111,40 +67,90 @@ background:transparent;border:0;cursor:pointer;width:100%;height:100%;padding:0}
 display:flex;align-items:center;justify-content:center;transition:transform .15s}
 .video .play:hover .ring{transform:scale(1.08);background:rgba(0,0,0,.7)}
 .video .play svg{width:22px;height:22px;fill:#fff;margin-left:3px}
-@media(max-width:560px){.gantt .dt{display:none}.gantt .nm{min-width:100px}}
 </style>
 </head>
 <body>
 <div class=wrap>
   <h1>Hack-AI-Thon in a Box</h1>
-  <p class=sub>Plan a hackathon in your city. Six questions at a time — never more.</p>
+  <p class=sub>Type five things about your event. An AI researches your city — real, sourced
+  venues, sponsors, and mentors — and builds your plan.</p>
 
   <div id=videoSlot></div>
 
-  <div id=savedSlot></div>
+  <div class=panel>
+    <h2>Tell us about your hackathon</h2>
+    <p class=q>Five questions plus your organization. Submit once, then watch it work.</p>
+    <form id=intake novalidate>
+      <div class=field>
+        <label for=org_name>Your organization</label>
+        <input type=text id=org_name autocomplete=organization
+          placeholder="e.g. Boise Public Library">
+      </div>
 
-  <ol class=chunks id=chunks aria-label="Progress"></ol>
+      <div class=field>
+        <label for=city>City <span class=hint>— City, ST</span></label>
+        <input type=text id=city required placeholder="e.g. Boise, ID">
+      </div>
 
-  <div class=panel id=panel>
-    <h2 id=chunkTitle>Loading…</h2>
-    <p class=q id=chunkQ></p>
-    <form id=form></form>
-    <button class=primary id=next>Next</button>
-    <div class=err id=err role=alert></div>
+      <div class=field>
+        <label>When?</label>
+        <div class=seg id=timingSeg>
+          <button type=button data-mode=date aria-pressed=false>I have a date</button>
+          <button type=button data-mode=window aria-pressed=true>Not sure yet</button>
+        </div>
+        <input type=date id=event_date style="display:none">
+        <input type=text id=date_window placeholder="Rough window, e.g. late October 2026">
+      </div>
+
+      <div class=field>
+        <label for=budget_usd>Budget (USD)</label>
+        <input type=number id=budget_usd min=0 step=100 placeholder="e.g. 500">
+        <label class=check for=budget_free>
+          <input type=checkbox id=budget_free> Free / $0 budget
+        </label>
+      </div>
+
+      <div class=field>
+        <label for=audience>Who is it for?</label>
+        <select id=audience>
+          <option value=anyone>Anyone — open to all</option>
+          <option value=non-technical selected>Non-technical folks</option>
+          <option value=technical>Technical / builders</option>
+          <option value=mixed>A mix</option>
+        </select>
+      </div>
+
+      <div class=field>
+        <label for=purpose>Why should someone give up a Saturday for this?</label>
+        <textarea id=purpose
+          placeholder="e.g. Help local nonprofits build practical AI tools they actually need."></textarea>
+      </div>
+
+      <div class=field>
+        <label for=anchor>Do you already know a local venue or partner to anchor it?</label>
+        <select id=anchor>
+          <option value=no selected>No — help me find one</option>
+          <option value=yes>Yes — I have a local anchor</option>
+        </select>
+      </div>
+
+      <button class=primary id=go type=submit>Generate my plan</button>
+      <div class=err id=err role=alert></div>
+    </form>
   </div>
 
-  <div id=out></div>
-  <p class=sub id=live aria-live=polite class=sr></p>
+  <div id=run class=run></div>
+  <p id=live aria-live=polite class=sr></p>
 </div>
 
-<script type="module">
-import * as core from './js/core.js';
-import { render as renderPlanHtml } from './js/render.js';
-import * as store from './js/store.js';
-
-let facts = {};
-let LEADS = {};
-let LEADS_META = {};
+<script>
+/* The live product is the agentic pipeline (ADR-0001): this form collects the five inputs
+   plus org name and the local-anchor question, POSTs them ONCE to /api/plan, and the server
+   streams the run back. The old deterministic-core UX (six chunks, gates, client-side
+   render) is set aside — public/js/*.js stay in the repo as legacy but are no longer on the
+   live path. Ticket #4 keeps the front-end minimal: submit, validate, and a "run started"
+   placeholder. The live activity log (ticket #5) and the plan render (ticket #6) build on
+   the stream reader below. */
 
 /* Set this after uploading the demo video to YouTube as UNLISTED (see docs/DEPLOY.md).
    The ID is the part after "v=" in the video's URL, e.g. "dQw4w9WgXcQ". Leave it empty
@@ -152,24 +158,28 @@ let LEADS_META = {};
    should never ship as if it were a real link. */
 const DEMO_VIDEO_ID = '';
 
+const el = (t, c, x) => { const n = document.createElement(t); if (c) n.className = c;
+  if (x !== undefined) n.textContent = x; return n; };
+const $ = (id) => document.getElementById(id);
+
 /* Click-to-embed, not autoload: the iframe (and YouTube's own JS) only loads once someone
    asks for it, so the landing page stays fast and nobody's visit pings YouTube by default.
    youtube-nocookie.com is the privacy-enhanced embed domain — no tracking cookie until
    playback actually starts. */
-function renderVideo(){
-  const slot = document.getElementById('videoSlot');
-  if(!DEMO_VIDEO_ID){ slot.innerHTML=''; return; }
+function renderVideo() {
+  const slot = $('videoSlot');
+  if (!DEMO_VIDEO_ID) { slot.innerHTML = ''; return; }
 
-  const btn = el('button','watch');
-  btn.type='button';
+  const btn = el('button', 'watch');
+  btn.type = 'button';
   btn.innerHTML = '<span class=dot></span> Watch the demo';
   btn.onclick = () => {
-    const box = el('div','video');
+    const box = el('div', 'video');
     const img = document.createElement('img');
     img.src = `https://i.ytimg.com/vi/${DEMO_VIDEO_ID}/hqdefault.jpg`;
     img.alt = ''; img.loading = 'lazy';
-    const play = el('button','play'); play.type='button';
-    play.setAttribute('aria-label','Play the demo video');
+    const play = el('button', 'play'); play.type = 'button';
+    play.setAttribute('aria-label', 'Play the demo video');
     play.innerHTML = '<span class=ring><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></span>';
     play.onclick = () => {
       const f = document.createElement('iframe');
@@ -185,328 +195,155 @@ function renderVideo(){
   slot.innerHTML = ''; slot.appendChild(btn);
 }
 
-/* The plan lives in the URL, not in a database. That keeps the architecture's promise:
-   no account, no server-side session, and a link an organizer can bookmark or send to a
-   colleague. It also means we never hold anyone's data. */
-function saveHash(){
-  const s = btoa(unescape(encodeURIComponent(JSON.stringify(facts))));
-  history.replaceState(null,'','#'+s);
+/* Date vs. rough window: the timeline counts back from a hard date, or works to a window
+   when the organizer has not committed. Only the chosen one is sent. */
+let timingMode = 'window';
+function setTiming(mode) {
+  timingMode = mode;
+  [...$('timingSeg').children].forEach((b) =>
+    b.setAttribute('aria-pressed', String(b.dataset.mode === mode)));
+  $('event_date').style.display = mode === 'date' ? '' : 'none';
+  $('date_window').style.display = mode === 'window' ? '' : 'none';
 }
-function loadHash(){
-  if(!location.hash) return {};
-  try{ return JSON.parse(decodeURIComponent(escape(atob(location.hash.slice(1))))); }
-  catch(e){ return {}; }
-}
-
-/* No API. Everything below runs in this tab: the deterministic core is core.js, ported
-   from core/*.py and held to it by tests/test_conformance.py. That makes the whole product
-   a static file — no server, no cold start, nothing to fail on demo day, and it hosts free
-   anywhere. */
-const citySlug = (c) => (c||'').split(',')[0].toLowerCase().replace(/[^a-z0-9-]/g,'');
-
-/* Three layers, in order, each optional:
-     1. bundled file  — instant, works offline, ships with the site
-     2. D1 cache      — cities researched since the last deploy (progressive enhancement)
-     3. nothing       — an honest empty state, plus a demand signal
-   The database is never on the critical path. If it is down, unconfigured, or the browser
-   is offline, this falls back to exactly the behaviour the static-only site had. */
-async function loadLeads(city){
-  const slug = citySlug(city);
-  LEADS_META = {};
-  if(!slug) return {};
-
-  try{
-    const r = await fetch(`./data/${slug}-leads.json`);
-    if(r.ok){
-      const j = await r.json();
-      LEADS_META = {source:'bundled', researched_at:j.researched_on || null};
-      return j.leads || {};
-    }
-  } catch(e){ /* offline or absent — fall through */ }
-
-  try{
-    const r = await fetch(`./api/leads/${slug}`);
-    if(r.ok){
-      const j = await r.json();
-      if(j.leads && Object.keys(j.leads).length){
-        LEADS_META = {source:j.source, researched_at:j.researched_at, stale:j.stale};
-        return j.leads;
-      }
-    }
-  } catch(e){ /* no functions deployed — fine, this layer is optional */ }
-
-  // Nobody has researched this city. Say so, and put it in the queue.
-  LEADS_META = {source:'none'};
-  recordDemand(city);
-  return {};
-}
-
-/* Fired only when a real organizer clears chunk 1 with a city we have nothing for — not on
-   page load, not per keystroke. A crawler is not demand. No identity is sent. */
-const demandSent = new Set();
-function recordDemand(city){
-  const slug = citySlug(city);
-  if(!slug || demandSent.has(slug)) return;
-  demandSent.add(slug);
-  fetch('./api/demand', {method:'POST', headers:{'Content-Type':'application/json'},
-    body: JSON.stringify({city})}).catch(()=>{});
-}
-
-const el = (t,c,x) => { const n=document.createElement(t); if(c)n.className=c;
-  if(x!==undefined)n.textContent=x; return n; };
-
-function inputFor(q){
-  const wrap = el('div','field');
-  const id = 'f_'+q.field;
-  const lab = el('label',null,q.prompt); lab.htmlFor = id; wrap.appendChild(lab);
-
-  if(q.type === 'bool'){
-    const box = el('div','yn'); box.id = id;
-    ['Yes','No'].forEach(v=>{
-      const b = el('button',null,v); b.type='button';
-      b.setAttribute('aria-pressed', String(facts[q.field] === (v==='Yes')));
-      b.onclick = () => { facts[q.field] = (v==='Yes');
-        [...box.children].forEach(c=>c.setAttribute('aria-pressed',String(c===b))); };
-      box.appendChild(b);
-    });
-    wrap.appendChild(box);
-  } else {
-    const i = document.createElement('input');
-    i.id = id; i.name = q.field;
-    i.type = q.type==='date' ? 'date' : q.type==='int' ? 'number' : 'text';
-    if(q.field === 'ORGANIZER_EMAIL') i.type = 'email';
-    if(q.type === 'int') i.min = '0';
-    if(facts[q.field] != null) i.value = facts[q.field];
-    i.oninput = () => {
-      const v = i.value.trim();
-      facts[q.field] = q.type==='int' ? (v===''?null:Number(v)) : v;
-    };
-    wrap.appendChild(i);
-  }
-  return wrap;
-}
-
-function renderChunks(progress){
-  const ol = document.getElementById('chunks'); ol.innerHTML='';
-  progress.states.forEach(s=>{
-    const li = el('li', s.state);
-    li.appendChild(el('div','n', s.n+' · '+(s.state==='active'?'you are here':s.state)));
-    li.appendChild(el('div','t', s.title));
-    ol.appendChild(li);
-  });
-}
-
-function renderSaved(){
-  const slot = document.getElementById('savedSlot'); slot.innerHTML='';
-  if(!store.available()) return;   // private mode: no strip rather than a broken one
-
-  const favs = store.favorites(), recs = store.recents();
-  if(!favs.length && !recs.length) return;
-
-  const box = el('div','saved');
-  if(favs.length){
-    box.appendChild(el('h4',null,'Saved plans'));
-    const row = el('div','chips');
-    favs.forEach(f=>{
-      const c = el('button','chip'); c.type='button';
-      c.appendChild(document.createTextNode('★ '+f.label));
-      const x = el('button','x','×'); x.type='button';
-      x.setAttribute('aria-label','Remove '+f.label);
-      x.onclick = (ev)=>{ ev.stopPropagation(); store.removeFavorite(f.hash); renderSaved(); };
-      c.onclick = ()=> open(f.hash);
-      c.appendChild(x); row.appendChild(c);
-    });
-    box.appendChild(row);
-  }
-  if(recs.length){
-    const h = el('h4',null,'Recent'); h.style.marginTop = favs.length ? '14px' : '0';
-    box.appendChild(h);
-    const row = el('div','chips');
-    recs.forEach(r=>{
-      const c = el('button','chip',r.city); c.type='button';
-      c.onclick = ()=> open(r.hash);
-      row.appendChild(c);
-    });
-    box.appendChild(row);
-  }
-  slot.appendChild(box);
-}
-
-/* Favorites are links, so opening one is just restoring the hash. */
-function open(hash){
-  if(!hash) return;
-  location.hash = hash.startsWith('#') ? hash.slice(1) : hash;
-  facts = loadHash();
-  refresh();
-}
-
-function renderPlan(st){
-  const out = document.getElementById('out'); out.innerHTML='';
-
-  (st.blocking_tasks||[]).forEach(t=>{
-    const d = el('div','blocking');
-    d.appendChild(el('b',null,t.title));
-    d.appendChild(el('div',null,t.why));
-    out.appendChild(d);
-  });
-
-  /* The payoff: four answers, and the whole dated timeline appears. */
-  if(st.timeline){
-    const s = el('section');
-    s.appendChild(el('h3',null,'Your timeline'));
-    if(st.risk_sentence) s.appendChild(el('div','sentence', st.risk_sentence));
-
-    const rows = st.timeline.timeline;
-    const t0 = new Date(rows[0].start_date), t1 = new Date(rows[rows.length-1].end_date);
-    const span = Math.max(1,(t1-t0)/864e5);
-    const risky = new Set((st.at_risk||[]).map(r=>r.phase));
-    const g = el('div','gantt');
-    rows.forEach(r=>{
-      const row = el('div','row');
-      row.appendChild(el('div','nm', r.phase.replace(/_/g,' ')));
-      const track = el('div','track');
-      const bar = el('div','bar'+(risky.has(r.phase)?' risk':''));
-      bar.style.left = ((new Date(r.start_date)-t0)/864e5/span*100).toFixed(1)+'%';
-      bar.style.width = Math.max(1.5,(new Date(r.end_date)-new Date(r.start_date))/864e5/span*100).toFixed(1)+'%';
-      track.appendChild(bar); row.appendChild(track);
-      row.appendChild(el('div','dt', r.start_date));
-      g.appendChild(row);
-    });
-    s.appendChild(g);
-    out.appendChild(s);
-  }
-
-  if((st.warnings||[]).length){
-    const s = el('section');
-    s.appendChild(el('h3',null,'What this plan is honest about'));
-    st.warnings.forEach(w=> s.appendChild(el('div','warnbox', w)));
-    out.appendChild(s);
-  }
-
-  const unlocked = st.templates.filter(t=>t.unlocked).length;
-  const s = el('section');
-  s.appendChild(el('h3',null,`Your templates — ${unlocked} of ${st.templates.length} unlocked`));
-  const ul = el('ul','tpl');
-  st.templates.forEach(t=>{
-    const li = el('li', t.unlocked?'on':'off');
-    li.appendChild(el('div','tag', t.unlocked?'Unlocked':'Locked'));
-    li.appendChild(el('div','nm', t.label));
-    if(!t.unlocked) li.appendChild(el('div','why', t.reason));
-    ul.appendChild(li);
-  });
-  s.appendChild(ul);
-  out.appendChild(s);
-
-  /* Where these leads came from, and whether they are old. A stale list is worse than an
-     empty one, because the organizer trusts it — so say it out loud. */
-  if(facts.CITY && LEADS_META.source){
-    const m = LEADS_META;
-    const line = el('div','leadsrc');
-    if(m.source==='none'){
-      line.textContent = 'No verified leads for this city yet — it has been added to the '
-        + 'research queue. Everything above still applies.';
-    } else if(m.stale){
-      line.className = 'leadsrc stale';
-      line.textContent = `Leads researched ${(m.researched_at||'').slice(0,10)} — over 120 `
-        + `days old. Re-verify before you contact anyone.`;
-    } else {
-      line.textContent = `Leads ${m.source==='bundled'?'bundled with this site':'from the '
-        + 'shared cache'}${m.researched_at? ', researched '+String(m.researched_at).slice(0,10):''}.`;
-    }
-    out.appendChild(line);
-  }
-
-  const acts = el('div','actions');
-  const dl = el('button','ghost','Download your plan');
-  dl.type='button'; dl.onclick = download;
-  acts.appendChild(dl);
-  const hash = location.hash;
-  const fav = el('button','star');
-  fav.type='button';
-  const syncFav = ()=>{
-    const on = store.isFavorite(hash);
-    fav.setAttribute('aria-pressed', String(on));
-    fav.textContent = on ? '★ Saved' : '☆ Save this plan';
-  };
-  fav.onclick = ()=>{
-    store.toggleFavorite({city: facts.CITY, hash, label: facts.CITY || facts.ORG_NAME});
-    syncFav(); renderSaved();
-  };
-  syncFav();
-  if(store.available()) acts.appendChild(fav);
-
-  const copy = el('button','ghost','Copy shareable link');
-  copy.type='button';
-  copy.onclick = () => navigator.clipboard.writeText(location.href)
-    .then(()=>{ copy.textContent='Link copied'; setTimeout(()=>copy.textContent='Copy shareable link',1600); });
-  acts.appendChild(copy);
-  out.appendChild(acts);
-}
-
-async function download(){
-  const html = renderPlanHtml(facts, {leads: LEADS});
-  const url = URL.createObjectURL(new Blob([html],{type:'text/html'}));
-  const a = document.createElement('a');
-  a.href=url; a.download='hackathon-plan.html'; a.click();
-  URL.revokeObjectURL(url);
-}
-
-async function refresh(){
-  const err = document.getElementById('err'); err.textContent='';
-  let st;
-  try{ st = core.state(facts); }
-  catch(e){ err.textContent = e.message; return; }
-
-  saveHash();
-  if(facts.CITY){
-    LEADS = await loadLeads(facts.CITY);
-    store.pushRecent(facts.CITY, location.hash);
-  }
-  renderSaved();
-  renderChunks(st.progress);
-
-  const active = st.progress.states.find(s=>s.state==='active');
-  const form = document.getElementById('form'); form.innerHTML='';
-  const nextBtn = document.getElementById('next');
-
-  if(!active){
-    document.getElementById('chunkTitle').textContent = 'Every gate has passed';
-    document.getElementById('chunkQ').textContent = 'Your plan is complete below.';
-    nextBtn.style.display='none';
-  } else {
-    document.getElementById('chunkTitle').textContent =
-      `Chunk ${active.n} — ${active.title}`;
-    document.getElementById('chunkQ').textContent = active.question;
-
-    /* Once the fields are in, the chunk stops collecting and starts confirming. Say so —
-       a hard gate answered "No" legitimately re-asks, and without this the organizer just
-       sees the same question again and assumes the tool is broken. */
-    if(st.next_action.kind === 'gate'){
-      const g = el('div','sentence');
-      g.appendChild(el('b',null,'Gate: '));
-      g.appendChild(document.createTextNode(st.next_action.gate_text));
-      g.appendChild(el('div','why', 'All of the next chunk stays locked until this is true. '
-        + 'Answering "No" is a real answer — it keeps you here on purpose.'));
-      form.appendChild(g);
-    }
-
-    const qs = core.nextQuestions(facts);
-    qs.forEach(q=> form.appendChild(inputFor(q)));
-    nextBtn.style.display = qs.length ? '' : 'none';
-  }
-
-  document.getElementById('live').textContent = st.next_action.say;
-  renderPlan(st);
-}
-
-document.getElementById('next').onclick = refresh;
-document.getElementById('form').addEventListener('keydown', e=>{
-  if(e.key==='Enter'){ e.preventDefault(); refresh(); }
+$('timingSeg').addEventListener('click', (e) => {
+  const b = e.target.closest('button[data-mode]');
+  if (b) setTiming(b.dataset.mode);
 });
 
+/* A $0 budget is a real answer, not a blank — the toggle sends budget_usd: 0 and takes the
+   number field out of play. */
+$('budget_free').addEventListener('change', () => {
+  $('budget_usd').disabled = $('budget_free').checked;
+});
+
+/* Collect the raw payload. Only include a field the organizer actually filled — cleanInputs
+   on the server treats an absent field and an empty one the same, and validates the rest. */
+function collectInputs() {
+  const inputs = {};
+  const org = $('org_name').value.trim(); if (org) inputs.org_name = org;
+  const city = $('city').value.trim(); if (city) inputs.city = city;
+
+  if (timingMode === 'date') {
+    if ($('event_date').value) inputs.event_date = $('event_date').value;
+  } else {
+    const w = $('date_window').value.trim(); if (w) inputs.date_window = w;
+  }
+
+  if ($('budget_free').checked) {
+    inputs.budget_usd = 0;
+  } else {
+    const b = $('budget_usd').value.trim();
+    if (b !== '') inputs.budget_usd = Number(b);
+  }
+
+  inputs.audience = $('audience').value;
+  const purpose = $('purpose').value.trim(); if (purpose) inputs.purpose = purpose;
+  inputs.has_local_anchor = $('anchor').value === 'yes';
+  return inputs;
+}
+
+/* Parse the Server-Sent-Events stream frame by frame, handing each decoded event to
+   `onEvent`. This is the seam ticket #5 builds the live activity log on. Event shapes:
+     { type:'stage',    stage, detail? }
+     { type:'complete', plan_json, plan_html }
+     { type:'error',    message } */
+async function readStream(res, onEvent) {
+  const reader = res.body.getReader();
+  const decoder = new TextDecoder();
+  let buf = '';
+  for (;;) {
+    const { value, done } = await reader.read();
+    if (done) break;
+    buf += decoder.decode(value, { stream: true });
+    let idx;
+    while ((idx = buf.indexOf('\n\n')) !== -1) {
+      const frame = buf.slice(0, idx);
+      buf = buf.slice(idx + 2);
+      const line = frame.split('\n').find((l) => l.startsWith('data: '));
+      if (!line) continue;
+      try { onEvent(JSON.parse(line.slice(6))); } catch (_) { /* ignore a partial frame */ }
+    }
+  }
+}
+
+function setStatus(text) {
+  const box = $('run');
+  box.innerHTML = '';
+  const s = el('div', 'status');
+  s.appendChild(el('span', 'dot'));
+  s.appendChild(document.createTextNode(text));
+  box.appendChild(s);
+  box.appendChild(el('div', 'note',
+    'Watching the run live. The full activity log and your finished plan land in a later update.'));
+  $('live').textContent = text;
+}
+
+async function generate(ev) {
+  ev.preventDefault(); // CSP sets form-action 'none'; we submit via fetch, never a navigation
+  const err = $('err');
+  err.textContent = '';
+  const inputs = collectInputs();
+
+  if (!inputs.city) { err.textContent = 'Please enter your city (City, ST).'; return; }
+
+  const go = $('go');
+  go.disabled = true;
+  go.textContent = 'Working…';
+  $('run').innerHTML = '';
+
+  let res;
+  try {
+    res = await fetch('./api/plan', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(inputs),
+    });
+  } catch (_) {
+    err.textContent = 'Could not reach the planner. Check your connection and try again.';
+    resetButton();
+    return;
+  }
+
+  if (!res.ok) {
+    let msg = 'That input was rejected — please check your answers and try again.';
+    if (res.status === 503) {
+      msg = 'The planner is offline right now. Please try again later.';
+    } else {
+      try { const j = await res.json(); if (j && j.message) msg = j.message; } catch (_) {}
+    }
+    err.textContent = msg;
+    resetButton();
+    return;
+  }
+
+  setStatus('Run started — normalizing your inputs…');
+  try {
+    await readStream(res, (event) => {
+      if (event.type === 'stage') {
+        setStatus('Working: ' + String(event.stage).replace(/_/g, ' '));
+      } else if (event.type === 'complete') {
+        setStatus('Your plan is ready. (Rendering it in the page arrives in a later update.)');
+      } else if (event.type === 'error') {
+        $('err').textContent = 'The run failed: ' + event.message;
+        $('run').innerHTML = '';
+      }
+    });
+  } catch (_) {
+    err.textContent = 'The run was interrupted. Please try again.';
+  }
+  resetButton();
+}
+
+function resetButton() {
+  const go = $('go');
+  go.disabled = false;
+  go.textContent = 'Generate my plan';
+}
+
+$('intake').addEventListener('submit', generate);
+
 renderVideo();
-facts = loadHash();
-refresh();
+setTiming('window');
 </script>
 </body>
 </html>

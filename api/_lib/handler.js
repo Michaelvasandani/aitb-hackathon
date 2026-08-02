@@ -14,6 +14,8 @@
 // { plan_json, plan_html }. The handler owns the terminal `complete` frame so the terminal
 // contract stays inside the tested seam.
 
+import { cleanInputs, BadRequest } from './clean-inputs.js';
+
 // The small, human-readable stage set the noisy SDK stream is mapped down to.
 // The front-end keys its activity log off exactly these names.
 export const STAGES = Object.freeze([
@@ -26,20 +28,6 @@ export const STAGES = Object.freeze([
   'assembling',
 ]);
 
-// Ticket #3 is a spike: one hardcoded input. Ticket #4 replaces this with
-// cleanInputs(req.body). A small city + tight scope keeps the verification run cheap.
-export const HARDCODED_INPUT = Object.freeze({
-  org_name: 'Boise Public Library',
-  city: 'Boise, ID',
-  event_date: null,
-  date_window: 'late October 2026',
-  budget_usd: 500,
-  audience: 'non-technical',
-  purpose:
-    'Introduce local nonprofit staff and small-business owners to practical, everyday AI tools.',
-  has_local_anchor: false,
-});
-
 export function createPlanHandler({ runPlan }) {
   return async function planHandler(req, res) {
     if (req.method !== 'POST') {
@@ -49,6 +37,18 @@ export function createPlanHandler({ runPlan }) {
     // Checked BEFORE the run so a disabled endpoint never costs tokens. Never logged.
     if (!process.env.ANTHROPIC_API_KEY) {
       return sendJson(res, 503, { error: 'endpoint_disabled' });
+    }
+
+    // Validate the body BEFORE opening the stream, so malformed input is a clean 400 JSON
+    // response and never costs a single token (spec user stories #23, #27).
+    let inputs;
+    try {
+      let raw = req.body;
+      if (typeof raw === 'string') raw = JSON.parse(raw);
+      inputs = cleanInputs(raw == null ? {} : raw);
+    } catch (err) {
+      const message = err instanceof BadRequest ? err.message : 'body must be valid JSON';
+      return sendJson(res, 400, { error: 'invalid_input', message });
     }
 
     res.statusCode = 200;
@@ -62,7 +62,6 @@ export function createPlanHandler({ runPlan }) {
     const emit = (stageEvent) => send({ type: 'stage', ...stageEvent });
 
     try {
-      const inputs = HARDCODED_INPUT;
       const { plan_json, plan_html } = await runPlan(inputs, emit);
       send({ type: 'complete', plan_json, plan_html });
     } catch (err) {

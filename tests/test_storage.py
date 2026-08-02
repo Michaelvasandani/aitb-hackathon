@@ -100,33 +100,23 @@ class TestSeeding(unittest.TestCase):
 
 
 class TestGracefulDegradation(unittest.TestCase):
-    """The page must work with no functions deployed at all."""
+    """The page must work with no functions deployed at all.
 
-    def test_bundled_leads_are_tried_before_the_network(self):
-        bundled = INDEX.index("./data/${slug}-leads.json")
-        cached = INDEX.index("./api/leads/${slug}")
-        self.assertLess(bundled, cached,
-                        "the bundled file must be tried first so the site works offline")
+    Retired (ADR-0001/0002): the live index.html no longer wires the deterministic-core
+    client features these guarded — the D1 lead-cache fallback (`./data/*-leads.json` →
+    `./api/leads/*`), the `./api/demand` signal, and the localStorage favorites strip.
+    ADR-0002 replaced the six-chunk form with a single intake form that POSTs to /api/plan
+    and streams the run back; the agent researches leads live, so the client-side cache and
+    demand queue are set aside with the core. Those modules (store.js / the Pages Functions)
+    still exist and are exercised directly by TestClientSide via scripts/test_client_js.mjs;
+    only their coupling to index.html is gone. The one property still true of the new
+    front-end — API calls stay relative so subpath hosting works — is kept below.
+    """
 
-    def test_every_api_call_has_a_catch(self):
-        # An unreachable function must not surface as a broken planner.
-        for call in ("./api/leads/", "./api/demand"):
-            idx = INDEX.index(call)
-            window = INDEX[idx:idx + 400]
-            self.assertIn("catch", window, f"{call} has no failure path")
-
-    def test_demand_is_not_fired_on_page_load(self):
-        # A crawler is not demand. It fires only from the no-leads branch.
-        self.assertIn("demandSent", INDEX)
-        self.assertIn("recordDemand(city)", INDEX)
-
-    def test_leads_still_fetched_relative_so_subpath_hosting_works(self):
-        # GitHub Pages serves a project repo under /<repo>/.
+    def test_api_calls_stay_relative_so_subpath_hosting_works(self):
+        # GitHub Pages serves a project repo under /<repo>/, so /api/plan must be relative.
         self.assertNotIn('fetch("/api', INDEX)
         self.assertNotIn("fetch('/api", INDEX)
-
-    def test_private_mode_hides_the_strip_rather_than_breaking(self):
-        self.assertIn("if(!store.available()) return;", INDEX)
 
 
 class TestNoNewNetworkOrigins(unittest.TestCase):

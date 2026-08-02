@@ -10,12 +10,30 @@
 
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { createPlanHandler, HARDCODED_INPUT, STAGES } from '../../api/_lib/handler.js';
+import { createPlanHandler, STAGES } from '../../api/_lib/handler.js';
+
+// The handler gates on the *presence* of ANTHROPIC_API_KEY (runPlan is faked, so its value
+// is never used). Pin a fake one here so the suite is deterministic regardless of the
+// developer's ambient env — a real key must not silently make these pass, nor its absence
+// make them fail. The 503 test manages this variable itself.
+process.env.ANTHROPIC_API_KEY = 'test-key-not-real';
 
 // ---- minimal req/res doubles (no live server) ---------------------------------------
 
-function mockReq(method = 'POST') {
-  return { method, headers: { 'content-type': 'application/json' } };
+// A valid raw body: cleanInputs (ticket #4) now runs before the stream, so a POST that
+// should reach the runner must carry a well-formed payload.
+const VALID_BODY = Object.freeze({
+  org_name: 'Boise Public Library',
+  city: 'Boise, ID',
+  date_window: 'late October 2026',
+  budget_usd: 500,
+  audience: 'non-technical',
+  purpose: 'Introduce local nonprofit staff to practical, everyday AI tools.',
+  has_local_anchor: false,
+});
+
+function mockReq(method = 'POST', body = { ...VALID_BODY }) {
+  return { method, headers: { 'content-type': 'application/json' }, body };
 }
 
 class MockRes {
@@ -102,11 +120,25 @@ test('the terminal event carries the data-contract top-level keys and a string p
   assert.equal(typeof terminal.plan_html, 'string');
 });
 
-test('the handler passes the hardcoded input to the runner (ticket #4 replaces with cleanInputs)', async () => {
+test('the handler passes the cleaned body inputs to the runner', async () => {
   const runner = fakeRunner([]);
   const handler = createPlanHandler({ runPlan: runner });
-  await handler(mockReq('POST'), new MockRes());
-  assert.deepEqual(runner.calledWith, HARDCODED_INPUT);
+  // Include an unknown key to prove the body is cleaned (dropped), not passed raw.
+  await handler(mockReq('POST', { ...VALID_BODY, DROP_TABLE: 1 }), new MockRes());
+  assert.deepEqual(runner.calledWith, { ...VALID_BODY });
+});
+
+test('invalid input is a 400 with no (paid) run, before the stream opens', async () => {
+  let called = false;
+  const handler = createPlanHandler({ runPlan: async () => { called = true; return {}; } });
+  const res = new MockRes();
+  await handler(mockReq('POST', { org_name: 'No City Provided' }), res); // city is required
+  assert.equal(res.statusCode, 400);
+  assert.equal(called, false);
+  assert.equal(res.headers['content-type'], 'application/json');
+  const body = JSON.parse(res.body);
+  assert.equal(body.error, 'invalid_input');
+  assert.equal(typeof body.message, 'string');
 });
 
 test('a non-POST method is rejected with 405 and no run', async () => {
