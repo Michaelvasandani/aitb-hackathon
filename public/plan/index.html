@@ -16,6 +16,11 @@ body{margin:0;background:var(--bg);color:var(--fg);
 font:16px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
 .wrap{max-width:960px;margin:0 auto;padding:28px 18px 80px}
 a{color:var(--accent)}
+.topnav{display:flex;gap:16px;flex-wrap:wrap;align-items:center;margin:0 0 18px;
+font-size:.88rem;font-weight:600}
+.topnav a{text-decoration:none}
+.topnav a:hover{text-decoration:underline}
+.topnav a[aria-current=page]{color:var(--muted);text-decoration:none;cursor:default}
 h1{font-size:1.4rem;margin:0 0 4px;letter-spacing:-.01em}
 .sub{color:var(--muted);margin:0 0 22px;font-size:.92rem}
 .grid{display:grid;gap:14px;grid-template-columns:repeat(auto-fill,minmax(240px,1fr))}
@@ -39,6 +44,11 @@ border-radius:9px;text-decoration:none;font-weight:700;font-size:.9rem}
 </head>
 <body>
 <div class=wrap>
+  <nav class=topnav aria-label="Site">
+    <a href="/">Planner</a>
+    <a href="/landing.html">AI Trailblazers</a>
+    <a href="/plan/" aria-current=page>Gallery</a>
+  </nav>
   <h1>Plan gallery</h1>
   <p class=sub>Real, sourced hackathon plans people have generated — newest first. Open any one to read it end-to-end.</p>
   <div id=view></div>
