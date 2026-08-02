@@ -17,9 +17,10 @@ import { randomUUID } from 'node:crypto';
 const HERE = path.dirname(fileURLToPath(import.meta.url)); // api/_lib
 export const REPO_ROOT = path.resolve(HERE, '..', '..'); // where .claude/skills lives
 
-// Sonnet 5: fast + cheap for a token-heavy research run (ADR-0001). Escalate to Opus only
-// if lead quality disappoints.
-export const DEFAULT_MODEL = 'claude-sonnet-5';
+// Haiku 4.5: fastest tier — chosen to keep a full fan-out research run inside the 300s
+// function ceiling (ADR-0001 timeout risk). Bump to 'claude-sonnet-5' (or 'claude-opus-4-8')
+// if lead quality disappoints and the run still finishes in time.
+export const DEFAULT_MODEL = 'claude-haiku-4-5-20251001';
 
 // ---- pure event mapping -------------------------------------------------------------
 
