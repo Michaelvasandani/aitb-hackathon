@@ -58,8 +58,12 @@ target sponsor is a door-opener).
 2. Then fan out **research-venue + research-sponsor + research-talent** concurrently (talent
    sources in parallel but holds its final overlap score until the sponsor list lands).
 3. Run **timeline** as soon as the date/runway is settled (independent of research).
-4. Run the **verification pass** (see below) after research returns.
-5. Dispatch **plan-assembly** last.
+4. Dispatch **plan-assembly** last.
+
+> The dedicated adversarial verification pass is **temporarily disabled** (it was the run-time
+> bottleneck). See `docs/decisions/0001-disable-verification-stage.md`. The sourced-or-omitted
+> guardrail still holds inside each research skill — leads without a real `source_url` are
+> dropped at source. To re-enable, restore step 4 above and the section below.
 
 ## Done-signals (completeness gates — lifted from planning-hack-ai-thon)
 
@@ -74,7 +78,14 @@ is thin" guardrail).
 | judges_mentors | 3 prospects you'd actually invite (capped at 3 for speed) |
 | date | a scored date or window above the lead-time floor |
 
-## Verification pass (adversarial — run before plan-assembly)
+## Verification pass (adversarial — DISABLED FOR NOW)
+
+> **Temporarily disabled** — this pass was the run-time bottleneck (a second web-fetch round
+> per lead that pushed runs toward the function timeout). It is skipped until re-enabled.
+> See `docs/decisions/0001-disable-verification-stage.md`. The sourced-or-omitted guardrail
+> in each research skill still protects against invented leads; what's lost for now is the
+> independent re-check / confidence downgrade. **To restore:** re-add step 4 in the fan-out
+> above and treat the paragraph below as active again.
 
 For each lead, independently check the source URL actually backs the claim and the org/person
 is real and in the target city. Drop or downgrade `confidence`. One skeptical check per lead

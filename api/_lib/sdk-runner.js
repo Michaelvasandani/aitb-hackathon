@@ -3,8 +3,8 @@
 // its test seam never touch the SDK.
 //
 // runPlan drives the JS `@anthropic-ai/claude-agent-sdk` against the repo's `.claude/skills/`
-// (settingSources: ['project']), runs the full pipeline (orchestrator -> intake -> research
-// fan-out -> verification -> timeline -> plan-assembly), maps the noisy message stream down
+// (settingSources: ['project']), runs the pipeline (orchestrator -> intake -> research
+// fan-out -> timeline -> plan-assembly), maps the noisy message stream down
 // to the small STAGES set via `emit`, and returns the assembled { plan_json, plan_html } read
 // back from the files the plan-assembly skill wrote.
 
@@ -27,6 +27,9 @@ export const DEFAULT_MODEL = 'claude-sonnet-5';
 
 // Ordered longest-intent-first: a "verify the venues" task is verification, not venue
 // research, so `verif` must be tested before `venue`.
+// NOTE: the dedicated verification pass is currently disabled (see
+// docs/decisions/0001-disable-verification-stage.md), so the 'verifying' stage is inert
+// plumbing — kept so the STAGES contract and restore path stay intact; it just won't fire.
 const STAGE_PATTERNS = [
   [/\bverif/, 'verifying'],
   [/\bintake\b|clarif/, 'intake'],
@@ -94,9 +97,11 @@ function buildPrompt(inputs, jsonPath, htmlPath) {
     '   specialist, sent together) so they run concurrently. Use web search for every lead.',
     '   Every lead MUST carry a real, working `source_url`; OMIT any lead you cannot source.',
     '   Keep each list SHORT — EXACTLY 3 well-sourced leads per category (the skills cap at 3).',
-    '3. Run the adversarial verification pass on the leads (drop/downgrade confidence).',
-    '4. Build the timeline counting back from the event window (timeline).',
-    '5. Assemble the final plan (plan-assembly) as ONE self-contained HTML file.',
+    '   (The separate adversarial verification pass is DISABLED for now — it was the run-time',
+    '   bottleneck; see docs/decisions/0001-disable-verification-stage.md. Sourced-or-omitted',
+    '   still holds: only include a lead if you have a real source_url for it.)',
+    '3. Build the timeline counting back from the event window (timeline).',
+    '4. Assemble the final plan (plan-assembly) as ONE self-contained HTML file.',
     '',
     'Write outputs to EXACTLY these paths (do not choose your own):',
     `- structured plan (plan.json): ${jsonPath}`,
