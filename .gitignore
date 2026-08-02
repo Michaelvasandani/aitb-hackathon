@@ -18,3 +18,8 @@ plan.html
 
 # Node
 node_modules/
+
+# Secrets / local env — never commit API keys
+.env
+.env.*
+!.env.example
