@@ -87,6 +87,36 @@ tenants.
 
 ---
 
+## Demo video on the landing page
+
+`public/index.html` has a "Watch the demo" pill under the title that expands into an
+embedded video on click — the iframe (and YouTube's own JS) doesn't load until someone
+actually clicks, so it costs the landing page nothing by default.
+
+**To wire it up:**
+
+1. Upload `HACKATHON VID DEMO 1.mov` to YouTube as **Unlisted** (not Private, not Public —
+   Unlisted means anyone with the link can watch, but it won't appear in search or on your
+   channel). YouTube transcodes it server-side, which also solves compressing the raw
+   320MB source — nothing to do on your end.
+2. Copy the video ID from the URL: `youtube.com/watch?v=`**`abc123XYZ`** → `abc123XYZ`.
+3. In `public/index.html`, set `const DEMO_VIDEO_ID = 'abc123XYZ';` (search for
+   `DEMO_VIDEO_ID`). Leave it as `''` and the section renders nothing — an unset
+   placeholder should never ship as if it were a real link.
+
+That's the only edit needed. The CSP in `vercel.json` already allow-lists exactly two
+origins for this: `frame-src https://www.youtube-nocookie.com` (the embed itself, using
+YouTube's cookie-free domain) and `img-src ... https://i.ytimg.com` (the thumbnail). Nothing
+broader was opened.
+
+**Why not embed it straight from Drive** — the option this replaced: Drive's preview isn't
+built for production traffic (it rate-limits and throws "too many views" once a file gets
+real traffic), requires "anyone with the link" sharing you don't control, has no adaptive
+bitrate, and Google can change embed behavior without notice. YouTube unlisted gets you
+free transcoding and a stable embed for the same one-link-sharing tradeoff.
+
+---
+
 ## Netlify
 
 **Netlify Functions run JavaScript, TypeScript, and Go. There is no Python runtime.** So

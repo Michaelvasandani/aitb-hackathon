@@ -79,6 +79,21 @@ ul.tpl .why{font-size:.78rem;color:var(--muted);margin-top:3px}
 .actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:16px}
 .err{color:var(--warn);font-size:.88rem;margin-top:8px}
 .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+.watch{display:inline-flex;align-items:center;gap:8px;margin:2px 0 22px;padding:9px 15px;
+border:1px solid var(--line);border-radius:999px;background:var(--card);color:var(--fg);
+font:inherit;font-size:.88rem;font-weight:600;cursor:pointer}
+.watch:hover{border-color:var(--accent);color:var(--accent)}
+.watch .dot{width:9px;height:9px;border-radius:50%;background:var(--accent)}
+.video{position:relative;width:100%;aspect-ratio:16/9;border-radius:12px;overflow:hidden;
+background:#000;margin:2px 0 22px;border:1px solid var(--line)}
+.video img{width:100%;height:100%;object-fit:cover;display:block;opacity:.75}
+.video iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+.video .play{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+background:transparent;border:0;cursor:pointer;width:100%;height:100%;padding:0}
+.video .play .ring{width:64px;height:64px;border-radius:50%;background:rgba(0,0,0,.55);
+display:flex;align-items:center;justify-content:center;transition:transform .15s}
+.video .play:hover .ring{transform:scale(1.08);background:rgba(0,0,0,.7)}
+.video .play svg{width:22px;height:22px;fill:#fff;margin-left:3px}
 @media(max-width:560px){.gantt .dt{display:none}.gantt .nm{min-width:100px}}
 </style>
 </head>
@@ -86,6 +101,8 @@ ul.tpl .why{font-size:.78rem;color:var(--muted);margin-top:3px}
 <div class=wrap>
   <h1>Hack-AI-Thon in a Box</h1>
   <p class=sub>Plan a hackathon in your city. Six questions at a time — never more.</p>
+
+  <div id=videoSlot></div>
 
   <ol class=chunks id=chunks aria-label="Progress"></ol>
 
@@ -104,6 +121,45 @@ ul.tpl .why{font-size:.78rem;color:var(--muted);margin-top:3px}
 <script>
 const API = location.origin;
 let facts = {};
+
+/* Set this after uploading the demo video to YouTube as UNLISTED (see docs/DEPLOY.md).
+   The ID is the part after "v=" in the video's URL, e.g. "dQw4w9WgXcQ". Leave it empty
+   and the section renders nothing rather than a broken player — an unset placeholder
+   should never ship as if it were a real link. */
+const DEMO_VIDEO_ID = '';
+
+/* Click-to-embed, not autoload: the iframe (and YouTube's own JS) only loads once someone
+   asks for it, so the landing page stays fast and nobody's visit pings YouTube by default.
+   youtube-nocookie.com is the privacy-enhanced embed domain — no tracking cookie until
+   playback actually starts. */
+function renderVideo(){
+  const slot = document.getElementById('videoSlot');
+  if(!DEMO_VIDEO_ID){ slot.innerHTML=''; return; }
+
+  const btn = el('button','watch');
+  btn.type='button';
+  btn.innerHTML = '<span class=dot></span> Watch the demo';
+  btn.onclick = () => {
+    const box = el('div','video');
+    const img = document.createElement('img');
+    img.src = `https://i.ytimg.com/vi/${DEMO_VIDEO_ID}/hqdefault.jpg`;
+    img.alt = ''; img.loading = 'lazy';
+    const play = el('button','play'); play.type='button';
+    play.setAttribute('aria-label','Play the demo video');
+    play.innerHTML = '<span class=ring><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></span>';
+    play.onclick = () => {
+      const f = document.createElement('iframe');
+      f.src = `https://www.youtube-nocookie.com/embed/${DEMO_VIDEO_ID}?autoplay=1&rel=0`;
+      f.title = 'Hack-AI-Thon in a Box — demo';
+      f.allow = 'accelerometer; autoplay; encrypted-media; picture-in-picture';
+      f.allowFullscreen = true;
+      box.innerHTML = ''; box.appendChild(f);
+    };
+    box.appendChild(img); box.appendChild(play);
+    slot.innerHTML = ''; slot.appendChild(box);
+  };
+  slot.innerHTML = ''; slot.appendChild(btn);
+}
 
 /* The plan lives in the URL, not in a database. That keeps the architecture's promise:
    no account, no server-side session, and a link an organizer can bookmark or send to a
@@ -295,6 +351,7 @@ document.getElementById('form').addEventListener('keydown', e=>{
   if(e.key==='Enter'){ e.preventDefault(); refresh(); }
 });
 
+renderVideo();
 facts = loadHash();
 refresh();
 </script>

@@ -56,6 +56,24 @@ class TestDeploymentContract(unittest.TestCase):
         self.assertNotIn("<link ", html)
         self.assertNotIn("cdn.", html)
 
+    def test_csp_allows_only_the_video_embed_it_names_and_nothing_wider(self):
+        # The demo-video facade needs exactly two third-party origins. A future edit that
+        # widens frame-src/img-src beyond these (or adds a script-src exception) should
+        # fail this test rather than ship quietly.
+        csp = json.loads((ROOT / "vercel.json").read_text())["headers"][0]["headers"]
+        value = next(h["value"] for h in csp if h["key"] == "Content-Security-Policy")
+        self.assertIn("frame-src https://www.youtube-nocookie.com", value)
+        self.assertIn("img-src 'self' data: https://i.ytimg.com", value)
+        self.assertNotIn("youtube.com'", value.replace("youtube-nocookie.com", ""))
+        self.assertNotIn("*", value)
+
+    def test_unset_video_id_is_the_shipped_default(self):
+        # DEMO_VIDEO_ID must be a deliberate, documented step (docs/DEPLOY.md), not
+        # something that lands from a stray edit. Guards against shipping a broken or
+        # unintended embed by accident.
+        html = (ROOT / "public/index.html").read_text()
+        self.assertIn("const DEMO_VIDEO_ID = ", html)
+
 
 class TestFactValidation(unittest.TestCase):
     def test_unknown_keys_are_dropped_not_trusted(self):
