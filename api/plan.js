@@ -12,6 +12,9 @@ import { runPlan } from './_lib/sdk-runner.js';
 export default createPlanHandler({ runPlan });
 
 // A single request can run for minutes (research fan-out + assembly), so give the function
-// the full 300s ceiling (ADR-0001). Also declared in vercel.json; kept here so the limit
-// travels with the function. Fluid Compute streams res.write() frames without buffering.
-export const config = { maxDuration: 300 };
+// the full 800s Vercel Pro/Fluid ceiling. Runs were dropping mid-research at the 300s
+// default (see the 800s bump in vercel.json), and sdk-runner.js's choice of Sonnet over
+// Haiku assumes this headroom. MUST stay equal to vercel.json's functions."api/plan.js"
+// .maxDuration — tests/test_api.py::test_plan_maxduration_agrees_with_vercel_json is the
+// guard. Fluid Compute streams res.write() frames without buffering.
+export const config = { maxDuration: 800 };

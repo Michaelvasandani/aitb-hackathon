@@ -1,0 +1,689 @@
+<!doctype html>
+<html lang=en>
+<head>
+<meta charset=utf-8>
+<meta name=viewport content="width=device-width,initial-scale=1">
+<title>AI Trailblazers — Every community, equipped to thrive in the AI economy</title>
+<meta name=description content="AI Trailblazers empowers communities to use AI and build wealth from the bottom up. No technical prerequisite. Hackathons, apprenticeships, and a kit any city can pick up.">
+<meta name=theme-color content="#09073b">
+<link rel=icon type="image/png" href="/assets/aitb-logo.png">
+<link rel=apple-touch-icon href="/assets/aitb-logo.png">
+<meta property="og:title" content="AI Trailblazers">
+<meta property="og:description" content="Every community, equipped to thrive in the AI economy. No technical prerequisite. No one left behind.">
+<meta property="og:image" content="/assets/aitb-logo.png">
+<meta property="og:type" content="website">
+<style>
+/* ─────────────────────────────────────────────────────────────────────────────
+   AI Trailblazers — landing page.
+
+   Self-contained by design: no external fonts, stylesheets, scripts, or images.
+   The only third-party request on the whole page is the YouTube embed, and that
+   loads on click, not on arrival. Palette is pulled from the logo — flame red on
+   deep navy — and the "trail" motif runs through the page as a recurring gradient.
+   ───────────────────────────────────────────────────────────────────────────── */
+
+/* Brand colours sampled directly from the official logo asset
+   (aitrailblazers.org/assets/images/aitb-logo.png): the mark uses exactly two —
+   red #AB150A and navy #09073B. Everything below is those two, tinted and shaded.
+   No orange, amber or gold: they are not AI Trailblazers colours. */
+:root{
+  --flame:#ab150a;          /* brand red, sampled */
+  --flame-2:#d4210f;        /* lighter red — hover, glow, gradient end */
+  --flame-3:#7a0f07;        /* deeper red — gradient start */
+  --navy:#09073b;           /* brand navy, sampled */
+  --navy-2:#05041f;         /* deeper navy for hero/footer grounds */
+  --bg:#ffffff; --fg:#0f0e28; --muted:#565a7a; --line:#e4e4ee;
+  --card:#f7f7fb; --card-2:#ffffff;
+  --hero-fg:#f4f4fa; --hero-muted:#a6a8c6;
+  --radius:16px;
+  --trail:linear-gradient(90deg,var(--flame-3) 0%,var(--flame) 52%,var(--flame-2) 100%);
+}
+@media(prefers-color-scheme:dark){
+  :root{
+    --bg:#07061f; --fg:#ececf6; --muted:#9698ba; --line:#211f4c;
+    --card:#100d38; --card-2:#0b0a2b;
+  }
+}
+:root[data-theme=dark]{
+  --bg:#07061f; --fg:#ececf6; --muted:#9698ba; --line:#211f4c;
+  --card:#100d38; --card-2:#0b0a2b; color-scheme:dark;
+}
+:root[data-theme=light]{
+  --bg:#ffffff; --fg:#0f0e28; --muted:#565a7a; --line:#e4e4ee;
+  --card:#f7f7fb; --card-2:#ffffff; color-scheme:light;
+}
+
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--fg);
+  font:16px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  -webkit-font-smoothing:antialiased}
+img,svg{max-width:100%}
+a{color:inherit}
+h1,h2,h3{line-height:1.15;letter-spacing:-.02em;margin:0}
+p{margin:0}
+
+.wrap{max-width:1080px;margin:0 auto;padding:0 20px}
+.skip{position:absolute;left:-9999px;top:0;background:var(--flame);color:#fff;
+  padding:10px 16px;border-radius:0 0 10px 0;z-index:100;font-weight:700}
+.skip:focus{left:0}
+:focus-visible{outline:3px solid var(--flame-2);outline-offset:3px;border-radius:4px}
+
+/* ── header ──────────────────────────────────────────────────────────────── */
+header.top{position:sticky;top:0;z-index:50;background:color-mix(in srgb,var(--bg) 88%,transparent);
+  backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
+.topbar{display:flex;align-items:center;gap:18px;padding:12px 0}
+.brand{display:flex;align-items:center;gap:11px;text-decoration:none;font-weight:800;
+  letter-spacing:-.02em;flex:none}
+.brand .mark{width:28px;height:35px;flex:none;object-fit:contain}
+.brand .name{font-size:1rem;line-height:1.05}
+.brand .name b{display:block;color:var(--flame)}
+nav.main{margin-left:auto;display:flex;gap:4px;align-items:center}
+nav.main a{padding:9px 13px;border-radius:9px;text-decoration:none;font-size:.92rem;
+  font-weight:600;color:var(--muted)}
+nav.main a:hover{color:var(--fg);background:var(--card)}
+.nav-cta{background:var(--trail);color:#fff!important;padding:10px 17px!important;
+  border-radius:999px!important;font-weight:800!important}
+.nav-cta:hover{filter:brightness(1.08)}
+.menu-btn{display:none;margin-left:auto;background:none;border:1px solid var(--line);
+  border-radius:9px;padding:9px 11px;cursor:pointer;color:var(--fg);font:inherit}
+.theme-btn{background:none;border:1px solid var(--line);border-radius:9px;padding:8px 10px;
+  cursor:pointer;color:var(--muted);font:inherit;font-size:.85rem}
+.theme-btn:hover{color:var(--fg)}
+@media(max-width:860px){
+  nav.main{position:fixed;inset:57px 0 auto 0;flex-direction:column;align-items:stretch;
+    background:var(--bg);border-bottom:1px solid var(--line);padding:10px 16px 18px;
+    gap:2px;display:none;box-shadow:0 20px 40px rgba(0,0,0,.16)}
+  nav.main.open{display:flex}
+  nav.main a{padding:13px}
+  .menu-btn{display:block}
+}
+
+/* ── hero ────────────────────────────────────────────────────────────────── */
+.hero{position:relative;overflow:hidden;background:
+  radial-gradient(1100px 520px at 50% -12%,rgba(171,21,10,.30),transparent 62%),
+  radial-gradient(760px 420px at 88% 8%,rgba(212,33,15,.16),transparent 60%),
+  linear-gradient(180deg,var(--navy) 0%,var(--navy-2) 100%);
+  color:var(--hero-fg);padding:74px 0 68px;text-align:center}
+.hero .mark-lg{width:101px;height:128px;margin:0 auto 22px;display:block;
+  filter:drop-shadow(0 10px 32px rgba(171,21,10,.5))}
+.eyebrow{display:inline-flex;align-items:center;gap:8px;font-size:.76rem;font-weight:800;
+  letter-spacing:.16em;text-transform:uppercase;color:var(--flame-2);
+  border:1px solid rgba(212,33,15,.42);border-radius:999px;padding:6px 15px;margin-bottom:20px}
+.hero h1{font-size:clamp(2.1rem,6vw,3.9rem);font-weight:800;max-width:16ch;margin:0 auto}
+.hero h1 .grad{background:var(--trail);-webkit-background-clip:text;background-clip:text;
+  -webkit-text-fill-color:transparent;color:transparent}
+.hero .lede{color:var(--hero-muted);font-size:clamp(1rem,2.4vw,1.2rem);max-width:62ch;
+  margin:20px auto 0}
+.hero-cta{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:30px}
+.btn{display:inline-flex;align-items:center;gap:9px;padding:14px 26px;border-radius:999px;
+  font-weight:800;font-size:1rem;text-decoration:none;border:1px solid transparent;
+  cursor:pointer;font-family:inherit;transition:transform .14s,filter .14s}
+.btn:hover{transform:translateY(-2px)}
+.btn-primary{background:var(--trail);color:#fff;box-shadow:0 10px 26px rgba(171,21,10,.36)}
+.btn-primary:hover{filter:brightness(1.08)}
+.btn-ghost{background:rgba(255,255,255,.07);color:var(--hero-fg);
+  border-color:rgba(255,255,255,.24);backdrop-filter:blur(6px)}
+.btn-ghost:hover{background:rgba(255,255,255,.13)}
+
+/* embers — decorative only, disabled under reduced motion */
+.embers{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+.ember{position:absolute;bottom:-14px;width:5px;height:5px;border-radius:50%;
+  background:var(--flame-2);opacity:0;animation:rise linear infinite}
+@keyframes rise{
+  0%{opacity:0;transform:translateY(0) scale(.5)}
+  12%{opacity:.85}
+  100%{opacity:0;transform:translateY(-560px) scale(1.15)}
+}
+
+/* ── video ───────────────────────────────────────────────────────────────── */
+.video-wrap{max-width:880px;margin:44px auto 0}
+.video{position:relative;aspect-ratio:16/9;border-radius:var(--radius);overflow:hidden;
+  background:#000;border:1px solid rgba(255,255,255,.16);
+  box-shadow:0 26px 70px rgba(0,0,0,.5)}
+.video img{width:100%;height:100%;object-fit:cover;display:block;opacity:.82}
+.video iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+.video .play{position:absolute;inset:0;width:100%;height:100%;display:flex;
+  align-items:center;justify-content:center;background:transparent;border:0;cursor:pointer;
+  padding:0;color:#fff}
+.video .ring{width:82px;height:82px;border-radius:50%;background:var(--trail);
+  display:flex;align-items:center;justify-content:center;
+  box-shadow:0 10px 34px rgba(171,21,10,.55);transition:transform .16s}
+.video .play:hover .ring{transform:scale(1.09)}
+.video .ring svg{width:30px;height:30px;fill:#fff;margin-left:5px}
+.video-alt{text-align:center;margin-top:12px;font-size:.86rem}
+.video-alt a{color:var(--hero-muted);text-decoration:underline;text-underline-offset:3px}
+.video-alt a:hover{color:var(--hero-fg)}
+.video .cap{position:absolute;left:0;right:0;bottom:0;padding:36px 20px 15px;
+  background:linear-gradient(transparent,rgba(0,0,0,.82));font-weight:700;font-size:.92rem;
+  text-align:left;pointer-events:none}
+
+/* ── sections ────────────────────────────────────────────────────────────── */
+section{padding:76px 0}
+.sec-head{max-width:66ch;margin-bottom:38px}
+.kicker{display:block;font-size:.76rem;font-weight:800;letter-spacing:.16em;
+  text-transform:uppercase;color:var(--flame);margin-bottom:11px}
+.sec-head h2{font-size:clamp(1.6rem,3.6vw,2.5rem);font-weight:800}
+.sec-head p{color:var(--muted);margin-top:14px;font-size:1.06rem}
+
+/* stats */
+.stats{background:var(--card);border-top:1px solid var(--line);
+  border-bottom:1px solid var(--line);padding:34px 0}
+.stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:22px;
+  text-align:center}
+.stat .n{font-size:clamp(1.8rem,4.4vw,2.7rem);font-weight:800;
+  background:var(--trail);-webkit-background-clip:text;background-clip:text;
+  -webkit-text-fill-color:transparent;color:transparent;line-height:1}
+.stat .l{color:var(--muted);font-size:.88rem;margin-top:7px;font-weight:600}
+
+/* feature cards */
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(290px,1fr));gap:18px}
+.card{position:relative;background:var(--card-2);border:1px solid var(--line);
+  border-radius:var(--radius);padding:26px;text-decoration:none;color:inherit;display:flex;
+  flex-direction:column;overflow:hidden;transition:transform .18s,border-color .18s,box-shadow .18s}
+.card::before{content:"";position:absolute;inset:0 0 auto 0;height:4px;background:var(--trail);
+  transform:scaleX(0);transform-origin:left;transition:transform .3s}
+.card:hover{transform:translateY(-5px);border-color:transparent;
+  box-shadow:0 18px 44px rgba(19,26,74,.16)}
+.card:hover::before{transform:scaleX(1)}
+.card .ico{width:46px;height:46px;border-radius:12px;background:rgba(171,21,10,.11);
+  display:flex;align-items:center;justify-content:center;margin-bottom:16px;flex:none}
+.card .ico svg{width:23px;height:23px;stroke:var(--flame);fill:none;stroke-width:2;
+  stroke-linecap:round;stroke-linejoin:round}
+.card h3{font-size:1.16rem;font-weight:800;margin-bottom:8px}
+.card p{color:var(--muted);font-size:.94rem;flex:1}
+.card .go{margin-top:16px;font-weight:800;font-size:.9rem;color:var(--flame);
+  display:inline-flex;align-items:center;gap:7px}
+.card:hover .go{gap:11px}
+.card .go span{transition:transform .18s}
+
+/* values */
+.values{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px}
+.value{padding:24px;border-radius:var(--radius);background:var(--card);
+  border-left:4px solid var(--flame)}
+.value h3{font-size:1.05rem;font-weight:800;margin-bottom:8px}
+.value p{color:var(--muted);font-size:.93rem}
+
+/* mission band */
+.mission{background:linear-gradient(135deg,var(--navy) 0%,var(--navy-2) 100%);
+  color:var(--hero-fg);border-radius:22px;padding:clamp(32px,5vw,58px);position:relative;
+  overflow:hidden}
+.mission::after{content:"";position:absolute;right:-70px;top:-70px;width:280px;height:280px;
+  border-radius:50%;background:radial-gradient(circle,rgba(171,21,10,.42),transparent 68%)}
+.mission .kicker{color:var(--flame-2)}
+.mission h2{font-size:clamp(1.5rem,3.4vw,2.2rem);font-weight:800;max-width:22ch;position:relative}
+.mission blockquote{margin:24px 0 0;font-size:clamp(1.05rem,2.3vw,1.32rem);line-height:1.55;
+  color:var(--hero-fg);max-width:60ch;position:relative;font-weight:500}
+.mission cite{display:block;margin-top:16px;color:var(--hero-muted);font-size:.9rem;
+  font-style:normal;font-weight:700}
+
+/* quotes */
+.quotes{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:18px}
+.quote{background:var(--card-2);border:1px solid var(--line);border-radius:var(--radius);
+  padding:26px;display:flex;flex-direction:column}
+.quote .q{font-size:1rem;line-height:1.6;flex:1}
+.quote .q::before{content:"\201C";display:block;font-size:2.6rem;line-height:.7;
+  color:var(--flame);margin-bottom:10px;font-family:Georgia,serif}
+.quote .who{margin-top:16px;padding-top:14px;border-top:1px solid var(--line);
+  font-size:.86rem}
+.quote .who b{display:block;font-weight:800}
+.quote .who span{color:var(--muted)}
+
+/* timeline */
+.tl{position:relative;padding-left:30px}
+.tl::before{content:"";position:absolute;left:7px;top:6px;bottom:6px;width:3px;
+  background:var(--trail);border-radius:3px}
+.tl-item{position:relative;padding-bottom:26px}
+.tl-item:last-child{padding-bottom:0}
+.tl-item::before{content:"";position:absolute;left:-28px;top:5px;width:14px;height:14px;
+  border-radius:50%;background:var(--flame);border:3px solid var(--bg)}
+.tl-item b{display:block;font-weight:800}
+.tl-item span{color:var(--muted);font-size:.93rem}
+
+/* involve */
+.involve{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px}
+.inv{background:var(--card-2);border:1px solid var(--line);border-radius:var(--radius);
+  padding:24px;text-align:center;text-decoration:none;color:inherit;
+  transition:transform .16s,border-color .16s}
+.inv:hover{transform:translateY(-4px);border-color:var(--flame)}
+.inv .em{font-size:1.7rem;line-height:1;margin-bottom:12px;display:block}
+.inv b{display:block;font-weight:800;margin-bottom:6px}
+.ext{color:var(--muted);font-weight:600;font-size:.85em}
+.inv:hover .ext{color:var(--flame)}
+.inv span{color:var(--muted);font-size:.9rem}
+
+/* final cta */
+.final{text-align:center;background:
+  radial-gradient(760px 340px at 50% 0%,rgba(171,21,10,.24),transparent 66%),
+  linear-gradient(180deg,var(--navy),var(--navy-2));color:var(--hero-fg);
+  border-radius:22px;padding:clamp(38px,6vw,68px)}
+.final h2{font-size:clamp(1.6rem,3.8vw,2.5rem);font-weight:800;max-width:20ch;margin:0 auto}
+.final p{color:var(--hero-muted);margin:16px auto 0;max-width:54ch}
+
+footer{border-top:1px solid var(--line);padding:38px 0;margin-top:76px;
+  color:var(--muted);font-size:.9rem}
+.foot{display:flex;gap:20px;flex-wrap:wrap;align-items:center;justify-content:space-between}
+.foot a{color:var(--muted);text-decoration:none;font-weight:600}
+.foot a:hover{color:var(--flame)}
+
+/* scroll reveal */
+.reveal{opacity:0;transform:translateY(22px);transition:opacity .6s ease,transform .6s ease}
+.reveal.in{opacity:1;transform:none}
+
+@media(prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  *,*::before,*::after{animation:none!important;transition:none!important}
+  .reveal{opacity:1;transform:none}
+  .ember{display:none}
+}
+@media print{
+  .hero,.final,.mission{background:#fff!important;color:#000!important}
+  header.top,.embers,.video,nav.main,.hero-cta{display:none!important}
+  section{padding:18px 0;break-inside:avoid}
+}
+</style>
+</head>
+<body>
+<a class=skip href="#main">Skip to content</a>
+
+
+<header class=top>
+  <div class="wrap topbar">
+    <a class=brand href="#top" aria-label="AI Trailblazers home">
+      <img class=mark src="/assets/aitb-mark.png" alt="" width=301 height=381>
+      <span class=name>Ai<b>TRAILBLAZERS</b></span>
+    </a>
+    <button class=menu-btn id=menuBtn aria-expanded=false aria-controls=mainNav>☰ Menu</button>
+    <nav class=main id=mainNav aria-label="Main">
+      <a href="#mission">Mission</a>
+      <a href="#values">Values</a>
+      <a href="#what-we-do">What we do</a>
+      <a href="#events">Events</a>
+      <a href="#involved">Get involved</a>
+      <button class=theme-btn id=themeBtn aria-label="Switch colour theme">◐</button>
+      <a class=nav-cta href="/">Plan a hackathon</a>
+    </nav>
+  </div>
+</header>
+
+<main id=main>
+
+<!-- ── HERO ─────────────────────────────────────────────────────────────── -->
+<div class=hero id=top>
+  <div class=embers id=embers aria-hidden=true></div>
+  <div class=wrap>
+    <img class=mark-lg src="/assets/aitb-mark.png"
+      alt="AI Trailblazers logo — a flame rising from a trail" width=301 height=381>
+    <span class=eyebrow>Community-powered AI</span>
+    <h1>Every community, <span class=grad>equipped to thrive</span> in the AI economy</h1>
+    <p class=lede>We run weekends that launch real ventures and graduate people fluent in
+      working with AI teammates. No technical prerequisite. No one left behind.</p>
+
+    <div class=hero-cta>
+      <a class="btn btn-primary" href="/">
+        Plan your hackathon
+        <svg width=17 height=17 viewBox="0 0 24 24" fill=none stroke=currentColor
+          stroke-width=2.5 stroke-linecap=round aria-hidden=true>
+          <path d="M5 12h14M13 6l6 6-6 6"/></svg>
+      </a>
+      <a class="btn btn-ghost" href="#what-we-do">See what we do</a>
+    </div>
+
+    <!-- The play control is a REAL link to YouTube that JavaScript upgrades into an
+         inline player. So it plays three ways, worst case first:
+           · scripts blocked, or the embed refused  -> the link opens YouTube
+           · scripts running                        -> it plays inline, right here
+         Nothing is contacted until someone clicks. That is why this is an <a> and not
+         a <button>: a button with no JS does nothing at all. -->
+    <div class=video-wrap>
+      <div class=video id=video>
+        <img src="https://i.ytimg.com/vi/uNLiQLISEOo/maxresdefault.jpg"
+          alt="Title card for the AI-Trailblazers Hack-AI-Thon In A Box video"
+          width=1280 height=720>
+        <a class=play id=playBtn href="https://www.youtube.com/watch?v=uNLiQLISEOo"
+          rel="noopener noreferrer" target=_blank
+          aria-label="Play the video: AI-Trailblazers, Hack-AI-Thon In A Box">
+          <span class=ring>
+            <svg viewBox="0 0 24 24" aria-hidden=true><path d="M8 5v14l11-7z"/></svg>
+          </span>
+        </a>
+        <div class=cap>Watch — AI-Trailblazers: Hack-AI-Thon In A Box</div>
+      </div>
+      <!-- Always present, never hidden: if the embed is refused by a sandbox, an
+           extension, or a strict network, there is still a way to watch. -->
+      <p class=video-alt>
+        <a href="https://www.youtube.com/watch?v=uNLiQLISEOo" rel="noopener noreferrer"
+          target=_blank>Trouble playing? Watch on YouTube ↗</a>
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- ── STATS ────────────────────────────────────────────────────────────── -->
+<div class=stats>
+  <div class=wrap>
+    <div class=stat-grid>
+      <div class=stat><div class=n>4</div><div class=l>Hackathons run</div></div>
+      <div class=stat><div class=n>10</div><div class=l>Mentors trained in San&nbsp;Diego</div></div>
+      <div class=stat><div class=n>15</div><div class=l>Nonprofit projects backed</div></div>
+      <div class=stat><div class=n>6</div><div class=l>Languages supported</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ── MISSION ──────────────────────────────────────────────────────────── -->
+<section id=mission>
+  <div class=wrap>
+    <div class="mission reveal">
+      <span class=kicker>Our mission</span>
+      <h2>Empower communities using AI, and create wealth from the bottom up.</h2>
+      <blockquote>“A hackathon is a community event where tech people, entrepreneurs and
+        community members come together to solve problems and advance ideas. What comes out
+        of it is innovation, new ventures, and a community that feels its own power.”</blockquote>
+      <cite>— Maria Mascareno-Eden, Operations &amp; Outreach</cite>
+    </div>
+  </div>
+</section>
+
+<!-- ── VALUES ───────────────────────────────────────────────────────────── -->
+<section id=values style="padding-top:0">
+  <div class=wrap>
+    <div class="sec-head reveal">
+      <span class=kicker>What we hold fixed</span>
+      <h2>Our core values</h2>
+      <p>Everything about how a chapter runs an event is flexible. These are not. They are
+        what makes an AI Trailblazers weekend an AI Trailblazers weekend.</p>
+    </div>
+    <div class=values>
+      <div class="value reveal"><h3>Inclusivity, without an asterisk</h3>
+        <p>You do not need technical skills to take part. When people could not afford their
+          own cloud accounts, we gave them accounts. The door is the whole point.</p></div>
+      <div class="value reveal"><h3>The full spectrum, in one room</h3>
+        <p>Sessions run from “how to install Claude Code” to advanced topics. Beginners and
+          builders learn in the same building, on the same weekend.</p></div>
+      <div class="value reveal"><h3>Heart, transparency, empathy</h3>
+        <p>Community feeling is the engine. Run one of these without it and the weekend does
+          not work, however good the logistics are.</p></div>
+      <div class="value reveal"><h3>We don't leave anyone behind</h3>
+        <p>We share what we know and we hold hands. Human values are what make the
+          technology worth anything at all.</p></div>
+      <div class="value reveal"><h3>A pipeline, not a party</h3>
+        <p>Every event exists to find new apprentices, new mentors to guide them, and new
+          employers to hire them. That is the reason we do this.</p></div>
+      <div class="value reveal"><h3>Community over product</h3>
+        <p>The biggest output of a weekend is connection. The things people build matter —
+          the people they meet matter more.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ── CORE FEATURES ────────────────────────────────────────────────────── -->
+<section id=what-we-do style="background:var(--card);border-block:1px solid var(--line)">
+  <div class=wrap>
+    <div class="sec-head reveal">
+      <span class=kicker>Core programs</span>
+      <h2>What we do</h2>
+      <p>Four programs, one pipeline: run the weekend, train the mentors, place the
+        apprentices, and hand the whole playbook to the next city.</p>
+    </div>
+    <div class=cards>
+
+      <a class="card reveal" href="/">
+        <div class=ico><svg viewBox="0 0 24 24" aria-hidden=true>
+          <path d="M3 7h18M3 12h18M3 17h11"/><circle cx="19" cy="17" r="2.4"/></svg></div>
+        <h3>Hack-AI-Thon in a Box</h3>
+        <p>Tell us five things about your event and an AI researches your city — real,
+          sourced venues, sponsors and mentors — then builds your full phase-by-phase plan.
+          Free, and it needs no technical skill.</p>
+        <span class=go>Open the planner <span aria-hidden=true>→</span></span>
+      </a>
+
+      <a class="card reveal" href="#apprenticeship">
+        <div class=ico><svg viewBox="0 0 24 24" aria-hidden=true>
+          <path d="M12 3 2 8l10 5 10-5-10-5Z"/><path d="M6 10.5V16c0 1.7 2.7 3 6 3s6-1.3 6-3v-5.5"/></svg></div>
+        <h3>Apprenticeship Program</h3>
+        <p>The reason the events exist. Apprentices learn to work alongside AI teammates,
+          matched with mentors who have shipped real projects, and introduced to employers
+          who are hiring.</p>
+        <span class=go>How it works <span aria-hidden=true>→</span></span>
+      </a>
+
+      <a class="card reveal" href="#mentors">
+        <div class=ico><svg viewBox="0 0 24 24" aria-hidden=true>
+          <circle cx="9" cy="8" r="3.2"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0"/>
+          <path d="M17 8.5a3 3 0 0 1 0 5M19.5 6a6 6 0 0 1 0 10"/></svg></div>
+        <h3>Mentorship &amp; judging</h3>
+        <p>Mid-career builders who keep teams focused and out of rabbit holes, and senior
+          judges who score against a published rubric. Both get trained — mentor training
+          is mandatory, not optional.</p>
+        <span class=go>Become a mentor <span aria-hidden=true>→</span></span>
+      </a>
+
+      <a class="card reveal" href="#chapters">
+        <div class=ico><svg viewBox="0 0 24 24" aria-hidden=true>
+          <circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.6 3 2.6 15 0 18M12 3c-2.6 3-2.6 15 0 18"/></svg></div>
+        <h3>Start a chapter</h3>
+        <p>Libraries, chambers of commerce, community colleges and nonprofits. Everything we
+          learned across four events, packaged so a first-time organizer in a city we have
+          never visited can pick it up and run.</p>
+        <span class=go>Bring us to your city <span aria-hidden=true>→</span></span>
+      </a>
+
+    </div>
+  </div>
+</section>
+
+<!-- ── EVENTS ───────────────────────────────────────────────────────────── -->
+<section id=events>
+  <div class=wrap>
+    <div class="sec-head reveal">
+      <span class=kicker>Track record</span>
+      <h2>Four weekends, and counting</h2>
+      <p>Every event teaches the next one something. All of it is written down so the next
+        city does not have to learn it the hard way.</p>
+    </div>
+    <div class=tl>
+      <div class="tl-item reveal"><b>Hackathon 1 — Tucson, June 2025</b>
+        <span>The first run. Team formation, judging and check-in invented from scratch.</span></div>
+      <div class="tl-item reveal"><b>Hack-AI-Thon 2 — Tucson, February 2026</b>
+        <span>Sponsor packages and a repeatable run of show. Blog posts and team stories.</span></div>
+      <div class="tl-item reveal"><b>Hack-AI-Thon 3 — Tucson, May 2026</b>
+        <span>A four-session pre-event bootcamp, coaches and mentors guide, post-event survey.</span></div>
+      <div class="tl-item reveal"><b>San Diego, August 2026</b>
+        <span>First run outside Tucson. Nonprofit intake, identity-verified project board,
+          10 mentors trained, and the moment the kit became a product.</span></div>
+      <div class="tl-item reveal"><b>Your city, next</b>
+        <span>Three chapters have already asked to pilot the kit.</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ── VOICES ───────────────────────────────────────────────────────────── -->
+<section style="background:var(--card);border-block:1px solid var(--line)">
+  <div class=wrap>
+    <div class="sec-head reveal">
+      <span class=kicker>In their words</span>
+      <h2>The people who run these</h2>
+    </div>
+    <div class=quotes>
+      <div class="quote reveal">
+        <p class=q>The hardest part is the coordination of tasks and responsibilities — and
+          then being flexible enough to change it when everything changes. No event goes to
+          plan. I've run hundreds of these and nothing ever goes to plan.</p>
+        <div class=who><b>Aaron Eden</b><span>Founder, AI Trailblazers</span></div>
+      </div>
+      <div class="quote reveal">
+        <p class=q>We wouldn't be able to do it if we don't share, and if we don't hold
+          hands. Human values, empathy and sharing are what make technology beneficial.</p>
+        <div class=who><b>Maria Mascareno-Eden</b><span>Operations &amp; Outreach</span></div>
+      </div>
+      <div class="quote reveal">
+        <p class=q>The biggest output is community and connection, not just the technical
+          product. It was likely the most diverse hackathon I have ever attended.</p>
+        <div class=who><b>Alex Waters</b><span>The Program Labs, San Diego anchor</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── GET INVOLVED ─────────────────────────────────────────────────────── -->
+<section id=involved>
+  <div class=wrap>
+    <div class="sec-head reveal">
+      <span class=kicker>Get involved</span>
+      <h2>Find your way in</h2>
+      <p>Whether you have a Saturday, a skill, a room, or a budget — there is a door here
+        for you.</p>
+    </div>
+    <!-- Destinations are verified, not assumed. Only two real places exist today: the
+         planner at "/", and the AI Trailblazers site root. aitrailblazers.org is a
+         client-routed SPA whose sub-paths (/mentors, /sponsors …) all serve the same
+         shell — a made-up deep link would look fine and land nowhere. So anything
+         off-site points at the root, and anything about running an event points at the
+         planner, which genuinely does the job. -->
+    <div class=involve>
+      <a class="inv reveal" id=apprenticeship href="https://aitrailblazers.org"
+        rel="noopener noreferrer" target=_blank>
+        <span class=em aria-hidden=true>🎒</span><b>Participate <span class=ext>↗</span></b>
+        <span>Come build something for a local nonprofit. No experience required.</span></a>
+      <a class="inv reveal" id=mentors href="https://aitrailblazers.org"
+        rel="noopener noreferrer" target=_blank>
+        <span class=em aria-hidden=true>🧭</span><b>Mentor or judge <span class=ext>↗</span></b>
+        <span>Keep a team on track, or score final projects against the rubric.</span></a>
+      <a class="inv reveal" id=chapters href="/">
+        <span class=em aria-hidden=true>📍</span><b>Start a chapter</b>
+        <span>Run one in your city — the planner builds your whole timeline.</span></a>
+      <a class="inv reveal" id=sponsor href="https://aitrailblazers.org"
+        rel="noopener noreferrer" target=_blank>
+        <span class=em aria-hidden=true>🤝</span><b>Sponsor <span class=ext>↗</span></b>
+        <span>Trailblazer, Champion and Presenting tiers — plus in-kind support.</span></a>
+    </div>
+  </div>
+</section>
+
+<!-- ── FINAL CTA ────────────────────────────────────────────────────────── -->
+<section style="padding-top:0">
+  <div class=wrap>
+    <div class="final reveal">
+      <h2>Ready to run one in your city?</h2>
+      <p>Answer five questions. Watch an AI research your city and hand you a dated,
+        phase-by-phase plan with real local venues, sponsors and mentors.</p>
+      <div class=hero-cta>
+        <a class="btn btn-primary" href="/">
+          Start planning — it's free
+          <svg width=17 height=17 viewBox="0 0 24 24" fill=none stroke=currentColor
+            stroke-width=2.5 stroke-linecap=round aria-hidden=true>
+            <path d="M5 12h14M13 6l6 6-6 6"/></svg>
+        </a>
+        <a class="btn btn-ghost" href="https://aitrailblazers.org" rel="noopener noreferrer"
+          target=_blank>Visit aitrailblazers.org</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  <div class="wrap foot">
+    <a class=brand href="#top" style="text-decoration:none">
+      <img class=mark src="/assets/aitb-mark.png" alt="" width=301 height=381>
+      <span class=name>Ai<b>TRAILBLAZERS</b></span>
+    </a>
+    <span>Empowering communities with AI — from the bottom up.</span>
+    <span><a href="/">Plan a hackathon</a> · <a href="https://aitrailblazers.org"
+      rel="noopener noreferrer" target=_blank>aitrailblazers.org</a></span>
+  </div>
+</footer>
+
+<script>
+/* Everything below is progressive enhancement. With JS disabled the page still reads,
+   every link still navigates, and the video still links out — nothing here is load-bearing. */
+
+/* Mobile nav */
+const menuBtn = document.getElementById('menuBtn');
+const nav = document.getElementById('mainNav');
+menuBtn.addEventListener('click', () => {
+  const open = nav.classList.toggle('open');
+  menuBtn.setAttribute('aria-expanded', String(open));
+});
+nav.addEventListener('click', e => {
+  if (e.target.tagName === 'A') { nav.classList.remove('open'); menuBtn.setAttribute('aria-expanded','false'); }
+});
+
+/* Theme toggle — remembers the choice, defaults to the OS setting. */
+const themeBtn = document.getElementById('themeBtn');
+try {
+  const saved = localStorage.getItem('aitb.theme');
+  if (saved) document.documentElement.dataset.theme = saved;
+} catch {}
+themeBtn.addEventListener('click', () => {
+  const dark = document.documentElement.dataset.theme === 'dark'
+    || (!document.documentElement.dataset.theme
+        && matchMedia('(prefers-color-scheme: dark)').matches);
+  const next = dark ? 'light' : 'dark';
+  document.documentElement.dataset.theme = next;
+  try { localStorage.setItem('aitb.theme', next); } catch {}
+});
+
+/* Hero video: swap the thumbnail for the player only on click. youtube-nocookie sets no
+   tracking cookie until playback actually starts. */
+const VIDEO_ID = 'uNLiQLISEOo';
+const playBtn = document.getElementById('playBtn');
+playBtn.addEventListener('click', (e) => {
+  // Upgrade the plain YouTube link into an inline player. If anything here throws,
+  // we do NOT preventDefault, so the browser just follows the href and the video
+  // still plays — on YouTube instead of in place.
+  try {
+    const box = document.getElementById('video');
+    const f = document.createElement('iframe');
+    f.src = `https://www.youtube-nocookie.com/embed/${VIDEO_ID}?autoplay=1&rel=0&modestbranding=1`;
+    f.title = 'AI-Trailblazers: Hack-AI-Thon In A Box';
+    f.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture';
+    f.allowFullscreen = true;
+    box.replaceChildren(f);
+    e.preventDefault();
+  } catch (err) { /* let the link do its job */ }
+});
+
+/* Some uploads have no maxres thumbnail; fall back rather than showing a broken image. */
+const thumb = document.querySelector('.video img');
+thumb.addEventListener('error', () => {
+  if (!thumb.dataset.fell) { thumb.dataset.fell = '1'; thumb.src = `https://i.ytimg.com/vi/${VIDEO_ID}/hqdefault.jpg`; }
+}, { once: false });
+
+/* Embers. Decorative, skipped entirely when the visitor prefers reduced motion. */
+if (!matchMedia('(prefers-reduced-motion: reduce)').matches) {
+  const host = document.getElementById('embers');
+  for (let i = 0; i < 18; i++) {
+    const s = document.createElement('span');
+    s.className = 'ember';
+    s.style.left = Math.random() * 100 + '%';
+    s.style.animationDuration = (5 + Math.random() * 6).toFixed(1) + 's';
+    s.style.animationDelay = (Math.random() * 7).toFixed(1) + 's';
+    s.style.opacity = String(0.35 + Math.random() * 0.5);
+    const sz = (3 + Math.random() * 4).toFixed(1) + 'px';
+    s.style.width = s.style.height = sz;
+    host.appendChild(s);
+  }
+}
+
+/* Reveal on scroll. If IntersectionObserver is missing, everything just shows. */
+const items = document.querySelectorAll('.reveal');
+if ('IntersectionObserver' in window
+    && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach((en, i) => {
+      if (en.isIntersecting) {
+        setTimeout(() => en.target.classList.add('in'), Math.min(i * 70, 280));
+        io.unobserve(en.target);
+      }
+    });
+  }, { rootMargin: '0px 0px -8% 0px', threshold: 0.08 });
+  items.forEach(el => io.observe(el));
+} else {
+  items.forEach(el => el.classList.add('in'));
+}
+</script>
+</body>
+</html>

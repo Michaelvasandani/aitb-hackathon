@@ -6,6 +6,7 @@ function bundles, the routes resolve, and untrusted input gets a 400 rather than
 
 import json
 import pathlib
+import re
 import unittest
 
 from api.index import ALLOWED_FACTS, BadRequest, clean_facts, load_leads, route
@@ -38,6 +39,22 @@ class TestDeploymentContract(unittest.TestCase):
         # 800s (Vercel Pro/Fluid ceiling) — a full fan-out research run needs well past the
         # 300s default; the run was dropping mid-research at 300s.
         self.assertEqual(plan_fn["maxDuration"], 800)
+
+    def test_plan_maxduration_agrees_with_vercel_json(self):
+        # api/plan.js ALSO declares `export const config = { maxDuration: N }`, so the limit
+        # travels with the function. Two sources of truth drift silently: the 300 -> 800 bump
+        # landed in vercel.json (and in the guard above) but not in api/plan.js, leaving the
+        # function declaring the very 300s ceiling that bump existed to escape. Whichever
+        # declaration Vercel honours, they must not disagree.
+        cfg = json.loads((ROOT / "vercel.json").read_text())
+        declared = cfg["functions"]["api/plan.js"]["maxDuration"]
+        src = (ROOT / "api" / "plan.js").read_text()
+        m = re.search(r"maxDuration:\s*(\d+)", src)
+        self.assertIsNotNone(m, "api/plan.js no longer declares maxDuration in its config")
+        self.assertEqual(
+            int(m.group(1)), declared,
+            "api/plan.js maxDuration disagrees with vercel.json — update both together",
+        )
 
     def test_the_dynamically_loaded_file_actually_exists(self):
         self.assertTrue(
