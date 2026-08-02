@@ -33,7 +33,30 @@ python3 -m unittest discover -s tests -t . -q
 | `budget.py` | Break-even, in-kind offsets, minimum sponsor combinations. |
 | `replan.py` | The dominoes engine. |
 | `plan.py` | `plan.json` load/save, the deterministic next-action rule, the full render state. |
+| `render.py` | **L4** — one self-contained HTML file. Inline CSS, zero external requests. |
 | `cli.py` | Demo and inspection driver. |
+
+## The artifact
+
+```bash
+python3 -m core.cli render --demo --out plan.html
+```
+
+~18KB, no external requests of any kind — no CDN, no fonts, no images, no analytics. It opens
+from a Drive folder, an email attachment, or a URL, on any device, offline, with no account.
+Light and dark, mobile down to 360px, and it prints (organizers print things and put them on
+a check-in table).
+
+Tests enforce this rather than trusting it: `test_render.py` fails the build if any `<script>`,
+`<link>`, `@import`, `url(`, or `<img>` appears, and asserts the only outbound URLs in the
+document are lead source links.
+
+Two rules the renderer will not bend:
+
+- **A lead without a `source_url` is not rendered at all.** Not greyed out, not marked
+  unverified — absent. One invented venue ends the product's credibility.
+- **An empty section says it is empty.** Below the done-signal it gets a visible *thin* badge.
+  A plan that says "I only found 2 venues here" is worth more than one padded to 5.
 
 ## The three rules (from the Chunk Map build spec)
 

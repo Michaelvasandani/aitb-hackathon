@@ -180,6 +180,19 @@ def cmd_replan(args):
     return 0
 
 
+def cmd_render(args):
+    from . import render as render_mod
+    p = plan_mod.load(args.plan)
+    facts = p.get("facts") or {}
+    if not facts and args.demo:
+        for d in (DEMO_CHUNK1, DEMO_CHUNK1_GATE, DEMO_CHUNK2, DEMO_CHUNK2_GATE):
+            facts.update(d)
+    path = render_mod.write(facts, path=args.out, leads=p.get("leads"), today=args.today)
+    print(f"wrote {path}")
+    print("Open it on a phone that isn't yours before calling it shipped.")
+    return 0
+
+
 def cmd_timeline(args):
     print(timeline.risk_sentence(args.event_date, args.today))
     for r in timeline.at_risk_phases(args.event_date, args.today):
@@ -203,6 +216,11 @@ def main(argv=None):
     r.add_argument("--to", required=True)
     r.add_argument("--json", action="store_true")
     r.set_defaults(fn=cmd_replan)
+
+    w = sub.add_parser("render", help="write the self-contained plan.html")
+    w.add_argument("--out", default="plan.html")
+    w.add_argument("--demo", action="store_true", help="use the Fresno demo facts if no plan")
+    w.set_defaults(fn=cmd_render)
 
     t = sub.add_parser("timeline", help="runway risk for a date")
     t.add_argument("--event-date", required=True)
