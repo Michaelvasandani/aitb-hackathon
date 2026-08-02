@@ -60,6 +60,37 @@ export async function saveRun(run, { query } = {}) {
   return { id: row.id };
 }
 
+// ---- reading one run (the viewer, ticket #9) ----------------------------------------
+
+// The columns the viewer needs, in ONE place — drives the SELECT and is the single source
+// of truth for the read shape. `hidden` is DELIBERATELY absent: it is a prune flag, never
+// part of a run's public record, so it is never selected and never leaks to the client.
+const READ_COLUMNS = Object.freeze(['id', 'created_at', 'inputs', 'plan_json', 'plan_html']);
+
+const SELECT_RUN = `select ${READ_COLUMNS.join(', ')} from runs where id = $1`;
+
+// Shape one DB row into the viewer's API record. Pure and stateless (mirrors rowFromRun):
+// no client, no I/O, directly unit-testable. Returns null for a missing row (unknown id) so
+// the handler can turn that into a clean 404. Only the READ_COLUMNS are copied across, so a
+// stray column on the row (e.g. `hidden`) can never leak into the record.
+export function recordFromRow(row) {
+  if (!row || typeof row !== 'object') return null;
+  const rec = {};
+  for (const col of READ_COLUMNS) rec[col] = row[col] ?? null;
+  return rec;
+}
+
+// Fetch one saved run's full record by id, or null if no such run exists. `query(text,
+// params)` is injectable for hermetic tests; omitted in production, where a lazy Neon-backed
+// query is built from DATABASE_URL. The neon HTTP driver returns rows as a bare array by
+// default; some configs wrap them as `{ rows }`, so both shapes are accepted.
+export async function getRun(id, { query } = {}) {
+  const q = query || (await defaultQuery());
+  const result = await q(SELECT_RUN, [id]);
+  const rows = Array.isArray(result) ? result : (result && result.rows) || [];
+  return recordFromRow(rows[0]);
+}
+
 // ---- lazy Neon client ---------------------------------------------------------------
 
 // One process-wide query function, created on first real use. Importing this module never

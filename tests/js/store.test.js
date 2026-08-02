@@ -5,7 +5,7 @@
 
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { rowFromRun, saveRun } from '../../api/_lib/store.js';
+import { rowFromRun, saveRun, recordFromRow, getRun } from '../../api/_lib/store.js';
 
 const RUN = Object.freeze({
   id: 'run-uuid-1234',
@@ -114,4 +114,86 @@ test('a query failure propagates so the handler can mark the save as failed', as
     () => saveRun(RUN, { query: async () => { throw new Error('db down'); } }),
     /db down/,
   );
+});
+
+// ---- recordFromRow: pure shaping (DB row -> the viewer's API record) ------------------
+
+// A row as the SELECT returns it: the five read columns only. `hidden` is never selected,
+// and the card denorm columns (city/audience/org_name) are not part of the viewer record —
+// the viewer reads them from `inputs`.
+const ROW = Object.freeze({
+  id: 'run-uuid-1234',
+  created_at: '2026-08-02T12:00:00.000Z',
+  inputs: {
+    org_name: 'Boise Public Library',
+    city: 'Boise, ID',
+    audience: 'non-technical',
+    budget_usd: 500,
+  },
+  plan_json: { inputs: {}, timeline: [], leads: {} },
+  plan_html: '<!doctype html><html><body>ok</body></html>',
+});
+
+test('recordFromRow returns exactly the viewer record shape', () => {
+  const rec = recordFromRow(ROW);
+  assert.deepEqual(Object.keys(rec).sort(), ['created_at', 'id', 'inputs', 'plan_html', 'plan_json']);
+  assert.equal(rec.id, 'run-uuid-1234');
+  assert.equal(rec.created_at, '2026-08-02T12:00:00.000Z');
+  assert.deepEqual(rec.inputs, ROW.inputs);
+  assert.deepEqual(rec.plan_json, ROW.plan_json);
+  assert.equal(rec.plan_html, ROW.plan_html);
+});
+
+test('recordFromRow never leaks a hidden column even if the row carries one', () => {
+  const rec = recordFromRow({ ...ROW, hidden: false });
+  assert.ok(!('hidden' in rec), 'hidden must never reach the API record');
+});
+
+test('recordFromRow returns null for a missing row (unknown id)', () => {
+  assert.equal(recordFromRow(undefined), null);
+  assert.equal(recordFromRow(null), null);
+});
+
+// ---- getRun: one parameterized select via the injected query fn (no live DB) ----------
+
+test('getRun issues one parameterized select by id and shapes the row', async () => {
+  const calls = [];
+  const fakeQuery = async (text, params) => {
+    calls.push({ text, params });
+    return [ROW];
+  };
+
+  const rec = await getRun('run-uuid-1234', { query: fakeQuery });
+
+  assert.equal(calls.length, 1, 'exactly one select');
+  const { text, params } = calls[0];
+  assert.match(text, /select/i);
+  assert.match(text, /from\s+runs/i);
+  assert.match(text, /where\s+id\s*=\s*\$1/i);
+  // Only the five read columns are selected; hidden is NOT.
+  assert.ok(!/hidden/i.test(text), 'getRun must not select hidden');
+  assert.deepEqual(params, ['run-uuid-1234']);
+  assert.equal(rec.id, 'run-uuid-1234');
+  assert.equal(rec.plan_html, ROW.plan_html);
+});
+
+test('getRun tolerates a driver result wrapped as { rows: [...] }', async () => {
+  const rec = await getRun('run-uuid-1234', { query: async () => ({ rows: [ROW] }) });
+  assert.equal(rec.id, 'run-uuid-1234');
+});
+
+test('getRun returns null for an unknown id (no rows)', async () => {
+  const rec = await getRun('nope', { query: async () => [] });
+  assert.equal(rec, null);
+});
+
+test('getRun with an injected query never reads DATABASE_URL (stays hermetic)', async () => {
+  const saved = process.env.DATABASE_URL;
+  delete process.env.DATABASE_URL;
+  try {
+    const rec = await getRun('run-uuid-1234', { query: async () => [ROW] });
+    assert.equal(rec.id, 'run-uuid-1234');
+  } finally {
+    if (saved !== undefined) process.env.DATABASE_URL = saved;
+  }
 });
