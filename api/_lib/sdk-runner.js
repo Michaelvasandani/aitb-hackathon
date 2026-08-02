@@ -5,8 +5,9 @@
 // runPlan drives the JS `@anthropic-ai/claude-agent-sdk` against the repo's `.claude/skills/`
 // (settingSources: ['project']), runs the full pipeline (orchestrator -> intake -> research
 // fan-out -> verification -> timeline -> plan-assembly), maps the noisy message stream down
-// to the small STAGES set via `emit`, and returns the assembled { plan_json, plan_html } read
-// back from the files the plan-assembly skill wrote.
+// to the small STAGES set via `emit`, and returns the assembled { id, plan_json, plan_html } —
+// the plan read back from the files plan-assembly wrote, plus the per-run UUID for the
+// permalink (ADR-0003). The SDK seam mints the id but never touches the database.
 
 import fs from 'node:fs/promises';
 import os from 'node:os';
@@ -196,5 +197,8 @@ export async function runPlan(inputs, emit) {
     throw new Error('Pipeline finished without writing plan.html');
   }
 
-  return { plan_json, plan_html };
+  // Surface the per-run UUID as `id` so the handler can persist and permalink the run
+  // (ADR-0003). The SDK seam mints the id but never touches the database — persistence is
+  // the handler's job, through the store seam.
+  return { id: runId, plan_json, plan_html };
 }
