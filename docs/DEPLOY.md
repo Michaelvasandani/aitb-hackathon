@@ -111,6 +111,88 @@ That test earned its keep twice already:
 
 ---
 
+## Favorites, recent searches, and the city lead cache
+
+Two different problems, two different answers — and only one of them needs a database.
+
+### Favorites + recents → `localStorage`, no database
+
+The plan already lives in the URL hash, so a favorite is just a **link the app manages**.
+`public/js/store.js` keeps a capped list of favorites and the last 8 cities. Consequences
+worth being explicit about:
+
+- No account, no auth wall, no server round-trip. Value still precedes signup.
+- Nothing about a user ever leaves their device, so there is no PII, no consent banner,
+  and nothing to breach. `store.exportAll()` returns *everything* the app holds about
+  someone — that makes "we hold nothing" verifiable rather than a claim.
+- Works offline and survives the site being switched off.
+- **Trade-off, stated plainly:** favorites are per-device. Syncing them needs identity, and
+  an auth wall is where the funnel dies for the non-technical organizers this is built for.
+
+Private-browsing modes throw on write. The store catches that and the saved-plans strip
+simply does not render — a broken store never becomes a broken planner.
+
+### The lead cache → this is what earns a database
+
+`public/data/fresno-leads.json` came from a research pass that took ~20 minutes of agent
+work. Search any other city today and you get an honest empty state. The cache fixes that:
+research a city once, serve it to everyone afterwards.
+
+It needs **no accounts**, because it is global rather than per-user — which is exactly why
+it is worth building and favorites-sync is not.
+
+**Cloudflare D1**, two tables, no user table:
+
+```bash
+npx wrangler d1 create aitb-leads                                  # prints database_id
+# paste it into wrangler.toml
+npx wrangler d1 execute aitb-leads --remote --file=schema.sql
+python3 scripts/seed_cache.py > seed.sql
+npx wrangler d1 execute aitb-leads --remote --file=seed.sql
+```
+
+Free tier is 5 GB storage and 5 M row-reads/day. A cached city is ~40 KB.
+
+### The rule this feature obeys: the database is never on the critical path
+
+Leads load in three layers, each optional:
+
+1. **Bundled file** in `public/data/` — instant, works offline, ships with the site
+2. **D1 cache** — cities researched since the last deploy
+3. **Nothing** — an honest empty state, and the city joins the research queue
+
+Every failure mode of the database returns HTTP 200 with empty leads: no binding
+configured, D1 throwing, unknown city, malformed request. Tested explicitly — see
+`scripts/test_client_js.mjs`. **If you never create the D1 database at all, the site
+behaves exactly as it does today.**
+
+### What gets recorded, and what doesn't
+
+`POST /api/demand` fires **only** when a real organizer clears chunk 1 for a city with no
+leads — not on page load, not per keystroke. A crawler hitting the homepage is not demand,
+and inflating that number would send someone to research a city nobody asked for.
+
+It stores a city slug and a counter. No identity, no IP, no session. The research queue is
+one query:
+
+```sql
+SELECT d.city_label, d.requests FROM city_demand d
+LEFT JOIN lead_cache c USING (city_slug)
+WHERE c.city_slug IS NULL ORDER BY d.requests DESC;
+```
+
+### Adding a city
+
+Run a research pass, write `public/data/<slug>-leads.json` in the same shape, then either
+redeploy (bundled — faster, survives the DB being down) or reseed (cached — no deploy
+needed). Both paths work.
+
+Cached leads older than **120 days** are served with a visible staleness warning rather
+than quietly presented as current. Venues close and people change jobs; a stale list is
+worse than an empty one because the organizer trusts it.
+
+---
+
 ## Demo video on the landing page
 
 A "Watch the demo" pill under the title expands into an embed on click — the iframe and

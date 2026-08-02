@@ -79,6 +79,23 @@ ul.tpl .why{font-size:.78rem;color:var(--muted);margin-top:3px}
 .actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:16px}
 .err{color:var(--warn);font-size:.88rem;margin-top:8px}
 .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+.saved{margin:0 0 20px}
+.saved h4{margin:0 0 7px;font-size:.72rem;text-transform:uppercase;letter-spacing:.06em;
+color:var(--muted);font-weight:700}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chip{display:inline-flex;align-items:center;gap:6px;padding:5px 11px;border-radius:999px;
+border:1px solid var(--line);background:var(--card);color:var(--fg);font:inherit;
+font-size:.82rem;cursor:pointer}
+.chip:hover{border-color:var(--accent);color:var(--accent)}
+.chip .x{color:var(--muted);font-weight:700;padding:0 2px;border:0;background:none;
+cursor:pointer;font-size:.9rem}
+.chip .x:hover{color:var(--warn)}
+.star{border:1px solid var(--line);border-radius:9px;background:var(--bg);color:var(--fg);
+font:inherit;padding:10px 14px;cursor:pointer}
+.star[aria-pressed=true]{border-color:var(--accent);background:var(--accent-soft);
+color:var(--accent);font-weight:700}
+.leadsrc{font-size:.78rem;color:var(--muted);margin-top:-6px;margin-bottom:12px}
+.leadsrc.stale{color:var(--warn)}
 .watch{display:inline-flex;align-items:center;gap:8px;margin:2px 0 22px;padding:9px 15px;
 border:1px solid var(--line);border-radius:999px;background:var(--card);color:var(--fg);
 font:inherit;font-size:.88rem;font-weight:600;cursor:pointer}
@@ -104,6 +121,8 @@ display:flex;align-items:center;justify-content:center;transition:transform .15s
 
   <div id=videoSlot></div>
 
+  <div id=savedSlot></div>
+
   <ol class=chunks id=chunks aria-label="Progress"></ol>
 
   <div class=panel id=panel>
@@ -121,9 +140,11 @@ display:flex;align-items:center;justify-content:center;transition:transform .15s
 <script type="module">
 import * as core from './js/core.js';
 import { render as renderPlanHtml } from './js/render.js';
+import * as store from './js/store.js';
 
 let facts = {};
 let LEADS = {};
+let LEADS_META = {};
 
 /* Set this after uploading the demo video to YouTube as UNLISTED (see docs/DEPLOY.md).
    The ID is the part after "v=" in the video's URL, e.g. "dQw4w9WgXcQ". Leave it empty
@@ -183,14 +204,52 @@ function loadHash(){
    anywhere. */
 const citySlug = (c) => (c||'').split(',')[0].toLowerCase().replace(/[^a-z0-9-]/g,'');
 
+/* Three layers, in order, each optional:
+     1. bundled file  — instant, works offline, ships with the site
+     2. D1 cache      — cities researched since the last deploy (progressive enhancement)
+     3. nothing       — an honest empty state, plus a demand signal
+   The database is never on the critical path. If it is down, unconfigured, or the browser
+   is offline, this falls back to exactly the behaviour the static-only site had. */
 async function loadLeads(city){
   const slug = citySlug(city);
+  LEADS_META = {};
   if(!slug) return {};
+
   try{
     const r = await fetch(`./data/${slug}-leads.json`);
-    if(!r.ok) return {};
-    return (await r.json()).leads || {};
-  } catch(e){ return {}; }   // offline or unknown city: no leads, never a fake one
+    if(r.ok){
+      const j = await r.json();
+      LEADS_META = {source:'bundled', researched_at:j.researched_on || null};
+      return j.leads || {};
+    }
+  } catch(e){ /* offline or absent — fall through */ }
+
+  try{
+    const r = await fetch(`./api/leads/${slug}`);
+    if(r.ok){
+      const j = await r.json();
+      if(j.leads && Object.keys(j.leads).length){
+        LEADS_META = {source:j.source, researched_at:j.researched_at, stale:j.stale};
+        return j.leads;
+      }
+    }
+  } catch(e){ /* no functions deployed — fine, this layer is optional */ }
+
+  // Nobody has researched this city. Say so, and put it in the queue.
+  LEADS_META = {source:'none'};
+  recordDemand(city);
+  return {};
+}
+
+/* Fired only when a real organizer clears chunk 1 with a city we have nothing for — not on
+   page load, not per keystroke. A crawler is not demand. No identity is sent. */
+const demandSent = new Set();
+function recordDemand(city){
+  const slug = citySlug(city);
+  if(!slug || demandSent.has(slug)) return;
+  demandSent.add(slug);
+  fetch('./api/demand', {method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({city})}).catch(()=>{});
 }
 
 const el = (t,c,x) => { const n=document.createElement(t); if(c)n.className=c;
@@ -235,6 +294,50 @@ function renderChunks(progress){
     li.appendChild(el('div','t', s.title));
     ol.appendChild(li);
   });
+}
+
+function renderSaved(){
+  const slot = document.getElementById('savedSlot'); slot.innerHTML='';
+  if(!store.available()) return;   // private mode: no strip rather than a broken one
+
+  const favs = store.favorites(), recs = store.recents();
+  if(!favs.length && !recs.length) return;
+
+  const box = el('div','saved');
+  if(favs.length){
+    box.appendChild(el('h4',null,'Saved plans'));
+    const row = el('div','chips');
+    favs.forEach(f=>{
+      const c = el('button','chip'); c.type='button';
+      c.appendChild(document.createTextNode('★ '+f.label));
+      const x = el('button','x','×'); x.type='button';
+      x.setAttribute('aria-label','Remove '+f.label);
+      x.onclick = (ev)=>{ ev.stopPropagation(); store.removeFavorite(f.hash); renderSaved(); };
+      c.onclick = ()=> open(f.hash);
+      c.appendChild(x); row.appendChild(c);
+    });
+    box.appendChild(row);
+  }
+  if(recs.length){
+    const h = el('h4',null,'Recent'); h.style.marginTop = favs.length ? '14px' : '0';
+    box.appendChild(h);
+    const row = el('div','chips');
+    recs.forEach(r=>{
+      const c = el('button','chip',r.city); c.type='button';
+      c.onclick = ()=> open(r.hash);
+      row.appendChild(c);
+    });
+    box.appendChild(row);
+  }
+  slot.appendChild(box);
+}
+
+/* Favorites are links, so opening one is just restoring the hash. */
+function open(hash){
+  if(!hash) return;
+  location.hash = hash.startsWith('#') ? hash.slice(1) : hash;
+  facts = loadHash();
+  refresh();
 }
 
 function renderPlan(st){
@@ -294,10 +397,44 @@ function renderPlan(st){
   s.appendChild(ul);
   out.appendChild(s);
 
+  /* Where these leads came from, and whether they are old. A stale list is worse than an
+     empty one, because the organizer trusts it — so say it out loud. */
+  if(facts.CITY && LEADS_META.source){
+    const m = LEADS_META;
+    const line = el('div','leadsrc');
+    if(m.source==='none'){
+      line.textContent = 'No verified leads for this city yet — it has been added to the '
+        + 'research queue. Everything above still applies.';
+    } else if(m.stale){
+      line.className = 'leadsrc stale';
+      line.textContent = `Leads researched ${(m.researched_at||'').slice(0,10)} — over 120 `
+        + `days old. Re-verify before you contact anyone.`;
+    } else {
+      line.textContent = `Leads ${m.source==='bundled'?'bundled with this site':'from the '
+        + 'shared cache'}${m.researched_at? ', researched '+String(m.researched_at).slice(0,10):''}.`;
+    }
+    out.appendChild(line);
+  }
+
   const acts = el('div','actions');
   const dl = el('button','ghost','Download your plan');
   dl.type='button'; dl.onclick = download;
   acts.appendChild(dl);
+  const hash = location.hash;
+  const fav = el('button','star');
+  fav.type='button';
+  const syncFav = ()=>{
+    const on = store.isFavorite(hash);
+    fav.setAttribute('aria-pressed', String(on));
+    fav.textContent = on ? '★ Saved' : '☆ Save this plan';
+  };
+  fav.onclick = ()=>{
+    store.toggleFavorite({city: facts.CITY, hash, label: facts.CITY || facts.ORG_NAME});
+    syncFav(); renderSaved();
+  };
+  syncFav();
+  if(store.available()) acts.appendChild(fav);
+
   const copy = el('button','ghost','Copy shareable link');
   copy.type='button';
   copy.onclick = () => navigator.clipboard.writeText(location.href)
@@ -321,7 +458,11 @@ async function refresh(){
   catch(e){ err.textContent = e.message; return; }
 
   saveHash();
-  if(facts.CITY) LEADS = await loadLeads(facts.CITY);
+  if(facts.CITY){
+    LEADS = await loadLeads(facts.CITY);
+    store.pushRecent(facts.CITY, location.hash);
+  }
+  renderSaved();
   renderChunks(st.progress);
 
   const active = st.progress.states.find(s=>s.state==='active');
