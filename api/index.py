@@ -107,7 +107,7 @@ def load_leads(city):
     slug = "".join(c for c in (city or "").lower() if c.isalnum() or c == "-")
     if not slug:
         return {}
-    path = ROOT / "data" / f"{slug}-leads.json"
+    path = ROOT / "public" / "data" / f"{slug}-leads.json"
     if not path.is_file():
         return {}
     try:
@@ -125,7 +125,7 @@ def route(method, path, query, body):
             "ok": True,
             "countback_loaded": hasattr(timeline.countback, "build"),
             "cities": sorted(p.name.replace("-leads.json", "")
-                             for p in (ROOT / "data").glob("*-leads.json")),
+                             for p in (ROOT / "public" / "data").glob("*-leads.json")),
         }
 
     if method == "GET" and path == "/api/leads":

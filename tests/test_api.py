@@ -34,7 +34,7 @@ class TestDeploymentContract(unittest.TestCase):
         include = cfg["functions"]["api/index.py"]["includeFiles"]
         self.assertIn(".claude/skills/timeline/scripts", include)
         self.assertIn("core/", include)
-        self.assertIn("data/", include)
+        self.assertIn("public/data/", include)
 
     def test_the_dynamically_loaded_file_actually_exists(self):
         self.assertTrue(
