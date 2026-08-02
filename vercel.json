@@ -1,5 +1,11 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
+  "functions": {
+    "api/plan.js": {
+      "maxDuration": 300,
+      "includeFiles": ".claude/skills/**"
+    }
+  },
   "headers": [
     {
       "source": "/(.*)",

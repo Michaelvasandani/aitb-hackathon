@@ -26,15 +26,16 @@ FULL = {
 class TestDeploymentContract(unittest.TestCase):
     """These fail loudly rather than at 3am on a cold start."""
 
-    def test_countback_is_listed_in_vercel_include_files(self):
-        # core/timeline.py loads countback.py dynamically via importlib. A bundler that
-        # traces static imports will not see it, the file will not ship, and the function
-        # dies on cold start. includeFiles is the fix; this test is the guard.
+    def test_plan_function_bundles_the_skills(self):
+        # ADR-0001: the live product is the Node agentic function at api/plan.js, which runs
+        # the SDK against .claude/skills. A bundler that does not ship those skill folders
+        # leaves the function unable to load any skill on a cold start. includeFiles is the
+        # fix; this test is the guard. (Replaces the retired Python-monofunction contract:
+        # core/index.py is set aside per ADR-0001 and is no longer on the live path.)
         cfg = json.loads((ROOT / "vercel.json").read_text())
-        include = cfg["functions"]["api/index.py"]["includeFiles"]
-        self.assertIn(".claude/skills/timeline/scripts", include)
-        self.assertIn("core/", include)
-        self.assertIn("public/data/", include)
+        plan_fn = cfg["functions"]["api/plan.js"]
+        self.assertIn(".claude/skills", plan_fn["includeFiles"])
+        self.assertEqual(plan_fn["maxDuration"], 300)
 
     def test_the_dynamically_loaded_file_actually_exists(self):
         self.assertTrue(
@@ -46,9 +47,9 @@ class TestDeploymentContract(unittest.TestCase):
         req = (ROOT / "requirements.txt").read_text().strip()
         self.assertEqual(req, "", "core/ is stdlib-only; a dependency here needs a reason")
 
-    def test_rewrite_sends_every_api_path_to_the_one_function(self):
-        cfg = json.loads((ROOT / "vercel.json").read_text())
-        self.assertEqual(cfg["rewrites"][0]["destination"], "/api/index")
+    # Retired (ADR-0001): the site no longer rewrites every /api/* path to one Python
+    # monofunction. The live backend is the file-routed Node function api/plan.js (Vercel
+    # routes /api/plan to it automatically), so no `rewrites` entry exists to assert.
 
     def test_frontend_is_self_contained(self):
         html = (ROOT / "public/index.html").read_text()
