@@ -35,7 +35,9 @@ class TestDeploymentContract(unittest.TestCase):
         cfg = json.loads((ROOT / "vercel.json").read_text())
         plan_fn = cfg["functions"]["api/plan.js"]
         self.assertIn(".claude/skills", plan_fn["includeFiles"])
-        self.assertEqual(plan_fn["maxDuration"], 300)
+        # 800s (Vercel Pro/Fluid ceiling) — a full fan-out research run needs well past the
+        # 300s default; the run was dropping mid-research at 300s.
+        self.assertEqual(plan_fn["maxDuration"], 800)
 
     def test_the_dynamically_loaded_file_actually_exists(self):
         self.assertTrue(
