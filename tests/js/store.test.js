@@ -5,7 +5,7 @@
 
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { rowFromRun, saveRun, recordFromRow, getRun } from '../../api/_lib/store.js';
+import { rowFromRun, saveRun, recordFromRow, getRun, cardFromRow, listRuns } from '../../api/_lib/store.js';
 
 const RUN = Object.freeze({
   id: 'run-uuid-1234',
@@ -193,6 +193,106 @@ test('getRun with an injected query never reads DATABASE_URL (stays hermetic)', 
   try {
     const rec = await getRun('run-uuid-1234', { query: async () => [ROW] });
     assert.equal(rec.id, 'run-uuid-1234');
+  } finally {
+    if (saved !== undefined) process.env.DATABASE_URL = saved;
+  }
+});
+
+// ---- cardFromRow: pure shaping (DB row -> a gallery card) -----------------------------
+
+// A row as the list SELECT returns it: the four card columns only. The big blobs
+// (plan_html/plan_json/inputs) are never selected for the gallery, and `hidden` is a prune
+// predicate, never a card field.
+const CARD_ROW = Object.freeze({
+  id: 'run-uuid-1234',
+  city: 'Boise, ID',
+  audience: 'non-technical',
+  created_at: '2026-08-02T12:00:00.000Z',
+});
+
+test('cardFromRow returns exactly the gallery card shape (four fields)', () => {
+  const card = cardFromRow(CARD_ROW);
+  assert.deepEqual(Object.keys(card).sort(), ['audience', 'city', 'created_at', 'id']);
+  assert.equal(card.id, 'run-uuid-1234');
+  assert.equal(card.city, 'Boise, ID');
+  assert.equal(card.audience, 'non-technical');
+  assert.equal(card.created_at, '2026-08-02T12:00:00.000Z');
+});
+
+test('cardFromRow never leaks a blob or hidden column even if the row carries one', () => {
+  const card = cardFromRow({ ...CARD_ROW, plan_html: '<html>', plan_json: {}, inputs: {}, hidden: false });
+  assert.ok(!('plan_html' in card), 'plan_html must never reach a gallery card');
+  assert.ok(!('plan_json' in card), 'plan_json must never reach a gallery card');
+  assert.ok(!('inputs' in card), 'inputs must never reach a gallery card');
+  assert.ok(!('hidden' in card), 'hidden must never reach a gallery card');
+});
+
+test('cardFromRow defaults missing card fields to null', () => {
+  const card = cardFromRow({ id: 'x' });
+  assert.equal(card.city, null);
+  assert.equal(card.audience, null);
+  assert.equal(card.created_at, null);
+});
+
+test('cardFromRow returns null for a non-object row', () => {
+  assert.equal(cardFromRow(undefined), null);
+  assert.equal(cardFromRow(null), null);
+});
+
+// ---- listRuns: one projection-only, non-hidden, newest-first select (no live DB) ------
+
+test('listRuns selects only the four card columns, non-hidden, newest-first', async () => {
+  const calls = [];
+  const fakeQuery = async (text, params) => {
+    calls.push({ text, params });
+    return [CARD_ROW];
+  };
+
+  const cards = await listRuns({ query: fakeQuery });
+
+  assert.equal(calls.length, 1, 'exactly one select');
+  const { text } = calls[0];
+  assert.match(text, /select/i);
+  assert.match(text, /from\s+runs/i);
+  // Only the card columns are projected — the big blobs are NEVER selected (spec §25).
+  assert.match(text, /\bid\b/);
+  assert.match(text, /\bcity\b/);
+  assert.match(text, /\baudience\b/);
+  assert.match(text, /\bcreated_at\b/);
+  assert.ok(!/plan_html/i.test(text), 'listRuns must not select plan_html');
+  assert.ok(!/plan_json/i.test(text), 'listRuns must not select plan_json');
+  assert.ok(!/\binputs\b/i.test(text), 'listRuns must not select inputs');
+  // Non-hidden only, newest-first.
+  assert.match(text, /where\s+not\s+hidden/i);
+  assert.match(text, /order\s+by\s+created_at\s+desc/i);
+  assert.deepEqual(cards, [CARD_ROW]);
+});
+
+test('listRuns maps every row through cardFromRow (shape guaranteed)', async () => {
+  const dirty = { ...CARD_ROW, plan_html: '<html>', hidden: false };
+  const cards = await listRuns({ query: async () => [dirty, dirty] });
+  assert.equal(cards.length, 2);
+  for (const card of cards) {
+    assert.deepEqual(Object.keys(card).sort(), ['audience', 'city', 'created_at', 'id']);
+  }
+});
+
+test('listRuns tolerates a driver result wrapped as { rows: [...] }', async () => {
+  const cards = await listRuns({ query: async () => ({ rows: [CARD_ROW] }) });
+  assert.equal(cards.length, 1);
+  assert.equal(cards[0].id, 'run-uuid-1234');
+});
+
+test('listRuns returns an empty array when there are no runs', async () => {
+  assert.deepEqual(await listRuns({ query: async () => [] }), []);
+});
+
+test('listRuns with an injected query never reads DATABASE_URL (stays hermetic)', async () => {
+  const saved = process.env.DATABASE_URL;
+  delete process.env.DATABASE_URL;
+  try {
+    const cards = await listRuns({ query: async () => [CARD_ROW] });
+    assert.equal(cards.length, 1);
   } finally {
     if (saved !== undefined) process.env.DATABASE_URL = saved;
   }

@@ -91,6 +91,43 @@ export async function getRun(id, { query } = {}) {
   return recordFromRow(rows[0]);
 }
 
+// ---- listing runs for the gallery (ticket #11) --------------------------------------
+
+// The card columns the gallery needs, in ONE place — drives the SELECT and is the single
+// source of truth for the list shape. DELIBERATELY excludes plan_html / plan_json / inputs
+// (the big blobs) so the gallery index stays cheap (spec §user story 25 — card fields only),
+// and `org_name` (the card shows city + audience). `hidden` is never selected — it is a prune
+// predicate (WHERE NOT hidden), never a card field.
+const LIST_COLUMNS = Object.freeze(['id', 'city', 'audience', 'created_at']);
+
+// Non-hidden runs, newest-first — the ordering + predicate the gallery relies on, matching the
+// partial index `runs_created_idx on runs (created_at desc) where not hidden`. No parameters:
+// the gallery lists everything (no search / filter / pagination in scope).
+const SELECT_RUNS = `select ${LIST_COLUMNS.join(', ')} from runs
+where not hidden
+order by created_at desc`;
+
+// Shape one DB row into a gallery card. Pure and stateless (mirrors recordFromRow): only the
+// LIST_COLUMNS are copied across, so a stray column on the row (a big blob, or `hidden`) can
+// never leak into a card. Returns null for a non-object row.
+export function cardFromRow(row) {
+  if (!row || typeof row !== 'object') return null;
+  const card = {};
+  for (const col of LIST_COLUMNS) card[col] = row[col] ?? null;
+  return card;
+}
+
+// List every non-hidden run as a gallery card, newest-first — card fields only, never the
+// blobs. `query(text, params)` is injectable for hermetic tests; omitted in production, where
+// a lazy Neon-backed query is built from DATABASE_URL. Row-shape wrapping ({ rows }) is
+// tolerated exactly as getRun does.
+export async function listRuns({ query } = {}) {
+  const q = query || (await defaultQuery());
+  const result = await q(SELECT_RUNS, []);
+  const rows = Array.isArray(result) ? result : (result && result.rows) || [];
+  return rows.map(cardFromRow).filter(Boolean);
+}
+
 // ---- lazy Neon client ---------------------------------------------------------------
 
 // One process-wide query function, created on first real use. Importing this module never

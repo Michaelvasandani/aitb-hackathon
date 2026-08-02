@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang=en>
+<head>
+<meta charset=utf-8>
+<meta name=viewport content="width=device-width,initial-scale=1">
+<title>Plan gallery — Hack-AI-Thon in a Box</title>
+<meta name=description content="A public, newest-first gallery of real, sourced hackathon plans — venues, sponsors, mentors, and a dated timeline for each city.">
+<style>
+:root{--bg:#fff;--fg:#14181f;--muted:#5b6472;--line:#e6e9ef;--card:#f7f8fa;
+--accent:#4f46e5;--accent-soft:#eef0ff;--hi:#0f8a4f;--warn:#b23b3b;--warn-bg:#fbebeb}
+@media(prefers-color-scheme:dark){:root{--bg:#0f1319;--fg:#e8ebf0;--muted:#9aa4b2;
+--line:#232a35;--card:#171c24;--accent:#8b85f5;--accent-soft:#1e2130;--hi:#4ade80;
+--warn:#f87171;--warn-bg:#2a1414}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);
+font:16px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+.wrap{max-width:960px;margin:0 auto;padding:28px 18px 80px}
+a{color:var(--accent)}
+h1{font-size:1.4rem;margin:0 0 4px;letter-spacing:-.01em}
+.sub{color:var(--muted);margin:0 0 22px;font-size:.92rem}
+.grid{display:grid;gap:14px;grid-template-columns:repeat(auto-fill,minmax(240px,1fr))}
+.pcard{display:flex;flex-direction:column;gap:8px;border:1px solid var(--line);
+border-radius:14px;padding:16px 16px 18px;background:var(--card);text-decoration:none;
+color:inherit;transition:border-color .12s ease,transform .12s ease}
+.pcard:hover{border-color:var(--accent);transform:translateY(-2px)}
+.pcard .city{font-weight:700;font-size:1.05rem;letter-spacing:-.01em}
+.pcard .aud{display:inline-block;align-self:flex-start;font-size:.78rem;font-weight:600;
+color:var(--accent);background:var(--accent-soft);border-radius:999px;padding:3px 10px}
+.pcard .date{color:var(--muted);font-size:.85rem;margin-top:auto}
+.pcard:focus-visible,a:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.state{border:1px solid var(--line);border-radius:14px;padding:34px 22px;background:var(--card);
+text-align:center;color:var(--muted)}
+.state h2{margin:0 0 8px;font-size:1.15rem;color:var(--fg)}
+.state p{margin:0 0 16px}
+.state a.cta{display:inline-block;padding:10px 16px;border:1px solid var(--accent);
+border-radius:9px;text-decoration:none;font-weight:700;font-size:.9rem}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+</style>
+</head>
+<body>
+<div class=wrap>
+  <h1>Plan gallery</h1>
+  <p class=sub>Real, sourced hackathon plans people have generated — newest first. Open any one to read it end-to-end.</p>
+  <div id=view></div>
+  <p id=live aria-live=polite class=sr></p>
+</div>
+
+<script type=module>
+/* Ticket #11 — the public gallery, served at /plan/ (a static file; it does NOT collide with
+   the /plan/:id viewer rewrite, which only matches a single non-empty segment). The page
+   fetches GET /api/plans (card fields only — id, city, audience, created_at, never the blobs)
+   and renders newest-first cards, each linking to the /plan/<id> viewer.
+
+   Absolute asset/API paths (/js/..., /api/plans) are used deliberately: this page is served
+   under /plan/, so a relative ./js/... would resolve against /plan/ and 404. The CSP
+   (script-src 'self', connect-src 'self') allows same-origin absolute paths.
+
+   All card data is written via textContent / createElement — never innerHTML — so a run's
+   city/audience can never inject markup into this page. */
+import { galleryState, cardFields } from '/js/plan-gallery.js';
+
+const el = (t, c, x) => { const n = document.createElement(t); if (c) n.className = c;
+  if (x !== undefined) n.textContent = x; return n; };
+const $ = (id) => document.getElementById(id);
+
+/* Render the wall of cards, newest-first (the server already orders and filters). */
+function renderList(cards) {
+  const box = $('view');
+  box.innerHTML = '';
+  const grid = el('div', 'grid');
+  for (const card of cards) {
+    const f = cardFields(card);
+    const a = el('a', 'pcard');
+    a.href = f.href;
+    a.appendChild(el('span', 'city', f.city));
+    if (f.audience) a.appendChild(el('span', 'aud', f.audience));
+    if (f.date) a.appendChild(el('span', 'date', f.date));
+    grid.appendChild(a);
+  }
+  box.appendChild(grid);
+  $('live').textContent = cards.length + (cards.length === 1 ? ' plan' : ' plans') + ' in the gallery.';
+}
+
+/* Clean empty state — an empty gallery (or a failed/garbled fetch) shows an invitation to
+   generate the first plan, never a broken or blank page. */
+function renderEmpty() {
+  const box = $('view');
+  box.innerHTML = '';
+  const s = el('div', 'state');
+  s.appendChild(el('h2', null, 'No plans yet'));
+  s.appendChild(el('p', null, 'Be the first — generate a real, sourced hackathon plan for your city.'));
+  const cta = el('a', 'cta', 'Generate the first one');
+  cta.href = '/';
+  s.appendChild(cta);
+  box.appendChild(s);
+  $('live').textContent = 'The gallery is empty.';
+}
+
+async function load() {
+  const box = $('view');
+  box.innerHTML = '';
+  box.appendChild(el('div', 'state', 'Loading plans…'));
+
+  let cards = null;
+  try {
+    const res = await fetch('/api/plans', { headers: { Accept: 'application/json' } });
+    if (res.status === 200) {
+      try { cards = await res.json(); } catch (_) { cards = null; }
+    }
+  } catch (_) {
+    // Network failure — fall through to the empty state rather than hanging.
+    cards = null;
+  }
+
+  if (galleryState(cards) === 'list') renderList(cards);
+  else renderEmpty();
+}
+
+load();
+</script>
+</body>
+</html>
