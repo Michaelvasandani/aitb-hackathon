@@ -31,6 +31,9 @@ export function rowFromRun(run) {
     inputs,
     plan_json: r.plan_json ?? null,
     plan_html: r.plan_html ?? null,
+    // Real spend for this run. Null when the SDK reported none — recorded as unknown
+    // rather than zero, because a zero would quietly understate the daily total.
+    cost: r.cost ?? null,
   };
 }
 
@@ -39,7 +42,7 @@ export function rowFromRun(run) {
 // exactly one spot (never a three-site edit where the order could silently drift). Order
 // here must match `rowFromRun`'s keys. `created_at` / `hidden` are intentionally absent so
 // their DB defaults (now() / false) apply.
-const INSERT_COLUMNS = Object.freeze(['id', 'city', 'audience', 'org_name', 'inputs', 'plan_json', 'plan_html']);
+const INSERT_COLUMNS = Object.freeze(['id', 'city', 'audience', 'org_name', 'inputs', 'plan_json', 'plan_html', 'cost']);
 
 const INSERT_RUN = `insert into runs (${INSERT_COLUMNS.join(', ')})
 values (${INSERT_COLUMNS.map((_, i) => `$${i + 1}`).join(', ')})`;

@@ -25,14 +25,26 @@ export const ALLOWED_INPUTS = Object.freeze([
   'concept', // free text — the hackathon's format/length/theme (not assumed to be a Saturday)
   'purpose',
   'has_local_anchor', // boolean
+  // How hard to work. 'optimized' is the cheap, fast default; 'custom' lets the organizer
+  // trade time and cost for depth. This is the one knob that materially changes run cost,
+  // so it is an explicit choice rather than something inferred.
+  'plan_mode',        // 'optimized' | 'custom'
+  'leads_per_category', // custom only: 2..5 venues/sponsors/mentors each
+  'verify_leads',     // custom only: run the adversarial re-check (slower, costlier)
 ]);
 
 // Integer-valued fields, coerced and range-checked after the type pass.
-const INT_FIELDS = Object.freeze(['budget_usd']);
+const INT_FIELDS = Object.freeze(['budget_usd', 'leads_per_category']);
 
 const MAX_STR = 500; // matches clean_facts; a purpose is a sentence or two, not an essay
 const MAX_FIELDS = 40; // raw payload ceiling, checked before unknown keys are dropped
 const MAX_BUDGET_USD = 1_000_000; // any real hackathon budget fits; rejects absurd values
+// Depth bounds. The ceiling is a cost ceiling: each extra lead per category is another
+// round of web search + fetch across three parallel research subagents.
+const OPTIMIZED_LEADS = 2;
+const DEFAULT_CUSTOM_LEADS = 3;
+const MIN_LEADS = 2;
+const MAX_LEADS = 5;
 const MIN_YEAR = 2020;
 const MAX_YEAR = 2100;
 
@@ -102,6 +114,22 @@ export function cleanInputs(raw) {
   // produce a plan, so an empty submission is rejected here rather than wasting tokens.
   if (!out.city) {
     throw new BadRequest('city is required');
+  }
+
+  // Normalize the depth controls. Anything unrecognized collapses to the cheap default
+  // rather than erroring — an odd value should never be a way to buy a more expensive run.
+  out.plan_mode = out.plan_mode === 'custom' ? 'custom' : 'optimized';
+  if (out.plan_mode === 'optimized') {
+    // The optimized path is fixed by design: its whole value is being predictable and
+    // cheap, so per-run knobs are ignored rather than honoured.
+    out.leads_per_category = OPTIMIZED_LEADS;
+    out.verify_leads = false;
+  } else {
+    const n = Number(out.leads_per_category);
+    out.leads_per_category = Number.isFinite(n)
+      ? Math.min(MAX_LEADS, Math.max(MIN_LEADS, Math.trunc(n)))
+      : DEFAULT_CUSTOM_LEADS;
+    out.verify_leads = out.verify_leads === true;
   }
 
   return out;
