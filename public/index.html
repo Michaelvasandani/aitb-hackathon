@@ -48,6 +48,8 @@ button.primary{width:100%;margin-top:6px;padding:13px;border:0;border-radius:10p
 background:var(--accent);color:#fff;font:inherit;font-weight:700;font-size:1rem;cursor:pointer}
 button.primary:disabled{opacity:.45;cursor:not-allowed}
 .err{color:var(--warn);font-size:.9rem;margin-top:10px}
+.email-row{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 10px}
+.email-row input{flex:1 1 220px}
 .cost{margin-top:18px;border:1px solid var(--line);border-radius:11px;background:var(--card);
 padding:13px 15px;font-size:.85rem}
 .cost h4{margin:0 0 9px;font-size:.72rem;text-transform:uppercase;letter-spacing:.06em;
@@ -237,6 +239,7 @@ display:flex;align-items:center;justify-content:center;transition:transform .15s
    (script-src 'self') and keeps the page self-contained — no external script/style tags. */
 import { initState, reduce, toView } from './js/activity-log.js';
 import { downloadName } from './js/plan-download.js';
+import { downloadPdf, isEmailish, emailRequestBody, emailErrorMessage } from './js/plan-delivery.js';
 
 /* Set this after uploading the demo video to YouTube as UNLISTED (see docs/DEPLOY.md).
    The ID is the part after "v=" in the video's URL, e.g. "dQw4w9WgXcQ". Leave it empty
@@ -475,6 +478,22 @@ function renderPlan(box, plan, city) {
         'application/json',
       );
     actions.appendChild(dlJson);
+
+    // Print-to-PDF. Uses the browser's own dialog (no library — a strict CSP and no
+    // bundler rule out both a CDN and an npm PDF lib), so the user picks "Save as PDF".
+    const pdfBtn = el('button', 'dl ghost', 'Save as PDF');
+    pdfBtn.type = 'button';
+    pdfBtn.onclick = async () => {
+      pdfBtn.disabled = true;
+      try {
+        await downloadPdf(plan.plan_html, downloadName(city, 'pdf'));
+      } catch (err) {
+        wrap.appendChild(el('div', 'soft-note', err && err.message
+          ? err.message + ' You can still download the plan above.'
+          : 'We couldn\u2019t open the print dialog. You can still download the plan above.'));
+      } finally { pdfBtn.disabled = false; }
+    };
+    actions.appendChild(pdfBtn);
   }
   head.appendChild(actions);
   wrap.appendChild(head);
@@ -494,6 +513,45 @@ function renderPlan(box, plan, city) {
   } else {
     wrap.appendChild(el('div', 'soft-note',
       'We couldn’t save a permalink for this one — you can still download it above.'));
+  }
+
+  // Email it. Only for a saved run: the server attaches the plan it looks up by id, and
+  // never accepts HTML from the browser — that would be an open relay sending
+  // attacker-controlled content from a verified domain.
+  if (plan.id && plan.saved) {
+    const row = el('div', 'email-row');
+    const input = document.createElement('input');
+    input.type = 'email';
+    input.placeholder = 'you@example.org';
+    input.setAttribute('aria-label', 'Email address to send this plan to');
+    const btn = el('button', 'dl ghost', 'Email me the plan');
+    btn.type = 'button';
+    const status = el('div', 'soft-note', '');
+    status.setAttribute('role', 'status');
+
+    btn.onclick = async () => {
+      const to = input.value.trim();
+      if (!isEmailish(to)) { status.textContent = 'That address doesn\u2019t look right.'; return; }
+      btn.disabled = true;
+      status.textContent = 'Sending\u2026';
+      try {
+        const res = await fetch('./api/email', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(emailRequestBody({ to, runId: plan.id })),
+        });
+        let body = null;
+        try { body = await res.json(); } catch (_) { /* an empty body is not the point */ }
+        status.textContent = res.ok
+          ? 'Sent \u2014 check ' + to + '. The plan is attached as an HTML file.'
+          : emailErrorMessage(res.status, body);
+      } catch (_) {
+        status.textContent = 'Couldn\u2019t reach the server. Nothing was sent.';
+      } finally { btn.disabled = false; }
+    };
+
+    row.appendChild(input); row.appendChild(btn);
+    wrap.appendChild(row); wrap.appendChild(status);
   }
 
   const frame = document.createElement('iframe');
