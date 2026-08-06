@@ -117,8 +117,11 @@ layer as a web app). No account, no server, no database.
 - **Redeploy:** `vercel --prod` from the repo root (project is linked; `.vercel/` is gitignored).
 - **Sharing:** use the `-iota` alias. The raw `…-<hash>-….vercel.app` deployment URLs sit behind Vercel
   Deployment Protection and 302 for anyone not signed into the Vercel account.
-- **Alternatives** (from `docs/DEPLOY.md`): Cloudflare Pages (unlimited bandwidth) or GitHub Pages
-  (workflow already committed at `.github/workflows/deploy.yml`).
+- **Alternatives: there are none any more.** This note used to offer Cloudflare Pages or GitHub
+  Pages. Both are static-only, and since ADR-0001 the planner, the permalink viewer and the
+  gallery are all HTTP calls to serverless functions backed by Neon — a static host serves
+  every one of them as a 404. The GitHub Pages job has been removed from
+  `.github/workflows/deploy.yml`, which now only runs tests. See `docs/DEPLOY.md`.
 
 ---
 
