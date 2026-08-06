@@ -6,7 +6,7 @@
   "scripts": {
     "rules": "python3 scripts/export_rules.py",
     "test": "python3 -m unittest discover -s tests -t . -q",
-    "test:js": "node --test tests/js/",
+    "test:js": "node --test tests/js/*.test.js",
     "test:all": "npm run test && npm run test:js",
     "dev": "python3 scripts/devserver.py",
     "db:init": "bash scripts/db-init.sh",

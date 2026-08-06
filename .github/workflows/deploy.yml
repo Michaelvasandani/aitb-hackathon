@@ -46,11 +46,18 @@ jobs:
         run: python3 -m unittest discover -s tests -t . -q
 
       # The Node suite covers the API seams the Python suite cannot reach: the request
-      # handler, the input validator, the store, and the spend guards. It was silently
-      # skipped for a long time because the script used a glob string, which `node --test`
-      # only accepts from Node 21 while this job pinned 20 — it matched nothing and exited
-      # quietly, and nine real failures accumulated behind it. The script now passes a
-      # directory, which works on every supported Node and does not depend on this pin.
+      # handler, the input validator, the store, and the spend guards.
+      #
+      # How this command is written has broken twice, both times silently:
+      #   - a quoted glob ("tests/js/**/*.test.js") is expanded by `node --test` itself,
+      #     which only supports it from Node 21 — on the old Node 20 pin it matched nothing
+      #     and nine real failures accumulated behind a green build;
+      #   - a bare directory (tests/js/) works on Node 20 but Node 22 resolves it as a
+      #     module and dies with MODULE_NOT_FOUND.
+      # It now passes explicit file paths, expanded by the shell before Node sees them —
+      # the most stable form the runner accepts, independent of the version pinned above.
+      # tests/test_js_suite_runs.py asserts the suite genuinely executes, so a third variant
+      # of this mistake fails the build instead of hiding.
       - name: API seam tests (handler, validation, store, guards)
         run: npm run test:js
 
