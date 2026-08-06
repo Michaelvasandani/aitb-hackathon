@@ -7,8 +7,7 @@ description: Build a ranked, sourced shortlist of candidate venues for a hackath
 
 Assembles a ranked, **sourced** venue shortlist for a hackathon in the user's city. There is no
 organizer counterpart to lift from, so this is built fresh — but it follows the repo's core
-pattern: **fan out pure-web source subagents in parallel → merge + dedupe → score with a
-deterministic rubric.**
+pattern: **sweep public sources → merge + dedupe → score with a deterministic rubric.**
 
 Writes `Lead` objects (shape in [`../_shared/data-contract.md`](../_shared/data-contract.md))
 into `plan.leads.venues`. Every venue carries a `source_url` and `confidence`. A shortlist of
@@ -21,10 +20,19 @@ into `plan.leads.venues`. Every venue carries a `source_url` and `confidence`. A
 - `budget_usd` — separates "free/community" venues from paid ones.
 - `event_date` / `date_window` — for weekend-access checks and day-of-week fit.
 
-## Source playbook (fan out — one subagent per source, run in parallel)
+## Source playbook (run these searches yourself — do NOT spawn subagents)
 
-Each subagent searches public sources only, returns candidates + a source URL each. No
-authenticated scraping, no private lists — this must be portable to the deployed runtime.
+**Do not delegate these to subagents.** Issue the searches directly, several in one turn.
+Every agent you spawn re-pays the full system prompt and copies its findings back into your
+context, so a subagent per source costs several times what the search itself does and buys
+nothing — these are independent queries, not independent reasoning.
+
+Search the sources below **in priority order and stop early**: once you have enough sourced
+venues to satisfy the requested count, do not work through the rest of the list. Sources 1–3
+hit most often; 4–6 are fallbacks for thin cities.
+
+Public sources only. No authenticated scraping, no private lists — this must be portable to
+the deployed runtime.
 
 1. **Coworking & innovation spaces** — search `"[city] coworking event space capacity"`,
    `"[city] coworking hackathon"`. WeWork/Industrious/Regus + local independents. These are the
@@ -93,6 +101,10 @@ For each venue, a `Lead` object with: `name`, `one_liner`, `signals[]`, `score`,
 (**required**), `confidence`, `warm_path` (usually null for venues), and a specific
 `suggested_first_move` (e.g. *"Email events@ to confirm Sat 8am–8pm access for 40 + wifi"*).
 
-Return **exactly the top 3 sourced venues** — cap the list at 3 to keep the run fast (the
-orchestrator's done-signal). If you can't find 3 with source URLs, return what you have and add
-a `warnings[]` entry — do not pad the list with invented spaces, and never exceed 3.
+Return **exactly the number of venues the dispatching prompt asked for** — it states an explicit
+count (`EXACTLY N well-sourced leads per category`). That number is the organizer's own
+cost/depth choice; honour it. If the prompt names no count, default to **3**.
+
+Never exceed the requested count. Each extra lead is another round of search and fetch whose
+results stay in context for the rest of the run. If you can't find enough leads with real
+source URLs, return what you have and add a `warnings[]` entry — never pad with invented spaces.

@@ -83,11 +83,29 @@ nothing. Every limit is an env var.
 **Dedup** fingerprints the normalized inputs, so a retry after a timeout or a second browser
 tab joins the existing run instead of starting a second paid pipeline for one intent.
 
-**The honest limitation:** state is per-instance and in-memory. On serverless that means
-limits are per warm instance, not global — an attacker spread across many cold starts gets
-more than the nominal budget. That is a deliberate trade: it needs no database on the request
-path and removes the whole *unbounded* class of risk. The **daily budget breaker is the real
-backstop**, and moving this to Postgres is the obvious follow-up.
+**~~The honest limitation:~~ FIXED — see below.** This section used to say the in-memory state
+was a deliberate trade and that the daily budget breaker was "the real backstop". That was
+wrong: the breaker was in the same per-instance memory, so it had the same hole. An attacker
+did not need cold starts, only concurrency — Vercel starts a fresh instance per concurrent
+request, each seeing an empty budget.
+
+There are now **two layers**, and both must pass:
+
+1. **In-memory** (above) — free and instant, rejects a same-instance burst before spending a
+   database round trip on it.
+2. **Durable** (`run_reservations`, via the store seam) — every limit lives inside a single
+   atomic `INSERT … WHERE`, so concurrent requests on different instances cannot each believe
+   they are the first. Checking and claiming in separate statements is the classic bug here:
+   N simultaneous requests all read "4 used" and all insert.
+
+The durable layer **fails closed**: if the database cannot be reached, we cannot know what has
+been spent, and an unverifiable budget is not a licence to spend. `PLAN_GUARD_FAIL_OPEN=1`
+inverts that for a demo where a DB blip must not stop a presentation — accepting, explicitly,
+that spend is unbounded while the DB is down.
+
+**Run `npm run db:verify-guard` after `npm run db:init`.** Because the guard fails closed, a
+missing table or a SQL syntax error takes the whole endpoint down, and the unit tests cannot
+catch it — they inject a fake query function and never execute the SQL.
 
 `endRun()` is called in a `finally`. A leaked concurrency slot is worse than a missing limit
 because it shrinks capacity silently and permanently on that instance.
@@ -148,11 +166,30 @@ now available per-run to organizers who want it, instead of on for everyone or n
 
 ---
 
+---
+
+## Tier 3 — the agent tree itself
+
+The tiers above bound what a run is *allowed* to cost. They do not make the run cheaper.
+`docs/TOKEN-EFFICIENCY.md` does that: it measures the tree of agents one request spawns and
+removes the nesting, the ignored depth cap, and the exhaustive source sweeps.
+
+**A run now costs 41% less at identical research depth, 53% less at the default**, and the
+`optimized` vs `custom` lever documented above finally binds — before that fix, both modes cost
+the same because the research skills overrode the requested lead count in prose.
+
+```bash
+python3 scripts/token_audit.py    # models the agent tree; reads its shape from the skill files
+```
+
+---
+
 ## Verifying
 
 ```bash
-python3 -m unittest discover -s tests -t . -q   # 213 tests
+python3 -m unittest discover -s tests -t . -q   # 273 tests
 node scripts/test_cost_controls.mjs             # guards + deterministic timeline
+python3 scripts/token_audit.py                  # token + cost model, before/after
 ```
 
 The tests assert the *ordering* that makes the guards meaningful — validation, then guards,

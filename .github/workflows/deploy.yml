@@ -36,6 +36,31 @@ jobs:
       - name: Test suite (includes Python↔JS conformance)
         run: python3 -m unittest discover -s tests -t . -q
 
+      # The Node suite covers the API seams the Python suite cannot reach: the request
+      # handler, the input validator, the store, and the spend guards. It was silently
+      # skipped for a long time because the script used a glob string, which `node --test`
+      # only accepts from Node 21 while this job pins 20 — it failed to match, and nothing
+      # ran. Nine real failures had accumulated behind that. Directory form works on 20.
+      - name: API seam tests (handler, validation, store, guards)
+        run: npm run test:js
+
+      # Supply chain. The Agent SDK runs with ANTHROPIC_API_KEY in its environment, so a
+      # compromised dependency reads the key — that is the highest-impact, lowest-effort
+      # attack on this repo, and nothing was checking for it.
+      #
+      # Threshold is `moderate` rather than `high` on purpose: the runtime surface is two
+      # direct dependencies (~110 packages total), so the noise is low, and the advisory
+      # this gate was written for (hono ReDoS, GHSA-8j4g-w8fx-2239) was itself moderate.
+      # Raise it to `high` if it ever starts blocking unrelated deploys.
+      - name: Dependencies have no known advisories
+        run: npm audit --audit-level=moderate
+
+      # An out-of-date lockfile means CI and production install different code than anyone
+      # reviewed. `npm ci` fails outright when package.json and the lockfile disagree, so
+      # this doubles as the "is the lockfile committed and current" check.
+      - name: Lockfile is committed and matches package.json
+        run: npm ci --ignore-scripts
+
   deploy:
     needs: test
     if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'

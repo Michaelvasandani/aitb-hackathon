@@ -59,6 +59,7 @@ color:var(--muted);font-weight:700}
 .cost dd{margin:0;font-variant-numeric:tabular-nums;text-align:right}
 .cost .total{font-weight:700;color:var(--fg)}
 .cost .note{margin-top:9px;color:var(--muted);font-size:.78rem}
+.cost .sect{color:var(--muted);font-size:.7rem;letter-spacing:.05em;padding-top:6px}
 .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
 .run{margin-top:26px}
 .run .note{color:var(--muted);font-size:.85rem;margin-top:10px}
@@ -381,30 +382,66 @@ function renderCost(cost) {
     ? '$' + cost.total_cost_usd.toFixed(4)
     : 'not reported';
 
+  const searches = cost.web_search_requests;
+  const hasSearches = typeof searches === 'number' && searches > 0;
+
+  // Anthropic bills web search at $10 per 1,000 requests. That fee is the part people
+  // quote, but it is the smaller half: the results land in context and are re-sent on
+  // every later turn of that agent. Both parts are shown so the real driver is visible.
+  const searchFeeUsd = hasSearches ? (searches / 1000) * 10 : null;
+  const perSearchUsd = hasSearches && typeof cost.total_cost_usd === 'number'
+    ? cost.total_cost_usd / searches
+    : null;
+
+  // How much of the input was served from cache, at a 90% discount.
+  const reads = cost.cache_read_input_tokens;
+  const fresh = cost.input_tokens;
+  const cacheRate = typeof reads === 'number' && typeof fresh === 'number' && (reads + fresh) > 0
+    ? reads / (reads + fresh)
+    : null;
+
+  const money = (v, dp = 4) => (typeof v === 'number' ? '$' + v.toFixed(dp) : '—');
+
   const rows = [
     ['Total cost', usd, true],
     ['Model', cost.model || '—'],
     ['Turns', n(cost.num_turns)],
+    ['Wall clock', typeof cost.duration_ms === 'number'
+      ? (cost.duration_ms / 1000).toFixed(1) + 's' : '—'],
+
+    ['— Search —', ''],
+    ['Web searches', n(searches)],
+    ['Search request fees', money(searchFeeUsd, 4)],
+    ['Cost per search (all-in)', money(perSearchUsd, 4)],
+
+    ['— Tokens —', ''],
     ['Input tokens', n(cost.input_tokens)],
     ['Output tokens', n(cost.output_tokens)],
     ['Cache reads', n(cost.cache_read_input_tokens)],
     ['Cache writes', n(cost.cache_creation_input_tokens)],
-    ['Web searches', n(cost.web_search_requests)],
-    ['Wall clock', typeof cost.duration_ms === 'number'
-      ? (cost.duration_ms / 1000).toFixed(1) + 's' : '—'],
+    ['Cache hit rate', cacheRate === null ? '—' : (cacheRate * 100).toFixed(0) + '%'],
   ];
 
   const box = el('div', 'cost');
   box.appendChild(el('h4', null, 'Run cost (debug)'));
   const dl = document.createElement('dl');
   for (const [label, value, isTotal] of rows) {
+    if (value === '') { // section divider
+      const hr = el('dt', 'sect', label);
+      hr.setAttribute('aria-hidden', 'true');
+      dl.appendChild(hr); dl.appendChild(el('dd', 'sect', ''));
+      continue;
+    }
     const dt = el('dt', null, label);
     const dd = el('dd', isTotal ? 'total' : null, value);
     dl.appendChild(dt); dl.appendChild(dd);
   }
   box.appendChild(dl);
   box.appendChild(el('p', 'note',
-    'Reported by the Agent SDK for this run. Add ?cost=0 to the URL to hide this panel.'));
+    'Totals and token counts are reported by the Agent SDK for this run. '
+    + 'Search request fees are derived at $10/1,000 searches; "cost per search" divides '
+    + 'this run\'s total by its search count, so it includes the context those results '
+    + 'occupy — the larger half. Add ?cost=0 to the URL to hide this panel.'));
   slot.appendChild(box);
 }
 

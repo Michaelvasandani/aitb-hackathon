@@ -80,7 +80,9 @@ test('saveRun issues one parameterized insert through the injected query fn (no 
   assert.match(text, /\bplan_html\b/);
   assert.ok(!/created_at/i.test(text), 'created_at must not be inserted');
   assert.ok(!/hidden/i.test(text), 'hidden must not be inserted');
-  // Parameter order matches the shaped row.
+  assert.match(text, /\bcost\b/);
+  // Parameter order matches the shaped row. `cost` is null here because RUN carries none —
+  // recorded as unknown rather than 0, which would understate the daily spend total.
   assert.deepEqual(params, [
     'run-uuid-1234',
     'Boise, ID',
@@ -89,6 +91,7 @@ test('saveRun issues one parameterized insert through the injected query fn (no 
     RUN.inputs,
     RUN.plan_json,
     RUN.plan_html,
+    null,
   ]);
 });
 
