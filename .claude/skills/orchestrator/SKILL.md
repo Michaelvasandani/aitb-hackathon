@@ -42,10 +42,15 @@ target sponsor is a door-opener).
 
 ## Dispatch map (phase → specialist skill)
 
+> **Dates are computed in code before you start** (`api/_lib/deterministic.js`, Tier 0). When
+> the dispatching prompt supplies a computed timeline, `plan.timeline[]` is already filled in
+> and authoritative — dispatch `timeline` **only for `run_of_show`**, and never to recount
+> phases or re-check the lead-time floor.
+
 | Phase | Skill to dispatch | Depends on |
 |---|---|---|
 | intake (pre-phase 0) | `intake-clarifier` | nothing |
-| 3. date / runway | `timeline` | intake (audience, date/window) |
+| 3. date / runway | *(computed in code — dispatch nothing)* | — |
 | 4. venue | `research-venue` | intake (city) |
 | 5. sponsors | `research-sponsor` | intake (city, audience) |
 | 6. judges_mentors | `research-talent` | sponsors (for overlap scoring) |
@@ -57,7 +62,11 @@ target sponsor is a door-opener).
 1. Run **intake-clarifier** first — everything downstream reads its normalized `inputs`.
 2. Then fan out **research-venue + research-sponsor + research-talent** concurrently (talent
    sources in parallel but holds its final overlap score until the sponsor list lands).
-3. Run **timeline** as soon as the date/runway is settled (independent of research).
+   **This is the only fan-out.** Each specialist runs its own searches directly; none of them
+   should spawn a further subagent per source. Every extra agent re-pays the full system prompt
+   and copies its findings back into its parent's context — that nesting was the largest single
+   cost in the pipeline and bought no better leads.
+3. Run **timeline** for `run_of_show` only — the planning dates are already computed in code.
 4. Dispatch **plan-assembly** last.
 
 > The dedicated adversarial verification pass is **temporarily disabled** (it was the run-time
@@ -71,11 +80,15 @@ A phase is "done" only when it clears its signal. Below signal → mark the sect
 and add a `warnings[]` entry; do not render it as complete (ties to the "say when the plan
 is thin" guardrail).
 
+`N` below is the lead count the dispatching prompt asked for (`EXACTLY N well-sourced leads per
+category`), defaulting to 3 if it names none. It is the organizer's cost/depth choice — do not
+substitute your own number, and do not treat a lower N as an incomplete plan.
+
 | Phase | Done signal |
 |---|---|
-| venue | 3 sourced venues, each with a source URL (capped at 3 for speed) |
-| sponsors | 3 cash-capable prospects, post revenue gate (capped at 3 for speed) |
-| judges_mentors | 3 prospects you'd actually invite (capped at 3 for speed) |
+| venue | N sourced venues, each with a source URL |
+| sponsors | N cash-capable prospects, post revenue gate |
+| judges_mentors | N prospects you'd actually invite |
 | date | a scored date or window above the lead-time floor |
 
 ## Verification pass (adversarial — DISABLED FOR NOW)

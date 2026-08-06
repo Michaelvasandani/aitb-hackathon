@@ -148,11 +148,30 @@ now available per-run to organizers who want it, instead of on for everyone or n
 
 ---
 
+---
+
+## Tier 3 — the agent tree itself
+
+The tiers above bound what a run is *allowed* to cost. They do not make the run cheaper.
+`docs/TOKEN-EFFICIENCY.md` does that: it measures the tree of agents one request spawns and
+removes the nesting, the ignored depth cap, and the exhaustive source sweeps.
+
+**A run now costs 41% less at identical research depth, 53% less at the default**, and the
+`optimized` vs `custom` lever documented above finally binds — before that fix, both modes cost
+the same because the research skills overrode the requested lead count in prose.
+
+```bash
+python3 scripts/token_audit.py    # models the agent tree; reads its shape from the skill files
+```
+
+---
+
 ## Verifying
 
 ```bash
-python3 -m unittest discover -s tests -t . -q   # 213 tests
+python3 -m unittest discover -s tests -t . -q   # 273 tests
 node scripts/test_cost_controls.mjs             # guards + deterministic timeline
+python3 scripts/token_audit.py                  # token + cost model, before/after
 ```
 
 The tests assert the *ordering* that makes the guards meaningful — validation, then guards,

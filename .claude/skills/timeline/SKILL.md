@@ -5,20 +5,30 @@ description: Build a dated, phase-by-phase hackathon timeline by counting BACK f
 
 # Timeline
 
-Produces two things from the event date and runway:
+> **Read this first — most of this skill no longer runs.**
+>
+> The **planning timeline and the lead-time floor are computed in code**, before the pipeline
+> starts, by `api/_lib/deterministic.js` (see `docs/COST-CONTROLS.md`, "Tier 0"). When a hard
+> event date is known, `plan.timeline[]` and its `warnings[]` **arrive already filled in** and
+> are authoritative: code overwrites anything you write there.
+>
+> So when the dispatching prompt supplies a computed timeline, **your only job is
+> `plan.run_of_show[]`** — jump straight to the run-of-show section below. Do not recount the
+> phases, re-check the lead-time floor, or re-score the date; that work is already done, and
+> redoing it costs turns and risks a second, conflicting answer.
+>
+> The date sections below stay for the one case they still apply to: a **rough date window with
+> no hard date**, where code computes nothing and the plan is expressed in weeks, not calendar
+> dates. In that case, do not invent specific dates.
 
-1. A **planning timeline** — the 8 phases as dated milestones, counted **back from event day**.
-2. An **event-day run-of-show** — the hour-by-hour schedule.
-
-Lifts the lead-time floor and run-of-show schema from `finding-event-dates` and
-`planning-aitb-events`; drops the Meetup/gog integrations. Writes into `plan.timeline` and
-`plan.run_of_show` ([`../_shared/data-contract.md`](../_shared/data-contract.md)).
+Writes into `plan.timeline` and `plan.run_of_show`
+([`../_shared/data-contract.md`](../_shared/data-contract.md)).
 
 ## Read from `plan.inputs`
 
 `event_date` (or `date_window`), `runway_days`, `expected_headcount`, `budget_usd`.
 
-## Lead-time floor — the hard-stop (do this FIRST)
+## Lead-time floor — the hard-stop (window-only runs; otherwise already computed)
 
 If the runway is below the floor, the plan is honest-small, not confident-big. Floors:
 

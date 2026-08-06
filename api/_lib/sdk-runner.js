@@ -99,16 +99,24 @@ function buildPrompt(inputs, jsonPath, htmlPath, computedTimeline) {
     '   research-sponsor, and research-talent as PARALLEL subagents (one Task tool call per',
     '   specialist, sent together) so they run concurrently. Use web search for every lead.',
     '   Every lead MUST carry a real, working `source_url`; OMIT any lead you cannot source.',
+    '   THREE subagents total — that is the ONLY fan-out. Each specialist runs its own',
+    '   searches directly and MUST NOT spawn a further subagent per source or per dimension.',
+    '   Every agent re-pays the full system prompt and copies its findings back into its',
+    '   parent, so nested fan-out multiplies cost without improving the leads.',
     `   Keep each list SHORT — EXACTLY ${leadsPerCategory} well-sourced leads per category.`,
     '   Do not exceed that count: each extra lead is another round of web search and fetch',
     '   across three parallel subagents, and the organizer chose this depth deliberately.',
+    '   Search in priority order and STOP as soon as you have enough sourced leads — do not',
+    '   work through an entire source list for completeness.',
     verifyLeads
       ? '   Then run the adversarial verification pass: independently re-fetch each source_url, '
         + 'confirm it backs the claim and the org is real and local, and drop or downgrade any lead that fails.'
       : '   (The adversarial verification pass is OFF for this run — it was the run-time '
         + 'bottleneck; see docs/decisions/0001-disable-verification-stage.md. Sourced-or-omitted '
         + 'still holds: only include a lead if you have a real source_url for it.)',
-    '3. Do NOT build the timeline — it is already computed for you below (Tier 0).',
+    '3. Do NOT build the timeline — it is already computed for you below (Tier 0). Dispatch',
+    '   the timeline skill ONLY to produce `run_of_show` (the event-day hour-by-hour schedule);',
+    '   do not let it recount phases or re-check the lead-time floor.',
     '4. Assemble the final plan (plan-assembly) as ONE self-contained HTML file.',
     '',
     timelinePromptBlock(computedTimeline),

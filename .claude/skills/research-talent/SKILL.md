@@ -17,7 +17,13 @@ Writes `Lead` objects into `plan.leads.mentors`. Shapes in
 
 We **cannot** log into LinkedIn and scrape it — against ToS, actively blocked, and there's no
 authenticated browser in the deployed runtime. Instead, use **web search over public sources**
-to surface *who runs community/AI events in this city*, each with a public source link:
+to surface *who runs community/AI events in this city*, each with a public source link.
+
+**Run these searches yourself — do not spawn a subagent per source.** A spawned agent re-pays
+the full system prompt and copies its findings back into yours, costing several times the
+search and buying nothing; these are independent queries, not independent reasoning. Issue
+several in one turn, and **stop early** once you have enough sourced people to satisfy the
+requested count.
 
 - **Indexed public profiles** (surfaced via search, not scraped behind a login).
 - **Luma / Meetup event pages** — the **host/organizer** of a local AI meetup is exactly the
@@ -82,7 +88,11 @@ Each `Lead`: `name`, `one_liner` (role + why they fit), `signals[]` (dims fired,
 public**), `confidence`, `warm_path` (usually null; note the public channel to reach them),
 and a specific `suggested_first_move`.
 
-Return **exactly the top 3 prospects you'd actually invite** — cap the list at 3 to keep the
-run fast (the orchestrator's done-signal). Below that, return what's real and add a `warnings[]`
-entry, and never exceed 3. **No invented people** — sourced or omitted, and the organizer sends
-the actual invite.
+Return **exactly the number of prospects the dispatching prompt asked for** — it states an
+explicit count (`EXACTLY N well-sourced leads per category`). That number is the organizer's own
+cost/depth choice; honour it. If the prompt names no count, default to **3**.
+
+Never exceed the requested count — each extra lead is another round of search and fetch whose
+results stay in context for the rest of the run. Below the count, return what's real and add a
+`warnings[]` entry. **No invented people** — sourced or omitted, and the organizer sends the
+actual invite.

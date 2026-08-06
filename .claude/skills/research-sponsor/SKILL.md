@@ -49,7 +49,16 @@ Every sponsor prospect must have an explicit motivation. Use this cheat sheet:
 | **Community / ESG** | Local workforce-development credit | Local-impact metrics, photo coverage, workforce narrative |
 | **Pipeline / relationships** | Doors into the local tech ecosystem | Intros to local leaders, community network access |
 
-## Web scan dimensions (all public — fan out in parallel)
+## Web scan dimensions (all public — run these searches yourself)
+
+**Do not spawn a subagent per dimension.** Issue the searches directly, several in one turn.
+A spawned agent re-pays the full system prompt and copies its findings back into yours, which
+costs several times the search and buys nothing — these are independent queries, not
+independent reasoning.
+
+**Stop early.** Dimensions 5 and 8 are the strongest signals and hit most often. Once you have
+enough gate-passing prospects to satisfy the requested count, stop; do not sweep every
+dimension for completeness.
 
 Dropped: dims 1–4 (Airtable past-sponsor loop, org graph, BB cross-ref, marketing-partners doc)
 and dim 11 (champion-alumni — needs warm data). **Kept and portable:**
@@ -99,7 +108,11 @@ Each sponsor `Lead`: `name`, `one_liner`, `signals[]` (dims fired), `score`, tie
 intro route or null), and a specific `suggested_first_move` (e.g. *"Reach [Company] DevRel via
 their community Slack — offer an API-credits + judging tier"*).
 
-Return **exactly the top 3 cash-capable prospects** — cap the list at 3 to keep the run fast
-(the orchestrator's done-signal). Below that, return what's real and add a `warnings[]` entry —
-never pad with orgs that fail the gate, and never exceed 3. Remember the guardrail: **agents
+Return **exactly the number of cash-capable prospects the dispatching prompt asked for** — it
+states an explicit count (`EXACTLY N well-sourced leads per category`). That number is the
+organizer's own cost/depth choice; honour it. If the prompt names no count, default to **3**.
+
+Never exceed the requested count — each extra lead is another round of search and fetch whose
+results stay in context for the rest of the run. Below the count, return what's real and add a
+`warnings[]` entry; never pad with orgs that fail the gate. Remember the guardrail: **agents
 draft, the organizer sends** — this skill stops at the prospect list.
