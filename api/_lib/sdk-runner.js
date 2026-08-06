@@ -146,7 +146,15 @@ function buildPrompt(inputs, jsonPath, htmlPath, computedTimeline) {
   ].join('\n');
 }
 
-export async function runPlan(inputs, emit) {
+/**
+ * Run the paid pipeline.
+ *
+ * `signal` lets the caller stop a run that nobody is waiting for any more — see the
+ * disconnect handling in ./handler.js. Without it, closing the browser tab left the agent
+ * researching for up to the full 800s `maxDuration`, spending the whole time, with no reader
+ * at the other end. Optional so every existing caller and test keeps working unchanged.
+ */
+export async function runPlan(inputs, emit, { signal } = {}) {
   // Import lazily so the handler module (and its tests) never load the SDK.
   const { query } = await import('@anthropic-ai/claude-agent-sdk');
 
@@ -165,6 +173,15 @@ export async function runPlan(inputs, emit) {
   let lastStage = 'intake';
 
   const abortController = new AbortController();
+  // Bridge the caller's signal onto the SDK's controller. Registered BEFORE query() so a
+  // client that vanishes during startup is honoured too, and cleaned up in the `finally`
+  // below so a long-lived signal does not accumulate listeners across runs.
+  const onExternalAbort = () => abortController.abort();
+  if (signal) {
+    if (signal.aborted) abortController.abort();
+    else signal.addEventListener('abort', onExternalAbort, { once: true });
+  }
+
   const response = query({
     prompt: buildPrompt(inputs, jsonPath, htmlPath, computedTimeline),
     options: {
@@ -218,6 +235,17 @@ export async function runPlan(inputs, emit) {
     }
   } finally {
     abortController.abort();
+    // Drop the bridge, or a caller that reuses one signal across runs accumulates listeners.
+    if (signal) signal.removeEventListener('abort', onExternalAbort);
+  }
+
+  // A cancelled run has no deliverable — say so plainly rather than falling through to the
+  // "pipeline finished without writing plan.json" error below, which would misreport a
+  // deliberate cancellation as a pipeline failure and send an operator hunting a real bug.
+  if (signal && signal.aborted) {
+    const err = new Error('Run cancelled — the client disconnected before it finished');
+    err.cancelled = true;
+    throw err;
   }
 
   // Real spend, straight from the SDK's terminal result message — not an estimate.

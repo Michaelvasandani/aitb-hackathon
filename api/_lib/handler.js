@@ -89,14 +89,38 @@ export function createPlanHandler({ runPlan, store = realStore }) {
     // Defeat proxy buffering so the browser sees stages as they happen.
     res.setHeader('X-Accel-Buffering', 'no');
 
-    const send = (event) => res.write(`data: ${JSON.stringify(event)}\n\n`);
+    // Stop writing once the socket is gone: res.write() on a destroyed stream can emit an
+    // unhandled 'error' and take the instance down with it.
+    let clientGone = false;
+    const send = (event) => {
+      if (clientGone || res.writableEnded) return;
+      res.write(`data: ${JSON.stringify(event)}\n\n`);
+    };
     const emit = (stageEvent) => send({ type: 'stage', ...stageEvent });
+
+    // A run nobody is waiting for still costs full price. Closing the browser tab used to
+    // leave the agent researching for up to the whole 800s maxDuration, spending the entire
+    // time, with no reader at the other end — the single easiest way to waste money here,
+    // and it did not even require malice.
+    //
+    // `close` also fires on a normal finish, so `done` guards against cancelling a run that
+    // already succeeded.
+    const abort = new AbortController();
+    let done = false;
+    const onClose = () => {
+      if (done) return;
+      clientGone = true;
+      console.warn('[planHandler] client disconnected mid-run — cancelling to stop the spend');
+      abort.abort();
+    };
+    res.on('close', onClose);
 
     beginRun(guard.key, guard.fingerprint);
     let runCostUsd = null;
 
     try {
-      const { id, plan_json, plan_html, cost } = await runPlan(inputs, emit);
+      const { id, plan_json, plan_html, cost } = await runPlan(inputs, emit, { signal: abort.signal });
+      done = true; // past this point `close` is a normal end-of-response, not a disconnect
       runCostUsd = cost && typeof cost.total_cost_usd === 'number' ? cost.total_cost_usd : null;
 
       // Best-effort persistence AFTER the run completes (ADR-0003). A DB failure must never
@@ -119,9 +143,18 @@ export function createPlanHandler({ runPlan, store = realStore }) {
       // It is observability, not a bill — see docs/COST-CONTROLS.md.
       send({ type: 'complete', id, saved, plan_json, plan_html, cost });
     } catch (err) {
-      // A failed run tells the browser it failed rather than hanging (user story #24).
-      send({ type: 'error', message: err && err.message ? err.message : String(err) });
+      done = true;
+      // A cancellation is not a failure: nobody is listening, and `send` is a no-op on a
+      // dead socket anyway. Log it as spend saved rather than as an error to chase.
+      if (err && err.cancelled) {
+        console.warn('[planHandler] run cancelled after client disconnect');
+      } else {
+        // A failed run tells the browser it failed rather than hanging (user story #24).
+        send({ type: 'error', message: err && err.message ? err.message : String(err) });
+      }
     } finally {
+      done = true;
+      res.removeListener('close', onClose);
       // Must run even when the client vanished mid-stream, or the concurrency slot leaks
       // and capacity shrinks permanently on this instance.
       endRun(guard.fingerprint, runCostUsd);

@@ -81,11 +81,11 @@ Read from the code and config, not the diagram.
 | 6 | **Mail relay** — sending attacker HTML from a verified domain | internet → `/api/email` | Mail abuser | Low | **High** | Attachment read via `store.getRun(run_id)`, never from the body; allowlist `['to','run_id','note']` | Pre-existing, **verified** |
 | 7 | **A run that outlives its reservation** frees its slot early, so the concurrency ceiling stops binding | app → Postgres | Cost griefer | Low | Med | `RUN_TTL_MS` (1200s) must exceed `maxDuration` (800s); asserted in a test | **FIXED** |
 | 8 | **Guard fails open on a DB outage** → unbounded spend precisely when you cannot see it | app → Postgres | Cost griefer | Low | **High** | Fails **closed** by default; `PLAN_GUARD_FAIL_OPEN=1` is opt-in and marks the run degraded | **FIXED** |
-| 9 | **Client disconnect keeps the run burning tokens** | internet → `/api/plan` | Cost griefer | Med | Med | None — no abort signal threaded through `runPlan` | **OPEN** |
+| 9 | **Client disconnect keeps the run burning tokens** — closing the tab left the agent running for up to the full 800s with no reader | internet → `/api/plan` | Cost griefer | Med | Med | `AbortSignal` threaded from the handler into `runPlan`; `res.on('close')` cancels, guarded so a normal finish is not mistaken for a disconnect | **FIXED** |
 | 10 | **Gallery exposes organizer inputs** — every plan is public by default | internet → `/api/plans` | Curious visitor | High | Low | `LIST_COLUMNS` excludes blobs and `hidden`; ids are UUIDs (not enumerable) | **ACCEPTED** |
 | 11 | **SQL injection** | app → Postgres | Scanner | Low | High | Fully parameterized; column lists frozen; asserted in a test | Pre-existing, **verified** |
 | 12 | **Prototype pollution via payload** | internet → `/api/plan` | Scanner | Low | Med | Allowlist drops unknown keys; asserted in a test | Pre-existing, **verified** |
-| 13 | **Compromised dependency** — the SDK runs with the API key in env | CI → prod | Supply chain | Low | **Critical** | 2 runtime deps, lockfile committed. No pinning-by-digest, no audit gate | **OPEN** |
+| 13 | **Compromised dependency** — the SDK runs with the API key in its environment, so a malicious package reads it | CI → prod | Supply chain | Low | **Critical** | `npm audit --audit-level=moderate` and `npm ci` now gate every build; lockfile committed. Found and fixed one live advisory (hono ReDoS, GHSA-8j4g-w8fx-2239) | **FIXED** |
 
 ### What was checked and found NOT to be a problem
 
@@ -110,6 +110,7 @@ Read from the code and config, not the diagram.
 | **No authentication anywhere** | A hackathon demo; adding accounts would cost more than it protects | Real user data, or spend that outruns the daily breaker |
 | **Spend limits are best-effort, not exact** | Reservations age out by time window rather than being reconciled; a crashed instance's row lingers until TTL. Over-counting briefly is the safe direction | Needing exact per-tenant billing |
 | `maxTurns: 80` is the only bound on a single run's cost | A runaway run is capped by turns and the 800s timeout | Observing runs that hit the ceiling routinely |
+| A cancelled run's spend is not recorded | The SDK reports cost only in its terminal `result` message, which a cancelled run never reaches. The tokens were spent but go uncounted, so the daily breaker slightly **under**-counts | Cancellations becoming common enough to matter — the fix is a mid-run usage estimate |
 
 ---
 
@@ -123,8 +124,8 @@ Read from the code and config, not the diagram.
 | #3, #5, #12 input validation | `tests/js/security.test.js` | Passing |
 | #11 parameterization | `tests/js/security.test.js` | Passing |
 | #6 email relay | `tests/test_email.py` | Passing |
-| #9 client disconnect | — | No test; unfixed |
-| #13 dependencies | `supply-chain-auditor` | Not run |
+| #9 client disconnect | `tests/js/handler.test.js` | Passing |
+| #13 dependencies | `npm audit` in CI | Passing (0 advisories) |
 | End-to-end adversarial pass | `penetration-tester` | Not run |
 
 ### Before deploying this branch

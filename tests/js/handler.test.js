@@ -67,6 +67,23 @@ class MockRes {
     this.headers = {};
     this.chunks = [];
     this.ended = false;
+    // The handler listens for 'close' to cancel a run whose client has gone away, so the
+    // fake response has to be an event emitter like the real one. `writableEnded` is read
+    // by `send` to avoid writing to a finished stream.
+    this.listeners = {};
+    this.writableEnded = false;
+  }
+  on(event, fn) {
+    (this.listeners[event] ||= []).push(fn);
+    return this;
+  }
+  removeListener(event, fn) {
+    this.listeners[event] = (this.listeners[event] || []).filter((f) => f !== fn);
+    return this;
+  }
+  /** Simulate the browser going away mid-stream. */
+  emitClose() {
+    for (const fn of this.listeners.close || []) fn();
   }
   setHeader(k, v) {
     this.headers[k.toLowerCase()] = v;
@@ -78,6 +95,11 @@ class MockRes {
   end(chunk) {
     if (chunk !== undefined) this.chunks.push(String(chunk));
     this.ended = true;
+    this.writableEnded = true;
+    // The real stream fires 'close' on a normal finish too — which is exactly why the
+    // handler needs its `done` flag. Modelling it here means a regression that cancels
+    // successful runs shows up as a test failure rather than in production.
+    this.emitClose();
   }
   get body() {
     return this.chunks.join('');
@@ -293,4 +315,109 @@ test('every stage the runner may emit is a member of the published STAGES set', 
     'assembling',
   ];
   assert.deepEqual([...STAGES].sort(), [...expected].sort());
+});
+
+// ---- client disconnect: stop paying for a run nobody is reading ----------------------
+//
+// Closing the browser tab used to leave the agent running for up to the full 800s
+// maxDuration, spending the whole time, with no reader at the other end. It is the easiest
+// way to waste money on this endpoint and it does not require malice — a refresh does it.
+
+test('a client disconnect aborts the run instead of paying it out', async () => {
+  let sawAbort = false;
+  const runner = async (_inputs, emit, { signal } = {}) => {
+    emit({ stage: 'researching_venues' });
+    res.emitClose(); // the browser goes away mid-run
+    await new Promise((r) => setTimeout(r, 5));
+    sawAbort = signal.aborted;
+    const err = new Error('Run cancelled — the client disconnected before it finished');
+    err.cancelled = true;
+    throw err;
+  };
+  const store = fakeStore();
+  const handler = createPlanHandler({ runPlan: runner, store });
+  const res = new MockRes();
+  await handler(mockReq('POST'), res); // must not throw
+
+  assert.equal(sawAbort, true, 'the runner should observe an aborted signal');
+  assert.equal(store.calls.length, 0, 'a cancelled run has nothing to persist');
+});
+
+test('a cancellation is not reported to the browser as an error', async () => {
+  // Nobody is listening, and writing to a dead socket can throw. A cancellation is also
+  // not a bug — surfacing it as one sends an operator hunting a failure that did not happen.
+  const runner = async (_i, _e, { signal } = {}) => {
+    res.emitClose();
+    await new Promise((r) => setTimeout(r, 5));
+    const err = new Error('Run cancelled — the client disconnected before it finished');
+    err.cancelled = true;
+    throw err;
+  };
+  const handler = createPlanHandler({ runPlan: runner, store: fakeStore() });
+  const res = new MockRes();
+  await handler(mockReq('POST'), res);
+
+  assert.equal(res.events().some((e) => e.type === 'error'), false);
+});
+
+test('a disconnect still releases the concurrency slot', async () => {
+  // A leaked slot shrinks capacity silently and permanently on that instance — worse than
+  // no limit at all, because nothing reports it.
+  const store = fakeStore();
+  const runner = async (_i, _e, { signal } = {}) => {
+    res.emitClose();
+    await new Promise((r) => setTimeout(r, 5));
+    const err = new Error('cancelled');
+    err.cancelled = true;
+    throw err;
+  };
+  const handler = createPlanHandler({ runPlan: runner, store });
+  const res = new MockRes();
+  await handler(mockReq('POST'), res);
+
+  assert.equal(store.released.length, 1, 'the durable reservation must be closed');
+});
+
+test('a normal finish is NOT treated as a disconnect', async () => {
+  // `close` fires on every completed response too. Without the `done` guard this would
+  // cancel every successful run at the moment it succeeded.
+  const store = fakeStore();
+  const handler = createPlanHandler({ runPlan: fakeRunner(['assembling']), store });
+  const res = new MockRes();
+  await handler(mockReq('POST'), res);
+
+  const events = res.events();
+  assert.equal(events.at(-1).type, 'complete', 'the plan should still be delivered');
+  assert.equal(store.calls.length, 1, 'and still persisted');
+});
+
+test('writes stop once the socket is gone', async () => {
+  // res.write() on a destroyed stream can emit an unhandled 'error' and take the instance
+  // down with it.
+  const runner = async (_i, emit) => {
+    res.emitClose();
+    emit({ stage: 'researching_sponsors' }); // must be swallowed
+    return { id: CANNED_ID, plan_json: CANNED_PLAN_JSON, plan_html: CANNED_PLAN_HTML };
+  };
+  const handler = createPlanHandler({ runPlan: runner, store: fakeStore() });
+  const res = new MockRes();
+  await handler(mockReq('POST'), res);
+
+  assert.equal(res.events().some((e) => e.stage === 'researching_sponsors'), false,
+    'no frame should be written after the client left');
+});
+
+test('the runner receives a signal even when the caller passes none', async () => {
+  // runPlan's signal option is optional so older callers keep working, but the handler
+  // must always supply one — otherwise the disconnect path is dead code in production.
+  let opts;
+  const runner = async (_i, _e, o) => {
+    opts = o;
+    return { id: CANNED_ID, plan_json: CANNED_PLAN_JSON, plan_html: CANNED_PLAN_HTML };
+  };
+  const handler = createPlanHandler({ runPlan: runner, store: fakeStore() });
+  await handler(mockReq('POST'), new MockRes());
+
+  assert.ok(opts && opts.signal, 'the handler must pass an AbortSignal');
+  assert.equal(typeof opts.signal.aborted, 'boolean');
 });
