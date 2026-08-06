@@ -13,6 +13,7 @@ import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { randomUUID } from 'node:crypto';
+import { computeTimeline, timelinePromptBlock, enforceTimeline, todayISO } from './deterministic.js';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url)); // api/_lib
 export const REPO_ROOT = path.resolve(HERE, '..', '..'); // where .claude/skills lives
@@ -81,7 +82,9 @@ export function mapMessage(msg) {
 
 // ---- the real SDK run ---------------------------------------------------------------
 
-function buildPrompt(inputs, jsonPath, htmlPath) {
+function buildPrompt(inputs, jsonPath, htmlPath, computedTimeline) {
+  const leadsPerCategory = Number(inputs?.leads_per_category) || 2;
+  const verifyLeads = inputs?.verify_leads === true;
   return [
     'You are running the Hack-AI-Thon-in-a-Box agentic pipeline headless. Use the project',
     'skills (orchestrator, intake-clarifier, research-venue, research-sponsor,',
@@ -96,12 +99,19 @@ function buildPrompt(inputs, jsonPath, htmlPath) {
     '   research-sponsor, and research-talent as PARALLEL subagents (one Task tool call per',
     '   specialist, sent together) so they run concurrently. Use web search for every lead.',
     '   Every lead MUST carry a real, working `source_url`; OMIT any lead you cannot source.',
-    '   Keep each list SHORT — EXACTLY 3 well-sourced leads per category (the skills cap at 3).',
-    '   (The separate adversarial verification pass is DISABLED for now — it was the run-time',
-    '   bottleneck; see docs/decisions/0001-disable-verification-stage.md. Sourced-or-omitted',
-    '   still holds: only include a lead if you have a real source_url for it.)',
-    '3. Build the timeline counting back from the event window (timeline).',
+    `   Keep each list SHORT — EXACTLY ${leadsPerCategory} well-sourced leads per category.`,
+    '   Do not exceed that count: each extra lead is another round of web search and fetch',
+    '   across three parallel subagents, and the organizer chose this depth deliberately.',
+    verifyLeads
+      ? '   Then run the adversarial verification pass: independently re-fetch each source_url, '
+        + 'confirm it backs the claim and the org is real and local, and drop or downgrade any lead that fails.'
+      : '   (The adversarial verification pass is OFF for this run — it was the run-time '
+        + 'bottleneck; see docs/decisions/0001-disable-verification-stage.md. Sourced-or-omitted '
+        + 'still holds: only include a lead if you have a real source_url for it.)',
+    '3. Do NOT build the timeline — it is already computed for you below (Tier 0).',
     '4. Assemble the final plan (plan-assembly) as ONE self-contained HTML file.',
+    '',
+    timelinePromptBlock(computedTimeline),
     '',
     'Write outputs to EXACTLY these paths (do not choose your own):',
     `- structured plan (plan.json): ${jsonPath}`,
@@ -121,12 +131,19 @@ export async function runPlan(inputs, emit) {
   const jsonPath = path.join(os.tmpdir(), `plan-${runId}.json`);
   const htmlPath = path.join(os.tmpdir(), `plan-${runId}.html`);
 
+  // Tier 0: dates are computed in code, before a single token is spent.
+  const today = todayISO();
+  const computedTimeline = computeTimeline(inputs, today);
+  if (computedTimeline) {
+    emit({ stage: 'building_timeline', detail: `${computedTimeline.runway_days} days out — computed` });
+  }
+
   emit({ stage: 'intake' });
   let lastStage = 'intake';
 
   const abortController = new AbortController();
   const response = query({
-    prompt: buildPrompt(inputs, jsonPath, htmlPath),
+    prompt: buildPrompt(inputs, jsonPath, htmlPath, computedTimeline),
     options: {
       cwd: REPO_ROOT, // so .claude/skills + .claude/settings.json are discovered
       model: DEFAULT_MODEL,
@@ -135,7 +152,10 @@ export async function runPlan(inputs, emit) {
       permissionMode: 'bypassPermissions',
       allowDangerouslySkipPermissions: true,
       allowedTools: ['Read', 'Write', 'Edit', 'Bash', 'Grep', 'Glob', 'WebSearch', 'WebFetch', 'Task', 'Skill', 'TodoWrite'],
-      maxTurns: 200,
+      // Sized to the actual pipeline (intake + 3 parallel research subagents + assembly)
+      // with real headroom, not the old 200. Only bites a run that has already gone
+      // somewhere expensive and unproductive; a healthy run finishes well inside it.
+      maxTurns: Number(process.env.PLAN_MAX_TURNS ?? 80),
       abortController,
       // Inherit env (incl. ANTHROPIC_API_KEY, PATH) for the subprocess. Never logged.
       env: { ...process.env },
@@ -166,6 +186,23 @@ export async function runPlan(inputs, emit) {
     abortController.abort();
   }
 
+  // Real spend, straight from the SDK's terminal result message — not an estimate.
+  // Read defensively: field names are not guaranteed across SDK versions, and a missing
+  // cost must degrade to "unknown", never crash a run that already succeeded.
+  const usage = (result && result.usage) || {};
+  const serverTool = usage.server_tool_use || {};
+  const cost = {
+    total_cost_usd: typeof result?.total_cost_usd === 'number' ? result.total_cost_usd : null,
+    input_tokens: usage.input_tokens ?? null,
+    output_tokens: usage.output_tokens ?? null,
+    cache_read_input_tokens: usage.cache_read_input_tokens ?? null,
+    cache_creation_input_tokens: usage.cache_creation_input_tokens ?? null,
+    web_search_requests: serverTool.web_search_requests ?? null,
+    num_turns: result?.num_turns ?? null,
+    duration_ms: result?.duration_ms ?? null,
+    model: DEFAULT_MODEL,
+  };
+
   const summary = {
     messages: msgCount,
     result_subtype: result ? result.subtype : null,
@@ -173,6 +210,7 @@ export async function runPlan(inputs, emit) {
     num_turns: result ? result.num_turns : null,
     last_stage: lastStage,
     last_assistant_text: lastAssistantText.slice(0, 400),
+    cost,
   };
   console.log('[runPlan] run finished', JSON.stringify(summary));
 
@@ -204,5 +242,8 @@ export async function runPlan(inputs, emit) {
   // Surface the per-run UUID as `id` so the handler can persist and permalink the run
   // (ADR-0003). The SDK seam mints the id but never touches the database — persistence is
   // the handler's job, through the store seam.
-  return { id: runId, plan_json, plan_html };
+  // Code wins on dates, even if the agent wrote its own timeline anyway.
+  enforceTimeline(plan_json, computedTimeline);
+
+  return { id: runId, plan_json, plan_html, cost, timeline_computed: !!computedTimeline };
 }

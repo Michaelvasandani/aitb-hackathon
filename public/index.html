@@ -48,6 +48,17 @@ button.primary{width:100%;margin-top:6px;padding:13px;border:0;border-radius:10p
 background:var(--accent);color:#fff;font:inherit;font-weight:700;font-size:1rem;cursor:pointer}
 button.primary:disabled{opacity:.45;cursor:not-allowed}
 .err{color:var(--warn);font-size:.9rem;margin-top:10px}
+.email-row{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 10px}
+.email-row input{flex:1 1 220px}
+.cost{margin-top:18px;border:1px solid var(--line);border-radius:11px;background:var(--card);
+padding:13px 15px;font-size:.85rem}
+.cost h4{margin:0 0 9px;font-size:.72rem;text-transform:uppercase;letter-spacing:.06em;
+color:var(--muted);font-weight:700}
+.cost dl{display:grid;grid-template-columns:auto 1fr;gap:4px 14px;margin:0}
+.cost dt{color:var(--muted)}
+.cost dd{margin:0;font-variant-numeric:tabular-nums;text-align:right}
+.cost .total{font-weight:700;color:var(--fg)}
+.cost .note{margin-top:9px;color:var(--muted);font-size:.78rem}
 .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
 .run{margin-top:26px}
 .run .note{color:var(--muted);font-size:.85rem;margin-top:10px}
@@ -182,12 +193,34 @@ display:flex;align-items:center;justify-content:center;transition:transform .15s
         </select>
       </div>
 
+      <div class=field>
+        <label>How deep should it go?</label>
+        <div class=seg id=modeSeg>
+          <button type=button data-mode=optimized aria-pressed=true>Optimized</button>
+          <button type=button data-mode=custom aria-pressed=false>Custom</button>
+        </div>
+        <p class=hint id=modeHint>Fastest and cheapest — 2 sourced leads per category,
+          no second verification pass. Right for almost everyone.</p>
+
+        <div id=customOpts style="display:none;margin-top:12px">
+          <label for=leads_per_category>Leads per category
+            <span class=hint>— venues, sponsors, and mentors each</span></label>
+          <input type=number id=leads_per_category min=2 max=5 step=1 value=3>
+          <label class=check for=verify_leads>
+            <input type=checkbox id=verify_leads>
+            Independently re-verify every lead
+            <span class=hint>&nbsp;— slower and costs more; drops leads that don't check out</span>
+          </label>
+        </div>
+      </div>
+
       <button class=primary id=go type=submit>Generate my plan</button>
       <div class=err id=err role=alert></div>
     </form>
   </div>
 
   <div id=run class=run></div>
+  <div id=costPanel></div>
   <p id=live aria-live=polite class=sr></p>
 </div>
 
@@ -206,6 +239,7 @@ display:flex;align-items:center;justify-content:center;transition:transform .15s
    (script-src 'self') and keeps the page self-contained — no external script/style tags. */
 import { initState, reduce, toView } from './js/activity-log.js';
 import { downloadName } from './js/plan-download.js';
+import { downloadPdf, isEmailish, emailRequestBody, emailErrorMessage } from './js/plan-delivery.js';
 
 /* Set this after uploading the demo video to YouTube as UNLISTED (see docs/DEPLOY.md).
    The ID is the part after "v=" in the video's URL, e.g. "dQw4w9WgXcQ". Leave it empty
@@ -301,7 +335,77 @@ function collectInputs() {
   const concept = $('concept').value.trim(); if (concept) inputs.concept = concept;
   const purpose = $('purpose').value.trim(); if (purpose) inputs.purpose = purpose;
   inputs.has_local_anchor = $('anchor').value === 'yes';
+
+  // Depth. Optimized is the cheap, fast default; custom trades cost for depth. The server
+  // re-normalizes these (api/_lib/clean-inputs.js) — this is convenience, not the gate.
+  inputs.plan_mode = planMode;
+  if (planMode === 'custom') {
+    const n = parseInt($('leads_per_category').value, 10);
+    if (Number.isFinite(n)) inputs.leads_per_category = n;
+    inputs.verify_leads = $('verify_leads').checked;
+  }
   return inputs;
+}
+
+/* ---- depth mode ---------------------------------------------------------------- */
+let planMode = 'optimized';
+const MODE_HINT = {
+  optimized: 'Fastest and cheapest — 2 sourced leads per category, no second verification '
+    + 'pass. Right for almost everyone.',
+  custom: 'You choose the depth. More leads and verification mean a better plan, but a '
+    + 'noticeably longer and more expensive run.',
+};
+document.getElementById('modeSeg').addEventListener('click', (e) => {
+  const btn = e.target.closest('button[data-mode]');
+  if (!btn) return;
+  planMode = btn.dataset.mode;
+  for (const b of document.querySelectorAll('#modeSeg button')) {
+    b.setAttribute('aria-pressed', String(b.dataset.mode === planMode));
+  }
+  document.getElementById('modeHint').textContent = MODE_HINT[planMode];
+  document.getElementById('customOpts').style.display = planMode === 'custom' ? '' : 'none';
+});
+
+/* ---- cost panel (debug) --------------------------------------------------------
+   Real spend for the run just completed, straight from the Agent SDK's own result
+   message — not an estimate. Shown so the cost of a run is observable while iterating;
+   see docs/COST-CONTROLS.md for turning it off in front of an audience. */
+const SHOW_COST = new URLSearchParams(location.search).get('cost') !== '0';
+function renderCost(cost) {
+  const slot = document.getElementById('costPanel');
+  slot.innerHTML = '';
+  if (!SHOW_COST || !cost) return;
+
+  const n = (v) => (typeof v === 'number' ? v.toLocaleString('en-US') : '—');
+  const usd = typeof cost.total_cost_usd === 'number'
+    ? '$' + cost.total_cost_usd.toFixed(4)
+    : 'not reported';
+
+  const rows = [
+    ['Total cost', usd, true],
+    ['Model', cost.model || '—'],
+    ['Turns', n(cost.num_turns)],
+    ['Input tokens', n(cost.input_tokens)],
+    ['Output tokens', n(cost.output_tokens)],
+    ['Cache reads', n(cost.cache_read_input_tokens)],
+    ['Cache writes', n(cost.cache_creation_input_tokens)],
+    ['Web searches', n(cost.web_search_requests)],
+    ['Wall clock', typeof cost.duration_ms === 'number'
+      ? (cost.duration_ms / 1000).toFixed(1) + 's' : '—'],
+  ];
+
+  const box = el('div', 'cost');
+  box.appendChild(el('h4', null, 'Run cost (debug)'));
+  const dl = document.createElement('dl');
+  for (const [label, value, isTotal] of rows) {
+    const dt = el('dt', null, label);
+    const dd = el('dd', isTotal ? 'total' : null, value);
+    dl.appendChild(dt); dl.appendChild(dd);
+  }
+  box.appendChild(dl);
+  box.appendChild(el('p', 'note',
+    'Reported by the Agent SDK for this run. Add ?cost=0 to the URL to hide this panel.'));
+  slot.appendChild(box);
 }
 
 /* Parse the Server-Sent-Events stream frame by frame, handing each decoded event to
@@ -374,6 +478,22 @@ function renderPlan(box, plan, city) {
         'application/json',
       );
     actions.appendChild(dlJson);
+
+    // Print-to-PDF. Uses the browser's own dialog (no library — a strict CSP and no
+    // bundler rule out both a CDN and an npm PDF lib), so the user picks "Save as PDF".
+    const pdfBtn = el('button', 'dl ghost', 'Save as PDF');
+    pdfBtn.type = 'button';
+    pdfBtn.onclick = async () => {
+      pdfBtn.disabled = true;
+      try {
+        await downloadPdf(plan.plan_html, downloadName(city, 'pdf'));
+      } catch (err) {
+        wrap.appendChild(el('div', 'soft-note', err && err.message
+          ? err.message + ' You can still download the plan above.'
+          : 'We couldn\u2019t open the print dialog. You can still download the plan above.'));
+      } finally { pdfBtn.disabled = false; }
+    };
+    actions.appendChild(pdfBtn);
   }
   head.appendChild(actions);
   wrap.appendChild(head);
@@ -393,6 +513,45 @@ function renderPlan(box, plan, city) {
   } else {
     wrap.appendChild(el('div', 'soft-note',
       'We couldn’t save a permalink for this one — you can still download it above.'));
+  }
+
+  // Email it. Only for a saved run: the server attaches the plan it looks up by id, and
+  // never accepts HTML from the browser — that would be an open relay sending
+  // attacker-controlled content from a verified domain.
+  if (plan.id && plan.saved) {
+    const row = el('div', 'email-row');
+    const input = document.createElement('input');
+    input.type = 'email';
+    input.placeholder = 'you@example.org';
+    input.setAttribute('aria-label', 'Email address to send this plan to');
+    const btn = el('button', 'dl ghost', 'Email me the plan');
+    btn.type = 'button';
+    const status = el('div', 'soft-note', '');
+    status.setAttribute('role', 'status');
+
+    btn.onclick = async () => {
+      const to = input.value.trim();
+      if (!isEmailish(to)) { status.textContent = 'That address doesn\u2019t look right.'; return; }
+      btn.disabled = true;
+      status.textContent = 'Sending\u2026';
+      try {
+        const res = await fetch('./api/email', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(emailRequestBody({ to, runId: plan.id })),
+        });
+        let body = null;
+        try { body = await res.json(); } catch (_) { /* an empty body is not the point */ }
+        status.textContent = res.ok
+          ? 'Sent \u2014 check ' + to + '. The plan is attached as an HTML file.'
+          : emailErrorMessage(res.status, body);
+      } catch (_) {
+        status.textContent = 'Couldn\u2019t reach the server. Nothing was sent.';
+      } finally { btn.disabled = false; }
+    };
+
+    row.appendChild(input); row.appendChild(btn);
+    wrap.appendChild(row); wrap.appendChild(status);
   }
 
   const frame = document.createElement('iframe');
@@ -503,10 +662,13 @@ async function generate(ev) {
   // complete, surfaced error, or noise — folds through the pure reducer; the reducer
   // ignores what it does not recognize, so a noisy event can never break the log.
   logState = initState(inputs.city);
+  document.getElementById('costPanel').innerHTML = '';   // clear the previous run's numbers
   renderLog();
   try {
     await readStream(res, (event) => {
       logState = reduce(logState, event);
+      // Real spend for this run, surfaced the moment it lands.
+      if (event && event.type === 'complete') renderCost(event.cost);
       // On `complete` the reducer retains { plan_json, plan_html, id, saved } on logState.plan;
       // renderLog then paints the finished plan in a sandboxed <iframe srcdoc> with Download
       // buttons plus the run's permalink or a soft "not saved" note (tickets #6, #10). plan_json

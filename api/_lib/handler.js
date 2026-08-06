@@ -24,6 +24,7 @@
 
 import { cleanInputs, BadRequest } from './clean-inputs.js';
 import * as realStore from './store.js';
+import { checkGuards, beginRun, endRun } from './guards.js';
 
 // The small, human-readable stage set the noisy SDK stream is mapped down to.
 // The front-end keys its activity log off exactly these names.
@@ -60,6 +61,14 @@ export function createPlanHandler({ runPlan, store = realStore }) {
       return sendJson(res, 400, { error: 'invalid_input', message });
     }
 
+    // Cost guards run AFTER validation and BEFORE the SDK, so a rejected request costs
+    // nothing — same principle as the input validation above, applied to spend.
+    const guard = checkGuards(req, inputs);
+    if (!guard.ok) {
+      if (guard.retry_after) res.setHeader('Retry-After', String(guard.retry_after));
+      return sendJson(res, guard.status, { error: guard.error, message: guard.message });
+    }
+
     res.statusCode = 200;
     res.setHeader('Content-Type', 'text/event-stream');
     res.setHeader('Cache-Control', 'no-cache, no-transform');
@@ -70,15 +79,19 @@ export function createPlanHandler({ runPlan, store = realStore }) {
     const send = (event) => res.write(`data: ${JSON.stringify(event)}\n\n`);
     const emit = (stageEvent) => send({ type: 'stage', ...stageEvent });
 
+    beginRun(guard.key, guard.fingerprint);
+    let runCostUsd = null;
+
     try {
-      const { id, plan_json, plan_html } = await runPlan(inputs, emit);
+      const { id, plan_json, plan_html, cost } = await runPlan(inputs, emit);
+      runCostUsd = cost && typeof cost.total_cost_usd === 'number' ? cost.total_cost_usd : null;
 
       // Best-effort persistence AFTER the run completes (ADR-0003). A DB failure must never
       // cost the organizer their finished plan, so it is caught here and surfaced only as
       // `saved:false`; the plan is delivered either way and no `error` frame is emitted.
       let saved = false;
       try {
-        await store.saveRun({ id, inputs, plan_json, plan_html });
+        await store.saveRun({ id, inputs, plan_json, plan_html, cost });
         saved = true;
       } catch (saveErr) {
         // Log server-side so a failed save is explainable from the logs. Never log env /
@@ -89,11 +102,16 @@ export function createPlanHandler({ runPlan, store = realStore }) {
         );
       }
 
-      send({ type: 'complete', id, saved, plan_json, plan_html });
+      // `cost` is real spend from the SDK's result message, surfaced for the debug panel.
+      // It is observability, not a bill — see docs/COST-CONTROLS.md.
+      send({ type: 'complete', id, saved, plan_json, plan_html, cost });
     } catch (err) {
       // A failed run tells the browser it failed rather than hanging (user story #24).
       send({ type: 'error', message: err && err.message ? err.message : String(err) });
     } finally {
+      // Must run even when the client vanished mid-stream, or the concurrency slot leaks
+      // and capacity shrinks permanently on this instance.
+      endRun(guard.fingerprint, runCostUsd);
       res.end();
     }
   };
