@@ -1,80 +1,86 @@
 # Deploying
 
-**The whole product is a static site.** No server, no database, no build step, no bundler,
-no framework. `public/` is the site. That means it runs free, forever, on every host — and
-there is nothing to cold-start, rate-limit, or fail at 4pm on demo day.
+> **This page used to say the product was a static site with no backend. That is no longer
+> true, and believing it is how a deploy ends up serving a broken app.** ADR-0001 put the
+> live Agent SDK pipeline back on the critical path. The history is preserved at the bottom,
+> because the reasoning still explains why the deterministic core is duplicated in JS.
 
-**Recommended: Cloudflare Pages** (unlimited bandwidth on the free plan).
-**Zero-setup alternative: GitHub Pages** — the repo is already on GitHub and the workflow
-is committed.
+**Deploy target: Vercel.** It is the only host that runs what this app now needs.
 
----
+The site is not self-contained. Three of its features are HTTP calls to serverless functions:
 
-## Free-tier comparison, for this app specifically
+| Page | Calls | Backed by |
+|---|---|---|
+| `public/index.html` — the planner | `POST /api/plan` | `api/plan.js` — the paid Agent SDK run, up to 800s |
+| `public/plan-view.html` — a permalink | `GET /api/plan/:id` | `api/plan/[id].js` → Neon Postgres |
+| `public/plan-gallery.html` | `GET /api/plans` | `api/plans.js` → Neon Postgres |
+| Email a plan (optional) | `POST /api/email` | `api/email.js` → Resend |
 
-| Host | Bandwidth | Build mins | Verdict |
-|---|---|---|---|
-| **Cloudflare Pages** | **Unlimited** | 500 builds/mo | **Best.** Nothing here can exceed it. |
-| **GitHub Pages** | 100 GB/mo soft | 2,000 min/mo | Zero setup — workflow already committed. 1 GB site cap; we are ~150 KB. |
-| **Netlify** | 100 GB/mo | 300 min/mo | Fine. Viable again now that no Python runtime is needed. |
-| **Vercel Hobby** | 100 GB/mo | 6,000 min/mo | Fine as static. Hobby is non-commercial — see note below. |
+**A static host serves all four as 404**, and the `/plan/:id` permalink rewrite lives in
+`vercel.json`, so it does not exist elsewhere either. Cloudflare Pages, GitHub Pages and
+Netlify are all static-only for this repo's purposes — `netlify.toml` and `public/_headers`
+are leftovers from the static era, not live configuration.
 
-We use roughly **150 KB per visitor** and zero compute. Every tier above is enormous
-headroom; pick on preference, not limits.
+## Deploy on Vercel
 
-> **On Vercel Hobby and commercial use:** Hobby is for non-commercial projects. This is a
-> hackathon demo, so it qualifies. An organization running it commercially should upgrade
-> to Pro — or just use Cloudflare Pages, which has no such restriction.
+1. Vercel → **Add New… → Project** → import this repo. No framework preset; `vercel.json`
+   already sets `outputDirectory: public`, the function config, the rewrites and the CSP.
+2. Set the environment variables below.
+3. Apply the database schema and verify the spend guard (see below). **Both, in order.**
 
----
+Pushes to `main` deploy automatically through Vercel's Git integration. Nothing in GitHub
+Actions deploys this app — `.github/workflows/deploy.yml` only runs the tests.
 
-## Deploy it
+### Environment variables
 
-### Cloudflare Pages
-1. Pages → **Create** → **Connect to Git** → pick this repo.
-2. Framework preset: **None**. Build command: **leave empty**. Output directory: **`public`**.
-3. Save and Deploy.
+| Variable | Required | What breaks without it |
+|---|---|---|
+| `ANTHROPIC_API_KEY` | **yes** | `/api/plan` returns `503 endpoint_disabled` |
+| `DATABASE_URL` | **yes** | No permalinks, no gallery — **and every run is refused**, because the spend guard fails closed |
+| `RESEND_API_KEY` + `EMAIL_FROM` | no | `/api/email` returns `503 email_disabled` |
+| `PLAN_DAILY_BUDGET_USD` | no | Defaults to $25/day |
+| `PLAN_RATE_LIMIT_PER_HOUR` | no | Defaults to 5/hour per client |
 
-Headers come from `public/_headers` automatically.
+Full list of cost knobs: `docs/COST-CONTROLS.md`.
 
-### GitHub Pages
-Already wired: `.github/workflows/deploy.yml` runs the tests, then publishes `public/`.
-Enable it once — repo **Settings → Pages → Source: GitHub Actions** — then push to `main`.
+### Before the first deploy — do not skip this
 
-The workflow fails the deploy if the tests fail *or* if `public/js/rules.js` is stale, so a
-broken or drifted build cannot reach the site.
-
-### Netlify
-Connect the repo. `netlify.toml` sets publish dir `public` and no build command.
-
-### Vercel
 ```bash
-npm i -g vercel && vercel --prod
+npm run db:init          # creates the runs + run_reservations tables
+npm run db:verify-guard  # proves the reservation SQL actually executes
 ```
-`vercel.json` sets `outputDirectory: public`. The Python function under `api/` still
-deploys and works, but **the site does not use it** — it is there for the optional
-server-side path below.
+
+The spend guard **fails closed**: if `run_reservations` is missing or its SQL is wrong,
+`/api/plan` returns 503 for every request and the app looks dead. The unit tests cannot
+catch that — they inject a fake query function and never execute SQL. `db:verify-guard`
+does, against the real database.
+
+### Why not GitHub Pages
+
+The Actions workflow used to publish `public/` there. It failed with *"Get Pages site
+failed"* because Pages had never been enabled on the repo — and enabling it would have been
+worse than the failure, replacing a loud error with a site that deploys successfully and
+serves a planner whose every submission 404s. The deploy job was removed; see the note at
+the bottom of `.github/workflows/deploy.yml`.
 
 ---
 
-## Why there is no backend
+## History: why the deterministic core exists twice
 
-The API used to exist and was deleted from the critical path, because auditing it showed it
-did exactly one piece of I/O: reading a JSON file that was already bundled. No database, no
-secrets, no auth, no external calls — just deterministic computation over data the client
-already had. A server for that is pure downside:
+*Kept because it explains a live design constraint, not because it describes the current
+deployment.*
 
-- a cold start the user waits through
-- a bundling failure mode (`core/timeline.py` loads `countback.py` dynamically, which
-  static import tracers miss)
-- rate limits and a duration cap
-- a host that must support Python, which ruled out Netlify entirely
+The API was once deleted from the critical path, because auditing it showed it did exactly
+one piece of I/O: reading a JSON file that was already bundled. No database, no secrets, no
+auth, no external calls — just deterministic computation over data the client already had.
 
-So `core/*.py` was ported to `public/js/core.js` and the whole thing became a static file.
+So `core/*.py` was ported to `public/js/core.js` and the product became a static file. ADR-0001
+later reversed that for the *research* pipeline, which genuinely needs a server (an API key
+that cannot ship to a browser, and minutes of runtime). **The port stayed** — and is now
+load-bearing on the server too: `api/_lib/deterministic.js` computes every timeline from
+`public/js/core.js` before a token is spent (`docs/COST-CONTROLS.md`, Tier 0).
 
-**`api/` is still in the repo** and still works — run `python3 scripts/devserver.py`. Keep
-it if you later want server-side generation (bulk plans, an integration, a Pro-tier
-feature). The site does not depend on it.
+That is why the conformance guarantee below still matters, and matters more than it did.
 
 ---
 

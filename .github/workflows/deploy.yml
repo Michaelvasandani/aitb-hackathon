@@ -1,4 +1,7 @@
-name: test & deploy
+name: test
+
+# Deployment is NOT done here — see the note at the bottom of this file and docs/DEPLOY.md.
+# This workflow's job is to stop a broken commit from reaching main.
 
 on:
   push:
@@ -6,24 +9,30 @@ on:
   pull_request:
   workflow_dispatch:
 
+# Read-only. The `pages: write` / `id-token: write` grants were here for the GitHub Pages
+# deploy that this workflow no longer performs; a token that can publish is not something to
+# leave lying around for a job that only runs tests.
 permissions:
   contents: read
-  pages: write
-  id-token: write
 
+# Keyed per ref, not the single global `pages` group the deploy job needed. With one shared
+# group, two PRs pushed at once cancelled each other's test runs and the loser looked green
+# because it never ran.
 concurrency:
-  group: pages
+  group: test-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      # Pinned to current majors. The older v4/v5 actions run on the Actions runner's Node 20,
+      # which GitHub is deprecating — that was the warning at the top of the failing run.
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
         with: { python-version: "3.12" }
-      - uses: actions/setup-node@v4
-        with: { node-version: "20" }
+      - uses: actions/setup-node@v7
+        with: { node-version: "22" }
 
       # No dependencies to install — core/ is stdlib-only and the browser build has no
       # bundler. That is deliberate; `test_api_has_no_third_party_dependencies` enforces it.
@@ -39,8 +48,9 @@ jobs:
       # The Node suite covers the API seams the Python suite cannot reach: the request
       # handler, the input validator, the store, and the spend guards. It was silently
       # skipped for a long time because the script used a glob string, which `node --test`
-      # only accepts from Node 21 while this job pins 20 — it failed to match, and nothing
-      # ran. Nine real failures had accumulated behind that. Directory form works on 20.
+      # only accepts from Node 21 while this job pinned 20 — it matched nothing and exited
+      # quietly, and nine real failures accumulated behind it. The script now passes a
+      # directory, which works on every supported Node and does not depend on this pin.
       - name: API seam tests (handler, validation, store, guards)
         run: npm run test:js
 
@@ -61,18 +71,20 @@ jobs:
       - name: Lockfile is committed and matches package.json
         run: npm ci --ignore-scripts
 
-  deploy:
-    needs: test
-    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
-    runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/configure-pages@v5
-      # `public/` is the whole site. No build step: no bundler, no transpile, no framework.
-      - uses: actions/upload-pages-artifact@v3
-        with: { path: public }
-      - id: deployment
-        uses: actions/deploy-pages@v4
+# ---------------------------------------------------------------------------------------
+# There is deliberately no deploy job here any more.
+#
+# This workflow used to publish `public/` to GitHub Pages. That dated from when the product
+# genuinely was a static site. It is not one now: the planner POSTs to /api/plan, the viewer
+# GETs /api/plan/:id, and the gallery GETs /api/plans — Vercel serverless functions backed by
+# a Neon Postgres database. GitHub Pages serves static files only, so a Pages deploy shipped
+# a site whose three main features returned 404, and the /plan/:id permalink rewrite (defined
+# in vercel.json) did not exist at all.
+#
+# The immediate failure was `actions/configure-pages` reporting "Get Pages site failed" —
+# Pages had never been enabled on the repo. Enabling it would have replaced a loud failure
+# with a quiet one: a deploy that succeeds and serves a broken app.
+#
+# Deployment is Vercel's Git integration, which builds from vercel.json on push to main and
+# needs nothing from Actions. See docs/DEPLOY.md.
+# ---------------------------------------------------------------------------------------
