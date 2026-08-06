@@ -131,6 +131,137 @@ export async function listRuns({ query } = {}) {
   return rows.map(cardFromRow).filter(Boolean);
 }
 
+// ---- durable spend guard (cross-instance) -------------------------------------------
+//
+// `guards.js` keeps the same counters in memory, which is fast and free but per-instance.
+// On serverless that is the whole problem: Vercel starts a fresh instance per concurrent
+// request, each one seeing an empty map, so an attacker's effective limit is
+// (nominal limit x however many instances they can force). The daily budget breaker had the
+// same hole, which meant the documented "real backstop" was not one.
+//
+// These two functions move the counters somewhere shared. The reservation is a SINGLE
+// statement whose WHERE clause contains every limit, so the check and the claim cannot be
+// interleaved by a concurrent request — with separate SELECT-then-INSERT, N simultaneous
+// requests all read "4 used" and all insert.
+//
+// Reservations are matched by a time window rather than cleaned up, so an instance that dies
+// mid-run cannot permanently consume a slot: its row simply ages out of every window.
+
+const RESERVE_RUN = `
+insert into run_reservations (fingerprint, client_key, state)
+select $1, $2, 'running'
+where
+      (select count(*) from run_reservations
+        where client_key = $2
+          and started_at > now() - ($3 || ' seconds')::interval) < $4
+  and (select count(*) from run_reservations
+        where state = 'running'
+          and started_at > now() - ($5 || ' seconds')::interval) < $6
+  and coalesce((select sum(cost_usd) from run_reservations
+        where started_at > now() - interval '24 hours'), 0) < $7
+  and not exists (select 1 from run_reservations
+        where fingerprint = $1
+          and state = 'running'
+          and started_at > now() - ($5 || ' seconds')::interval)
+returning id`;
+
+// Only runs when a reservation was REFUSED, so the happy path stays one round trip. Tells
+// the caller which limit bit, so the user gets "you've hit the hourly limit" instead of a
+// blank "busy".
+const DIAGNOSE_REFUSAL = `
+select
+  (select count(*) from run_reservations
+    where client_key = $2 and started_at > now() - ($3 || ' seconds')::interval) as recent_for_client,
+  (select count(*) from run_reservations
+    where state = 'running' and started_at > now() - ($5 || ' seconds')::interval) as running_now,
+  coalesce((select sum(cost_usd) from run_reservations
+    where started_at > now() - interval '24 hours'), 0) as spend_24h,
+  exists (select 1 from run_reservations
+    where fingerprint = $1 and state = 'running'
+      and started_at > now() - ($5 || ' seconds')::interval) as duplicate_running`;
+
+/**
+ * Atomically claim a run slot, or report why not.
+ *
+ * Returns `{ ok: true, id }` when the slot is claimed, or `{ ok: false, reason, stats }`
+ * where `reason` is one of 'rate_limited' | 'busy' | 'budget_reached' | 'already_running'.
+ * Throws only on a real database failure — the caller decides whether that fails open or
+ * closed (guards.js fails closed: an unverifiable budget is not a licence to spend).
+ */
+export async function reserveRun(
+  { fingerprint, clientKey, perHour, maxConcurrent, dailyUsd, windowSeconds = 3600, runTtlSeconds = 1200 },
+  { query } = {},
+) {
+  const q = query || (await defaultQuery());
+  const params = [fingerprint, clientKey, String(windowSeconds), perHour,
+    String(runTtlSeconds), maxConcurrent, dailyUsd];
+
+  const result = await q(RESERVE_RUN, params);
+  const rows = Array.isArray(result) ? result : (result && result.rows) || [];
+  if (rows.length > 0) return { ok: true, id: rows[0].id };
+
+  const dResult = await q(DIAGNOSE_REFUSAL, params);
+  const dRows = Array.isArray(dResult) ? dResult : (dResult && dResult.rows) || [];
+  const d = dRows[0] || {};
+  const stats = {
+    recent_for_client: Number(d.recent_for_client ?? 0),
+    running_now: Number(d.running_now ?? 0),
+    spend_24h: Number(d.spend_24h ?? 0),
+    duplicate_running: d.duplicate_running === true,
+  };
+
+  // Order matters: report the limit the caller can most plausibly act on. A duplicate is
+  // the most specific and most likely to be an honest double-submit.
+  let reason = 'busy';
+  if (stats.duplicate_running) reason = 'already_running';
+  else if (stats.spend_24h >= dailyUsd) reason = 'budget_reached';
+  else if (stats.recent_for_client >= perHour) reason = 'rate_limited';
+  else if (stats.running_now >= maxConcurrent) reason = 'busy';
+
+  return { ok: false, reason, stats };
+}
+
+/**
+ * Close out a reservation and record what it actually cost.
+ *
+ * A null/zero cost still closes the row: leaving it 'running' would hold a concurrency slot
+ * until the TTL expired. Best-effort by design — the caller wraps this so a bookkeeping
+ * failure never destroys a finished plan.
+ */
+export async function releaseRun(fingerprint, costUsd = null, { query } = {}) {
+  const q = query || (await defaultQuery());
+  const cost = typeof costUsd === 'number' && Number.isFinite(costUsd) && costUsd > 0
+    ? costUsd
+    : null;
+  await q(
+    `update run_reservations set state = 'done', finished_at = now(), cost_usd = $2
+      where fingerprint = $1 and state = 'running'`,
+    [fingerprint, cost],
+  );
+}
+
+/** Current durable counters, for /api/health and the debug panel. No identities. */
+export async function guardLedgerStats({ windowSeconds = 3600, runTtlSeconds = 1200 } = {}, { query } = {}) {
+  const q = query || (await defaultQuery());
+  const result = await q(
+    `select
+       (select count(*) from run_reservations
+         where state = 'running' and started_at > now() - ($2 || ' seconds')::interval) as running_now,
+       (select count(*) from run_reservations
+         where started_at > now() - ($1 || ' seconds')::interval) as runs_in_window,
+       coalesce((select sum(cost_usd) from run_reservations
+         where started_at > now() - interval '24 hours'), 0) as spend_24h`,
+    [String(windowSeconds), String(runTtlSeconds)],
+  );
+  const rows = Array.isArray(result) ? result : (result && result.rows) || [];
+  const r = rows[0] || {};
+  return {
+    running_now: Number(r.running_now ?? 0),
+    runs_in_window: Number(r.runs_in_window ?? 0),
+    spend_24h_usd: Number(r.spend_24h ?? 0),
+  };
+}
+
 // ---- lazy Neon client ---------------------------------------------------------------
 
 // One process-wide query function, created on first real use. Importing this module never

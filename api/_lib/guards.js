@@ -5,11 +5,22 @@
 // minutes of wall-clock and roughly $1–3 of tokens — without limit. Nothing here makes a
 // legitimate run slower or worse; it only stops runs that should never have started.
 //
-// State is per-instance and in-memory. On serverless that means limits are per warm
-// instance, not global — a determined attacker across many cold starts gets more than the
-// nominal budget. That is a deliberate trade: it needs no database on the request path and
-// removes the whole "unbounded" class of risk. The DB-backed version is a follow-up, noted
-// in docs/COST-CONTROLS.md; the daily budget breaker below is the real backstop.
+// TWO layers, because they fail differently:
+//
+//   1. **In-memory** (below). Free, instant, no I/O — catches the common case of one client
+//      hammering one warm instance. But it is PER-INSTANCE: Vercel starts a fresh instance
+//      per concurrent request, each seeing empty state, so on its own an attacker's real
+//      limit is (nominal x however many instances they can force). That applied to the daily
+//      budget breaker too, which meant the documented "real backstop" was not one.
+//
+//   2. **Durable** (`checkDurableGuards`, backed by `run_reservations` via the store seam).
+//      One atomic statement whose WHERE clause holds every limit, so concurrent requests
+//      cannot interleave a check with a claim. This is the layer that actually bounds spend.
+//
+// Both must pass. The durable layer FAILS CLOSED: if the database cannot be reached we
+// cannot know what has been spent, and an unverifiable budget is not a licence to spend.
+// Set PLAN_GUARD_FAIL_OPEN=1 to invert that for a demo where a DB blip must not stop a
+// presentation — accepting, explicitly, that spend is then unbounded if the DB stays down.
 
 const HOUR_MS = 60 * 60 * 1000;
 const DAY_MS = 24 * HOUR_MS;
@@ -21,6 +32,10 @@ export const LIMITS = Object.freeze({
   // A full run is minutes long; anything faster than this from one client is a
   // double-submit or a retry storm, not a person.
   MIN_GAP_MS: Number(process.env.PLAN_MIN_GAP_MS ?? 5000),
+  // How long a reservation may stay 'running' before it stops counting. Must exceed the
+  // function's maxDuration (800s) or a legitimate long run frees its own slot early and the
+  // concurrency ceiling stops meaning anything.
+  RUN_TTL_MS: Number(process.env.PLAN_RUN_TTL_MS ?? 1200 * 1000),
 });
 
 function createState() {
@@ -147,6 +162,81 @@ export function dailySpendUsd(now = Date.now()) {
   return state.spend
     .filter((e) => now - e.at < DAY_MS)
     .reduce((sum, e) => sum + e.usd, 0);
+}
+
+// ---- durable layer ------------------------------------------------------------------
+
+const REFUSALS = Object.freeze({
+  rate_limited: {
+    status: 429,
+    message: `You've generated ${LIMITS.PER_IP_PER_HOUR} plans in the past hour, which is the limit for this demo. Try again later.`,
+    retry_after: 900,
+  },
+  busy: {
+    status: 503,
+    message: 'Several plans are being generated right now. Try again in a few minutes.',
+    retry_after: 120,
+  },
+  budget_reached: {
+    status: 503,
+    message: 'The daily generation budget for this demo has been reached. It resets in 24 hours.',
+  },
+  already_running: {
+    status: 409,
+    message: 'A plan with these exact answers is already being generated. Watch that tab rather than starting another.',
+  },
+});
+
+/**
+ * The authoritative, cross-instance gate. Call AFTER `checkGuards` passes and BEFORE the SDK.
+ *
+ * Claiming the slot and checking the limits are the same statement, so this is safe under
+ * concurrency in a way the in-memory layer cannot be. `store` is injected for tests.
+ *
+ * Fails CLOSED on a database error — see the note at the top of this file.
+ */
+export async function checkDurableGuards(key, fingerprint, { store } = {}) {
+  const s = store || (await import('./store.js'));
+  try {
+    const res = await s.reserveRun({
+      fingerprint,
+      clientKey: key,
+      perHour: LIMITS.PER_IP_PER_HOUR,
+      maxConcurrent: LIMITS.GLOBAL_CONCURRENT,
+      dailyUsd: LIMITS.DAILY_USD,
+      windowSeconds: 3600,
+      runTtlSeconds: Math.ceil(LIMITS.RUN_TTL_MS / 1000),
+    });
+    if (res.ok) return { ok: true, reservation_id: res.id };
+    const refusal = REFUSALS[res.reason] || REFUSALS.busy;
+    return { ok: false, error: res.reason, ...refusal };
+  } catch (err) {
+    // Never log the connection string — message only.
+    console.error('[guards] durable guard unavailable:',
+      err && err.message ? err.message : String(err));
+    if (process.env.PLAN_GUARD_FAIL_OPEN === '1') {
+      return { ok: true, degraded: true };
+    }
+    return {
+      ok: false,
+      error: 'guard_unavailable',
+      status: 503,
+      message: 'Plan generation is paused while the service verifies its usage limits. Try again shortly.',
+      retry_after: 60,
+    };
+  }
+}
+
+/** Close the durable reservation. Best-effort: a bookkeeping failure must not surface. */
+export async function releaseDurableRun(fingerprint, costUsd, { store } = {}) {
+  const s = store || (await import('./store.js'));
+  try {
+    await s.releaseRun(fingerprint, costUsd);
+  } catch (err) {
+    // A row left 'running' ages out of the TTL window on its own, so this is recoverable.
+    console.error('[guards] could not close reservation:',
+      err && err.message ? err.message : String(err));
+  }
 }
 
 /** For /api/health and the debug panel — no identities, just counters. */

@@ -24,7 +24,7 @@
 
 import { cleanInputs, BadRequest } from './clean-inputs.js';
 import * as realStore from './store.js';
-import { checkGuards, beginRun, endRun } from './guards.js';
+import { checkGuards, beginRun, endRun, checkDurableGuards, releaseDurableRun } from './guards.js';
 
 // The small, human-readable stage set the noisy SDK stream is mapped down to.
 // The front-end keys its activity log off exactly these names.
@@ -63,10 +63,23 @@ export function createPlanHandler({ runPlan, store = realStore }) {
 
     // Cost guards run AFTER validation and BEFORE the SDK, so a rejected request costs
     // nothing — same principle as the input validation above, applied to spend.
+    //
+    // Cheap in-memory pass first: it needs no I/O and rejects the common single-instance
+    // burst before we spend a database round trip on it.
     const guard = checkGuards(req, inputs);
     if (!guard.ok) {
       if (guard.retry_after) res.setHeader('Retry-After', String(guard.retry_after));
       return sendJson(res, guard.status, { error: guard.error, message: guard.message });
+    }
+
+    // Then the authoritative cross-instance gate. This is the one that actually bounds
+    // spend: it claims the slot and checks every limit in a single atomic statement, so
+    // concurrent requests landing on different serverless instances cannot each believe
+    // they are the first. Fails closed by default.
+    const durable = await checkDurableGuards(guard.key, guard.fingerprint, { store });
+    if (!durable.ok) {
+      if (durable.retry_after) res.setHeader('Retry-After', String(durable.retry_after));
+      return sendJson(res, durable.status, { error: durable.error, message: durable.message });
     }
 
     res.statusCode = 200;
@@ -112,6 +125,11 @@ export function createPlanHandler({ runPlan, store = realStore }) {
       // Must run even when the client vanished mid-stream, or the concurrency slot leaks
       // and capacity shrinks permanently on this instance.
       endRun(guard.fingerprint, runCostUsd);
+      // Close the durable reservation and record what the run actually cost — this is what
+      // makes the daily budget breaker count real money rather than run attempts. Awaited
+      // BEFORE res.end() so the serverless instance is not frozen with the write in flight,
+      // which would leave the row 'running' until its TTL expired.
+      await releaseDurableRun(guard.fingerprint, runCostUsd, { store });
       res.end();
     }
   };

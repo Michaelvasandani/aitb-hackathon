@@ -8,9 +8,10 @@
 // What is NOT tested here: the real Agent SDK run (paid + non-deterministic) — that is
 // verified once by the runtime spike, never by this suite.
 
-import { test } from 'node:test';
+import { test, beforeEach } from 'node:test';
 import assert from 'node:assert/strict';
 import { createPlanHandler, STAGES } from '../../api/_lib/handler.js';
+import { __resetGuards } from '../../api/_lib/guards.js';
 
 // The handler gates on the *presence* of ANTHROPIC_API_KEY (runPlan is faked, so its value
 // is never used). Pin a fake one here so the suite is deterministic regardless of the
@@ -32,9 +33,33 @@ const VALID_BODY = Object.freeze({
   has_local_anchor: false,
 });
 
+// Every test gets its own client identity AND a clean guard state. Without both, the
+// in-memory guards in api/_lib/guards.js carry over between tests in this file: the
+// 5-second minimum gap and the in-flight dedup key are global to the module, so the second
+// test onward was silently rejected with 429/409 and never reached the handler body at all.
+// That is correct product behaviour and a broken test fixture.
+// cleanInputs normalizes the depth controls on every call, so anything that reaches the
+// runner or the store carries these even when the body named none.
+const DEPTH_DEFAULTS = Object.freeze({
+  plan_mode: 'optimized',
+  leads_per_category: 2,
+  verify_leads: false,
+});
+
+let clientCounter = 0;
 function mockReq(method = 'POST', body = { ...VALID_BODY }) {
-  return { method, headers: { 'content-type': 'application/json' }, body };
+  clientCounter += 1;
+  return {
+    method,
+    headers: { 'content-type': 'application/json', 'x-forwarded-for': `10.0.0.${clientCounter}` },
+    socket: {},
+    body,
+  };
 }
+
+beforeEach(() => {
+  __resetGuards();
+});
 
 class MockRes {
   constructor() {
@@ -94,13 +119,31 @@ function fakeRunner(stages) {
 // A fake store standing in for the real Neon-backed store seam — records the run it was
 // asked to save; never touches a database. `throws:true` makes saveRun reject so the
 // best-effort save path can be exercised.
-function fakeStore({ throws = false } = {}) {
+// The store fake must also answer the durable spend guard (api/_lib/guards.js ->
+// store.reserveRun). That gate FAILS CLOSED: without these methods every request is refused
+// with 503 guard_unavailable, which is the correct production behaviour — an unverifiable
+// budget is not a licence to spend — and would make every handler test below meaningless.
+//
+// `reserveRefusal` simulates a limit being hit; `reserveThrows` simulates the database
+// being unreachable, so the fail-closed path itself is testable.
+function fakeStore({ throws = false, reserveRefusal = null, reserveThrows = false } = {}) {
   return {
     calls: [],
+    reservations: [],
+    released: [],
     async saveRun(run) {
       this.calls.push(run);
       if (throws) throw new Error('db unavailable');
       return { id: run && run.id };
+    },
+    async reserveRun(opts) {
+      if (reserveThrows) throw new Error('db unavailable');
+      this.reservations.push(opts);
+      if (reserveRefusal) return { ok: false, reason: reserveRefusal, stats: {} };
+      return { ok: true, id: this.reservations.length };
+    },
+    async releaseRun(fingerprint, costUsd) {
+      this.released.push({ fingerprint, costUsd });
     },
   };
 }
@@ -135,7 +178,7 @@ test('on success the run is persisted through the store seam with the finished p
   assert.equal(store.calls.length, 1, 'saveRun called exactly once');
   const saved = store.calls[0];
   assert.equal(saved.id, CANNED_ID);
-  assert.deepEqual(saved.inputs, { ...VALID_BODY });
+  assert.deepEqual(saved.inputs, { ...VALID_BODY, ...DEPTH_DEFAULTS });
   assert.deepEqual(saved.plan_json, CANNED_PLAN_JSON);
   assert.equal(saved.plan_html, CANNED_PLAN_HTML);
 });
@@ -176,7 +219,7 @@ test('the handler passes the cleaned body inputs to the runner', async () => {
   const handler = createPlanHandler({ runPlan: runner, store: fakeStore() });
   // Include an unknown key to prove the body is cleaned (dropped), not passed raw.
   await handler(mockReq('POST', { ...VALID_BODY, DROP_TABLE: 1 }), new MockRes());
-  assert.deepEqual(runner.calledWith, { ...VALID_BODY });
+  assert.deepEqual(runner.calledWith, { ...VALID_BODY, ...DEPTH_DEFAULTS });
 });
 
 test('invalid input is a 400 with no (paid) run and no store write, before the stream opens', async () => {

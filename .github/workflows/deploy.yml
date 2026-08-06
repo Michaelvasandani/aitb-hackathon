@@ -36,6 +36,14 @@ jobs:
       - name: Test suite (includes Python↔JS conformance)
         run: python3 -m unittest discover -s tests -t . -q
 
+      # The Node suite covers the API seams the Python suite cannot reach: the request
+      # handler, the input validator, the store, and the spend guards. It was silently
+      # skipped for a long time because the script used a glob string, which `node --test`
+      # only accepts from Node 21 while this job pins 20 — it failed to match, and nothing
+      # ran. Nine real failures had accumulated behind that. Directory form works on 20.
+      - name: API seam tests (handler, validation, store, guards)
+        run: npm run test:js
+
   deploy:
     needs: test
     if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'

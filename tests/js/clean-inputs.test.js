@@ -23,13 +23,25 @@ const VALID = Object.freeze({
   has_local_anchor: false,
 });
 
+// Every call now normalizes the depth controls, so a payload that names none still comes
+// back carrying the cheap defaults. Kept as one constant so the expectation is stated once.
+const DEPTH_DEFAULTS = Object.freeze({
+  plan_mode: 'optimized',
+  leads_per_category: 2,
+  verify_leads: false,
+});
+
+// A fixed "today" so these tests do not start failing when VALID.event_date falls into the
+// past. The clock is a parameter precisely so the suite never depends on the wall clock.
+const TODAY = '2026-08-01';
+
 test('a full valid payload maps straight through to the inputs object', () => {
-  assert.deepEqual(cleanInputs({ ...VALID }), { ...VALID });
+  assert.deepEqual(cleanInputs({ ...VALID }, TODAY), { ...VALID, ...DEPTH_DEFAULTS });
 });
 
 test('unknown keys are dropped, not trusted', () => {
-  const got = cleanInputs({ city: 'Fresno, CA', __proto__: 'x', DROP_TABLE: 1, FOCUS_AREA: 'y' });
-  assert.deepEqual(got, { city: 'Fresno, CA' });
+  const got = cleanInputs({ city: 'Fresno, CA', __proto__: 'x', DROP_TABLE: 1, FOCUS_AREA: 'y' }, TODAY);
+  assert.deepEqual(got, { city: 'Fresno, CA', ...DEPTH_DEFAULTS });
 });
 
 test('every allowed input key survives cleaning', () => {

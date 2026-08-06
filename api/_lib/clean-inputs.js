@@ -39,6 +39,9 @@ const INT_FIELDS = Object.freeze(['budget_usd', 'leads_per_category']);
 const MAX_STR = 500; // matches clean_facts; a purpose is a sentence or two, not an essay
 const MAX_FIELDS = 40; // raw payload ceiling, checked before unknown keys are dropped
 const MAX_BUDGET_USD = 1_000_000; // any real hackathon budget fits; rejects absurd values
+// How far ahead a date may be booked. MAX_YEAR alone let through "2099-01-01", which is not
+// a plan, and every phase window would be nonsense.
+const MAX_DAYS_AHEAD = 365 * 3;
 // Depth bounds. The ceiling is a cost ceiling: each extra lead per category is another
 // round of web search + fetch across three parallel research subagents.
 const OPTIMIZED_LEADS = 2;
@@ -57,8 +60,14 @@ export class BadRequest extends Error {
   }
 }
 
-// Map the raw form payload to a validated `inputs` object, or throw BadRequest.
-export function cleanInputs(raw) {
+/**
+ * Map the raw form payload to a validated `inputs` object, or throw BadRequest.
+ *
+ * `today` is passed in rather than read from the clock so this stays pure and directly
+ * testable — the same reason the rest of the module does no I/O. It defaults to the real
+ * current date in UTC, which is what the handler wants.
+ */
+export function cleanInputs(raw, today = todayISO()) {
   if (raw === null || typeof raw !== 'object' || Array.isArray(raw)) {
     throw new BadRequest('inputs must be an object');
   }
@@ -72,14 +81,25 @@ export function cleanInputs(raw) {
     if (value === undefined) continue; // an absent field, not a value (JSON never yields it)
 
     if (typeof value === 'boolean' || value === null) {
+      // A boolean is meaningful for the flag fields, but `true` silently became a $1 budget
+      // once Number() got hold of it. A number field must be given a number.
+      if (value !== null && INT_FIELDS.includes(key)) {
+        throw new BadRequest(`${key} must be a number, not a boolean`);
+      }
       out[key] = value; // `false` and null are meaningful and preserved
     } else if (typeof value === 'number') {
       if (!Number.isFinite(value)) throw new BadRequest(`${key} must be a finite number`);
       out[key] = value;
     } else if (typeof value === 'string') {
       if (value.length > MAX_STR) throw new BadRequest(`${key} is too long`);
-      if (value.trim() === '') continue; // an unfilled form field is absent, not a value
-      out[key] = value.trim();
+      // Control characters serve no purpose in a form field and are the standard way to
+      // smuggle structure past a reviewer's eye (line breaks that forge a new prompt
+      // section, NULs that truncate downstream). Strip rather than reject: an organizer
+      // who pastes from a Word document should not get a 400.
+      const cleaned = stripControlChars(value);
+      if (cleaned.length > MAX_STR) throw new BadRequest(`${key} is too long`);
+      if (cleaned.trim() === '') continue; // an unfilled form field is absent, not a value
+      out[key] = cleaned.trim();
     } else {
       // Nested objects / arrays where a scalar is expected.
       throw new BadRequest(`${key} has an unsupported value type`);
@@ -97,17 +117,48 @@ export function cleanInputs(raw) {
     if (d.year < MIN_YEAR || d.year > MAX_YEAR) {
       throw new BadRequest(`event_date year must be between ${MIN_YEAR} and ${MAX_YEAR}`);
     }
+
+    // You cannot plan an event that has already happened. Without this check the date
+    // passed validation and the deterministic core produced a negative runway with phase
+    // windows whose end_date preceded their start_date — a nonsense plan, produced at the
+    // full cost of a real run. Rejecting here costs nothing.
+    //
+    // "Today" is allowed: a same-day event is absurd but it is the organizer's call, and
+    // the lead-time floor already warns loudly about it. A date in the PAST is not a
+    // judgement call, it is impossible.
+    const nowDays = daysSinceEpoch(parseIsoDate(today) ? today : todayISO());
+    const eventDays = daysSinceEpoch(iso);
+    if (eventDays < nowDays) {
+      throw new BadRequest(
+        `event_date ${iso} is in the past — pick a date on or after ${today}`,
+      );
+    }
+    if (eventDays - nowDays > MAX_DAYS_AHEAD) {
+      throw new BadRequest(
+        `event_date ${iso} is more than ${Math.round(MAX_DAYS_AHEAD / 365)} years away`,
+      );
+    }
     out.event_date = iso;
   }
 
   for (const field of INT_FIELDS) {
     if (out[field] === undefined || out[field] === null) continue;
-    const n = Number(out[field]);
+    const raw_value = out[field];
+
+    // Number() is far too permissive as a parser: it accepts "0x1F" (31), "0b11" (3),
+    // "1e5", and whitespace-padded values. A budget field should take digits, not a
+    // JavaScript numeric literal. Strings must look like plain decimal.
+    if (typeof raw_value === 'string' && !/^-?\d+(\.\d+)?$/.test(raw_value)) {
+      throw new BadRequest(`${field} must be a plain number, e.g. 5000`);
+    }
+
+    const n = Number(raw_value);
     if (!Number.isFinite(n)) throw new BadRequest(`${field} must be a number`);
-    const int = Math.trunc(n);
-    if (int < 0) throw new BadRequest(`${field} cannot be negative`); // but 0 (free) is valid
-    if (int > MAX_BUDGET_USD) throw new BadRequest(`${field} is out of range`);
-    out[field] = int;
+    // Range-check BEFORE truncating. Truncation turned -0.4 into 0, so a negative budget
+    // was silently accepted as "free" instead of being rejected.
+    if (n < 0) throw new BadRequest(`${field} cannot be negative`); // but 0 (free) is valid
+    if (n > MAX_BUDGET_USD) throw new BadRequest(`${field} is out of range`);
+    out[field] = Math.trunc(n);
   }
 
   // The one field the entire research pipeline is scoped on. A run with no city cannot
@@ -134,6 +185,36 @@ export function cleanInputs(raw) {
 
   return out;
 }
+
+/** Today in UTC as "YYYY-MM-DD". UTC so the boundary does not move with the server region. */
+export function todayISO(now = new Date()) {
+  return now.toISOString().slice(0, 10);
+}
+
+/** Whole days from the epoch for an ISO date — comparison without timezone drift. */
+function daysSinceEpoch(iso) {
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(iso);
+  if (!m) return NaN;
+  return Math.floor(Date.UTC(Number(m[1]), Number(m[2]) - 1, Number(m[3])) / 86400000);
+}
+
+// Control characters (and the Unicode line/paragraph separators) are stripped from every
+// free-text field. They are never meaningful in a form and are how untrusted text forges
+// structure once it is interpolated into a prompt.
+function stripControlChars(s) {
+  return s
+    // Normalize line endings first so the collapse below sees them all.
+    .replace(/\r\n?/g, '\n')
+    // C0 controls except \n and \t, DEL, C1 controls, and the Unicode line/paragraph
+    // separators. U+2028 / U+2029 are the sneaky ones: they render as nothing in most
+    // review tools but are line terminators to a parser.
+    // eslint-disable-next-line no-control-regex
+    .replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F-\u009F\u2028\u2029]/g, '')
+    // Collapse runs of blank lines: a paragraph break is fine, twelve blank lines followed
+    // by a forged "SYSTEM:" heading is how injected text tries to look like a new section.
+    .replace(/\n{3,}/g, '\n\n');
+}
+
 
 // Strict ISO "YYYY-MM-DD" parse. Returns { year } on success, or null. Rejects the loose
 // coercions the Date constructor allows ("next tuesday", "2026-13-40") so a bad date is a
